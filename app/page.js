@@ -1,11 +1,15 @@
-
+import BackGround from "@/components/BackGround";
 import ButtonLogin from "@/components/ButtonLogin";
 import FAQListitem from "@/components/FAQListitem";
-export default function Home() {
+import TalkingAvatar from "@/components/TalkingAvatar";
+import { auth } from "@/auth";
+
+export default async function Home() {
   const isLoggedin = true;
   const name = "Aaron";
 
-  
+  const session = await auth()
+  console.log(session)
 
   return (
     <main>
@@ -17,16 +21,17 @@ export default function Home() {
             <a className="link link-hover" href="#pricing">Price</a>
             <a className="link link-hover" href="#faq">FAQ</a>
           </div>
-          <div><ButtonLogin isLoggedin={isLoggedin} name={name}/></div>
+          <div><ButtonLogin session={session}/></div>
         </div>
       </section>
+
       {/* hero */}
       <section className="text-center py-32 px-8 max-w-3xl mx-auto">
         <h1 className="text-4xl lg:text-5xl font-extrabold mb-6">Get Started</h1>
         <div className="opacity-90 mb-10">Create a feedback</div>
 
         
-        <ButtonLogin isLoggedin={isLoggedin} name={name}/>
+        <ButtonLogin session={session}/>
       </section>
 
       {/* pricing */}
@@ -68,7 +73,7 @@ export default function Home() {
                 24/7 support
               </li>
             </ul>
-            <ButtonLogin isLoggedin={isLoggedin} name={name} extraStyle="w-full"/>
+            <ButtonLogin session={session} extraStyle="w-full"/>
           </div>
         </div>
 
