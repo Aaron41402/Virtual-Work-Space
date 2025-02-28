@@ -43,7 +43,7 @@ export default async function Home() {
 
           <div className="p-8 bg-base-100 w-96 rounded-3xl mx-auto space-y-6">
             <div className="flex gap-2 items-baseline">
-              <div className="text-4xl font-black">$19</div>
+              <div className="text-4xl font-black">$5</div>
               <div className="uppercase text-sm font-medium opacity-60">/month</div>
             </div>
 

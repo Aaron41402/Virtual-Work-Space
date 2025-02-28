@@ -14,13 +14,13 @@ export default function Dashboard() {
           <h2 className="text-xl font-bold mb-6">Dashboard</h2>
           <nav className="space-y-4">
             <Link href="/dashboard/analysis" className="block hover:bg-gray-700 p-2 rounded">
-              Analysis
+            📈 Analysis
             </Link>
             <Link href="/dashboard/todo" className="block hover:bg-gray-700 p-2 rounded">
-              To Do
+            📝 To Do
             </Link>
             <Link href="/dashboard/pomodoro" className="block hover:bg-gray-700 p-2 rounded">
-              Pomodoro
+            🍅 Pomodoro
             </Link>
           </nav>
         </div>
@@ -31,7 +31,7 @@ export default function Dashboard() {
 
       {/* Main Content */}
       <div className="flex-1 p-8 relative z-10">
-        <div className="bg-white/90 backdrop-blur-sm rounded-lg shadow p-6">
+        <div className="bg-white/90 backdrop-blur-sm w-3/4 rounded-lg shadow p-6">
           <h2 className="text-2xl font-bold mb-6">Today's Schedule</h2>
           <div className="space-y-4">
             <div className="flex items-start">
@@ -61,6 +61,10 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+      
+    <script src="https://cdn.botpress.cloud/webchat/v2.2/inject.js"></script>
+    <script src="https://files.bpcontent.cloud/2025/02/28/19/20250228192050-G6ZM6L05.js"></script>
+    
     </main>
   )
 }
