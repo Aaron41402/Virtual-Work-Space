@@ -8,6 +8,8 @@ const UserSchema = new mongoose.Schema(
     wakeUpTime: { type: String, required: true },
     sleepTime: { type: String, required: true },
     habits: { type: [String], default: [] },
+    priorities: { type: [String], default: [] },
+    freeTime: { type: String, required: true }
   },
   { timestamps: true }
 );

@@ -7,6 +7,7 @@ export default function Setup() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState({});
   const [isComplete, setIsComplete] = useState(false);
+  const [error, setError] = useState('');
 
   const questions = [
     {
@@ -42,10 +43,23 @@ export default function Setup() {
   ];
 
   const handleAnswer = (answer) => {
+    // Validate that answer is not empty
+    if (!answer || answer.trim() === '') {
+      setError('This field is required');
+      return;
+    }
+
+    setError(''); // Clear any existing error
     setAnswers(prev => ({
       ...prev,
       [questions[currentQuestionIndex].id]: answer
     }));
+    
+    // Clear the input field
+    const inputElement = document.querySelector('input');
+    if (inputElement) {
+      inputElement.value = '';
+    }
     
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
@@ -93,33 +107,66 @@ export default function Setup() {
           {currentQuestion.type === 'time' ? (
             <input
               type="time"
-              className="w-full p-2 border rounded"
+              className={`w-full p-2 border rounded ${error ? 'border-red-500' : ''}`}
+              required
+              onChange={() => setError('')}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  const value = e.target.value;
+                  if (value) handleAnswer(value);
+                }
+              }}
             />
           ) : (
             <input
               type="text"
-              className="w-full p-2 border rounded"
+              className={`w-full p-2 border rounded ${error ? 'border-red-500' : ''}`}
               placeholder="Your answer"
-              
+              required
+              onChange={() => setError('')}
               onKeyPress={(e) => {
                 if (e.key === 'Enter') {
-                  handleAnswer(e.target.value);
+                  const value = e.target.value;
+                  if (value) handleAnswer(value);
                 }
               }}
             />
           )}
+          
+          {error && (
+            <p className="text-red-500 text-sm mt-1">{error}</p>
+          )}
 
-          <ConfettiButton
-            onClick={(e) => {
-              // Get the input value before the confetti animation
-              const inputValue = document.querySelector('input').value;
-              // Small delay to allow confetti to start before transition
-              setTimeout(() => handleAnswer(inputValue), 100);
-            }}
-            className="mt-4 w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition-colors"
-          >
-            {currentQuestionIndex === questions.length - 1 ? 'Finish' : 'Next'}
-          </ConfettiButton>
+          {currentQuestionIndex === questions.length - 1 ? (
+            <ConfettiButton
+              onClick={(e) => {
+                const inputValue = document.querySelector('input').value;
+                if (!inputValue || inputValue.trim() === '') {
+                  setError('This field is required');
+                  return;
+                }
+                // Small delay to allow confetti to start before transition
+                setTimeout(() => handleAnswer(inputValue), 100);
+              }}
+              className="mt-4 w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition-colors"
+            >
+              Finish
+            </ConfettiButton>
+          ) : (
+            <button
+              onClick={(e) => {
+                const inputValue = document.querySelector('input').value;
+                if (!inputValue || inputValue.trim() === '') {
+                  setError('This field is required');
+                  return;
+                }
+                handleAnswer(inputValue);
+              }}
+              className="mt-4 w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition-colors"
+            >
+              Next
+            </button>
+          )}
         </div>
       </div>
     </div>
