@@ -1,174 +1,110 @@
-'use client';
-import { useState } from "react";
-import { ConfettiButton } from "@/components/confetti";
-import Link from 'next/link';
+"use client";
 
-export default function Setup() {
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+import { useSession } from "next-auth/react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+
+const questions = [
+  { id: "wakeTime", question: "What time do you usually wake up?", type: "time" },
+  { id: "bedTime", question: "What time do you usually go to bed?", type: "time" },
+  { id: "habits", question: "Do you have any recurring habits or activities?", type: "text" },
+  { id: "priorities", question: "What are your top priorities for most days?", type: "text" },
+  { id: "freeTime", question: "How much free time do you like to have each day?", type: "text" },
+];
+
+export default function SetupPage() {
+  const { data: session, status } = useSession();
   const [answers, setAnswers] = useState({});
-  const [isComplete, setIsComplete] = useState(false);
-  const [error, setError] = useState('');
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
-  const questions = [
-    {
-      id: 'wakeTime',
-      question: 'What time do you usually wake up?',
-      description: 'Helps set the start of your daily timeline.',
-      type: 'time'
-    },
-    {
-      id: 'bedTime',
-      question: 'What time do you usually go to bed?',
-      description: 'Defines the end of your daily schedule.',
-      type: 'time'
-    },
-    {
-      id: 'habits',
-      question: 'Do you have any recurring habits or activities?',
-      description: 'e.g., morning workouts, meditation, or specific mealtimes.',
-      type: 'text'
-    },
-    {
-      id: 'priorities',
-      question: 'What are your top priorities for most days?',
-      description: 'e.g., work, study, personal projects, or family time.',
-      type: 'text'
-    },
-    {
-      id: 'freeTime',
-      question: 'How much free time do you like to have each day?',
-      description: 'Helps balance tasks and leisure in your schedule.',
-      type: 'text'
-    }
-  ];
+  // Check if user has already completed setup
+  useEffect(() => {
+    const checkSetupStatus = async () => {
+      if (status === "loading") return;
+      
+      if (!session) {
+        setLoading(false);
+        return;
+      }
 
-  const handleAnswer = (answer) => {
-    // Validate that answer is not empty
-    if (!answer || answer.trim() === '') {
-      setError('This field is required');
+      try {
+        const response = await fetch("/api/setup");
+        const data = await response.json();
+        
+        if (data.hasSetup) {
+          // User has already completed setup, redirect to dashboard
+          router.push("/dashboard");
+        } else {
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error("Error checking setup status:", error);
+        setLoading(false);
+      }
+    };
+
+    checkSetupStatus();
+  }, [session, status, router]);
+
+  const handleChange = (e) => {
+    setAnswers({ ...answers, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!session) {
+      setMessage("You must be logged in to submit.");
       return;
     }
 
-    setError(''); // Clear any existing error
-    setAnswers(prev => ({
-      ...prev,
-      [questions[currentQuestionIndex].id]: answer
-    }));
-    
-    // Clear the input field
-    const inputElement = document.querySelector('input');
-    if (inputElement) {
-      inputElement.value = '';
-    }
-    
-    if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex(prev => prev + 1);
-    } else {
-      setIsComplete(true);
-      console.log('All questions answered:', answers);
+    try {
+      const response = await fetch("/api/setup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(answers),
+      });
+
+      const result = await response.json();
+      setMessage(result.message || result.error);
+      
+      if (response.ok && result.redirect) {
+        // Redirect to dashboard after successful submission
+        router.push(result.redirect);
+      }
+    } catch (error) {
+      console.error("Error submitting setup:", error);
+      setMessage("An error occurred. Please try again.");
     }
   };
 
-  const currentQuestion = questions[currentQuestionIndex];
-
-  if (isComplete) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center">
-        <div className="max-w-md w-full space-y-8 text-center">
-          <h1 className="text-3xl font-bold text-green-600">🎉 Congratulations!</h1>
-          <p className="text-xl">You've successfully completed your schedule setup.</p>
-          <p className="text-gray-600">Your preferences have been saved and your schedule is ready to go.</p>
-          <Link 
-            href="/dashboard" 
-            className="inline-block mt-6 bg-blue-500 text-white px-8 py-3 rounded-lg hover:bg-blue-600 transition-colors"
-          >
-            Go to Dashboard
-          </Link>
-        </div>
-      </div>
-    );
+  if (loading) {
+    return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
   }
 
-
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center">
-      <div className="max-w-md w-full space-y-8">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-2">Let's set up your schedule</h1>
-          <div className="mb-8">
-            Question {currentQuestionIndex + 1} of {questions.length}
+    <div className="max-w-md mx-auto p-6 bg-white shadow-md rounded-lg">
+      <h2 className="text-xl font-bold mb-4">Setup Survey</h2>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {questions.map((q) => (
+          <div key={q.id}>
+            <label className="block font-medium">{q.question}</label>
+            <input
+              type={q.type}
+              name={q.id}
+              onChange={handleChange}
+              required
+              className="w-full border p-2 rounded-md"
+            />
           </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold mb-2">{currentQuestion.question}</h2>
-          <p className="text-gray-600 mb-4">{currentQuestion.description}</p>
-          
-          {currentQuestion.type === 'time' ? (
-            <input
-              type="time"
-              className={`w-full p-2 border rounded ${error ? 'border-red-500' : ''}`}
-              required
-              onChange={() => setError('')}
-              onKeyPress={(e) => {
-                if (e.key === 'Enter') {
-                  const value = e.target.value;
-                  if (value) handleAnswer(value);
-                }
-              }}
-            />
-          ) : (
-            <input
-              type="text"
-              className={`w-full p-2 border rounded ${error ? 'border-red-500' : ''}`}
-              placeholder="Your answer"
-              required
-              onChange={() => setError('')}
-              onKeyPress={(e) => {
-                if (e.key === 'Enter') {
-                  const value = e.target.value;
-                  if (value) handleAnswer(value);
-                }
-              }}
-            />
-          )}
-          
-          {error && (
-            <p className="text-red-500 text-sm mt-1">{error}</p>
-          )}
-
-          {currentQuestionIndex === questions.length - 1 ? (
-            <ConfettiButton
-              onClick={(e) => {
-                const inputValue = document.querySelector('input').value;
-                if (!inputValue || inputValue.trim() === '') {
-                  setError('This field is required');
-                  return;
-                }
-                // Small delay to allow confetti to start before transition
-                setTimeout(() => handleAnswer(inputValue), 100);
-              }}
-              className="mt-4 w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition-colors"
-            >
-              Finish
-            </ConfettiButton>
-          ) : (
-            <button
-              onClick={(e) => {
-                const inputValue = document.querySelector('input').value;
-                if (!inputValue || inputValue.trim() === '') {
-                  setError('This field is required');
-                  return;
-                }
-                handleAnswer(inputValue);
-              }}
-              className="mt-4 w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition-colors"
-            >
-              Next
-            </button>
-          )}
-        </div>
-      </div>
+        ))}
+        <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded-md">
+          Submit
+        </button>
+      </form>
+      {message && <p className="mt-4 text-center">{message}</p>}
     </div>
   );
 }
