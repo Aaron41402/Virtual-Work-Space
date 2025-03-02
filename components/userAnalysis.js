@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -13,9 +13,17 @@ import {
 import { Line } from "react-chartjs-2";
 
 // Register Chart.js components
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
-export function UserAnalysis() {
+function UserAnalysis() {
   // 30 data points, each with date, efficiency score, and tasksCompleted
   const [efficiencyData] = useState([
     { date: "2023-01-01", score: 75, tasksCompleted: 5 },
@@ -56,7 +64,7 @@ export function UserAnalysis() {
   // Filter data based on duration
   let filtered;
   if (chartDuration === "today") {
-    // “Today” => last data point only (or real date check if desired)
+    // "Today" => last data point only (or real date check if desired)
     filtered = [efficiencyData[efficiencyData.length - 1]];
   } else if (chartDuration === "7") {
     filtered = efficiencyData.slice(-7);
@@ -85,66 +93,68 @@ export function UserAnalysis() {
       },
     ],
   };
-
+  // Simplify the chart options
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
       legend: { display: false },
     },
-    scales: {
-      y: {
-        min: 0,
-        max: 100,
-      },
-    },
   };
 
   return (
-    <section className="bg-white p-4 shadow-lg rounded flex flex-col space-y-4">
-        <div className="flex flex-row justify-between">
-            <h2 className="text-xl font-bold mb-4">Analysis</h2>
-            {/* Dropdown top-right */}
-            <div className="flex justify-end">
-                <select
-                tabIndex={0}
-                aria-label="Select chart duration"
-                value={chartDuration}
-                onChange={(e) => setChartDuration(e.target.value)}
-                className="border bg-white rounded px-1 text-sm mb-2"
-                >
-                <option value="today">Today</option>
-                <option value="7">Past 7 days</option>
-                <option value="30">Past 30 days</option>
-                </select>
-            </div>
+    <div className="flex-1 m-8 relative z-10">
+      <div className="bg-white/90 backdrop-blur-sm w-3/4 rounded-lg shadow p-6">
+        <div className="flex flex-row justify-between mb-6">
+          <h2 className="text-2xl font-bold">Analysis</h2>
+          <select
+            tabIndex={0}
+            aria-label="Select chart duration"
+            value={chartDuration}
+            onChange={(e) => setChartDuration(e.target.value)}
+            className="border bg-white rounded px-3 py-1 text-sm"
+          >
+            <option value="today">Today</option>
+            <option value="7">Past 7 days</option>
+            <option value="30">Past 30 days</option>
+          </select>
         </div>
 
         {/* Circles row */}
-        <div className="flex justify-evenly">
-            {/* Efficiency Score */}
-            <div className="flex flex-col items-center">
+        <div className="flex justify-evenly mb-8">
+          {/* Efficiency Score */}
+          <div className="flex flex-col items-center">
             <p className="text-sm mb-1">Efficiency Score</p>
             <div className="w-20 h-20 flex items-center justify-center rounded-full border-2">
-                <span className="text-xl font-semibold">{averageEfficiency}</span>
+              <span className="text-xl font-semibold">{averageEfficiency}</span>
             </div>
-            </div>
+          </div>
 
-            {/* Tasks Completed */}
-            <div className="flex flex-col items-center">
+          {/* Tasks Completed */}
+          <div className="flex flex-col items-center">
             <p className="text-sm mb-1">Tasks Completed</p>
             <div className="w-20 h-20 flex items-center justify-center rounded-full border-2">
-                <span className="text-xl font-semibold">{totalTasksCompleted}</span>
+              <span className="text-xl font-semibold">{totalTasksCompleted}</span>
             </div>
-            </div>
+          </div>
         </div>
 
         {/* Chart Container */}
-        <div className="border-2 rounded p-2">
-            <div className="relative h-60">
-            <Line data={chartData} options={chartOptions} />
-            </div>
+        <div className="border rounded-lg p-4 bg-white mt-6">
+          <div style={{ width: '100%', height: '400px', position: 'relative' }}>
+            {filtered.length > 0 ? (
+              <Line 
+                data={chartData}
+                options={chartOptions}
+              />
+            ) : (
+              <div>No data available</div>
+            )}
+          </div>
         </div>
-    </section>
+      </div>
+    </div>
   );
 }
+
+export default UserAnalysis

@@ -126,7 +126,7 @@ export default function Dashboard() {
 
       {/* Replace the static schedule with the TodaySchedule component */}
       <TodaySchedule />
-      
+
       <script src="https://cdn.botpress.cloud/webchat/v2.2/inject.js"></script>
       <script src="https://files.bpcontent.cloud/2025/02/28/19/20250228192050-G6ZM6L05.js"></script>
     
