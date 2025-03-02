@@ -20,38 +20,26 @@ function TodaySchedule() {
 
       try {
         // Fetch the user's setup data
-        console.log("Fetching setup status...");
-        const response = await fetch('/api/setup', {
-          headers: {
-            'Content-Type': 'application/json',
-            // Add any authentication headers if needed
-          },
-          credentials: 'include', // Important for cookies/session
-        });
+        const response = await fetch('/api/setup');
         const data = await response.json();
-        console.log("Setup status response:", data);
         
         if (response.ok && data.hasSetup) {
           // Fetch the actual setup response data
-          console.log("Fetching setup details...");
           const detailsResponse = await fetch('/api/setup/details');
           const setupDetails = await detailsResponse.json();
-          console.log("Setup details response:", setupDetails);
           
           if (detailsResponse.ok) {
             setSetupData(setupDetails.data);
             generateSchedule(setupDetails.data);
           } else {
-            console.error("Error in setup details response:", setupDetails.error);
             setError(setupDetails.error || 'Failed to fetch setup details');
           }
         } else {
-          console.error("Error in setup status response:", data.error || "No setup data found");
           setError('Setup data not found');
         }
       } catch (err) {
         console.error('Error fetching setup data:', err);
-        setError('Failed to load schedule data: ' + (err.message || "Unknown error"));
+        setError('Failed to load schedule data');
       } finally {
         setLoading(false);
       }
@@ -196,15 +184,6 @@ function TodaySchedule() {
           <h2 className="text-2xl font-bold mb-6">Today's Schedule</h2>
           <p className="text-red-500">{error}</p>
           <p>Please complete the setup process to see your personalized schedule.</p>
-          <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded">
-            <p className="font-semibold">Troubleshooting:</p>
-            <ul className="list-disc pl-5 mt-2">
-              <li>Make sure you've completed the setup questionnaire</li>
-              <li>Try refreshing the page</li>
-              <li>Try logging out and logging back in</li>
-              <li>If problems persist, please contact support</li>
-            </ul>
-          </div>
         </div>
       </div>
     );
