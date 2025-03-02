@@ -118,7 +118,7 @@ function ToDoList() {
 
     return (
         <div className="flex-1 p-8 relative z-10">
-            <div className="bg-white/90 backdrop-blur-sm w-1/2 mx-auto mt-16 rounded-lg shadow-lg p-6">
+            <div className="bg-white/90 backdrop-blur-sm w-1/2 mx-auto rounded-lg shadow-lg p-6">
                 <h2 className="text-2xl font-bold mb-6">To-Do List</h2>
                 <div className="mb-4 flex flex-col space-y-2">
                     {tasks.map((task) => (

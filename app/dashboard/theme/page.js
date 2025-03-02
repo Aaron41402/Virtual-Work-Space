@@ -95,7 +95,7 @@ export default function ThemePage() {
   };
 
   return (
-    <div className="relative min-h-screen">
+    <div className="relative min-h-screen flex items-center justify-center">
       {/* Background Video */}
       {isLoaded && (
         <div className="fixed inset-0 z-0">
@@ -116,19 +116,17 @@ export default function ThemePage() {
       )}
 
       {/* Back to Dashboard Button */}
-      <Link 
-        href="/dashboard" 
-        className="absolute top-4 left-4 z-10 px-4 py-2 bg-white/80 hover:bg-white/90 backdrop-blur-sm rounded-lg font-semibold text-gray-700 transition-colors flex items-center gap-2"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-          <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
-        </svg>
-        
+      <Link href="/dashboard">
+        <button className="absolute top-4 left-4 z-10 px-4 py-2 btn btn-soft btn-xs sm:btn-sm md:btn-md lg:btn-lg xl:btn-xl">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+          </svg>
+        </button>
       </Link>
 
       {isLoaded && (
         <div className="relative z-10 pt-16 px-8 pb-8 max-w-6xl mx-auto">
-          <div className="bg-white/80 backdrop-blur-sm rounded-lg mt-16 shadow-lg p-6">
+          <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-lg p-6">
             <h1 className="text-2xl font-bold mb-6">Choose Your Theme</h1>
             <p className="mb-6 text-gray-700">Select a video background theme for your dashboard experience.</p>
             
