@@ -1,7 +1,7 @@
 import React from 'react'
 import VideoBackground from '@/components/VideoBackground'
 import Link from 'next/link'
-import UserAnalysis from '@/components/UserAnalysis'
+import UserAnalysis from '@/components/userAnalysis'
 
 export default function Analysis() {
   return (

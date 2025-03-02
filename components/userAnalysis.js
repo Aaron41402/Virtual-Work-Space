@@ -104,7 +104,7 @@ function UserAnalysis() {
 
   return (
     <div className="flex-1 m-8 relative z-10">
-      <div className="bg-white/90 backdrop-blur-sm w-3/4 rounded-lg shadow p-6">
+      <div className="bg-white/90 backdrop-blur-sm w-1/2 mx-auto mt-16 rounded-lg shadow-lg p-6">
         <div className="flex flex-row justify-between mb-6">
           <h2 className="text-2xl font-bold">Analysis</h2>
           <select
