@@ -9,7 +9,7 @@ export default async function Home() {
   const name = "Aaron";
 
   const session = await auth()
-  console.log(session)
+  
 
   return (
     <main>
@@ -26,7 +26,8 @@ export default async function Home() {
       </section>
 
       {/* hero */}
-      <section className=" bg-[url('/wallpaper.jpeg')] bg-cover bg-center min-h-screen text-center py-32 px-8 mx-auto">
+      <section className=" bg-[url('/wallpaper.jpeg')] 
+      bg-cover bg-center min-h-screen text-center py-32 px-8 mx-auto">
         <h1 className="text-4xl lg:text-5xl font-extrabold mb-6">Get Started</h1>
         <div className="opacity-90 mb-10"></div>
 
