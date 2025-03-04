@@ -20,3 +20,21 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+.font-pixel {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+@font-face {
+  font-family: 'PixelFallback';
+  src: local('Courier New');
+  font-weight: normal;
+  font-style: normal;
+}
+
+.font-pixel-fallback {
+  font-family: 'PixelFallback', monospace;
+  letter-spacing: -0.05em;
+}
+

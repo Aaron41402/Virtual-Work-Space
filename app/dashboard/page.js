@@ -3,78 +3,49 @@ import ButtonLogout from '@/components/ButtonLogout'
 import TodaySchedule from '@/components/TodaySchedule'
 import VideoBackground from '@/components/VideoBackground'
 import Link from 'next/link'
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState } from 'react'
+import AIAssistant from '@/components/AIAssistant'
 
 export default function Dashboard() {
   const [isPlaying, setIsPlaying] = useState(true);
   const [volume, setVolume] = useState(0.5);
-  const [previousVolume, setPreviousVolume] = useState(0.5); // Store previous volume for unmuting
-  const audioRef = useRef(null);
+  const [volumeIcon, setVolumeIcon] = useState('🔊');
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    const storedPreference = localStorage.getItem('musicEnabled');
-    const storedVolume = localStorage.getItem('musicVolume');
-    const shouldPlay = storedPreference === null ? true : storedPreference === 'true';
-    const savedVolume = storedVolume ? parseFloat(storedVolume) : 0.5;
+    setIsMounted(true);
     
-    setIsPlaying(shouldPlay);
-    setVolume(shouldPlay ? savedVolume : 0);
-    setPreviousVolume(savedVolume);
-
-    audioRef.current = new Audio('/default.mp3');
-    audioRef.current.loop = true;
-    audioRef.current.volume = shouldPlay ? savedVolume : 0;
-
-    if (shouldPlay) {
-      const playPromise = audioRef.current.play();
+    // Sync with global audio state if available
+    if (typeof window !== 'undefined' && window.dashboardAudio) {
+      setIsPlaying(window.dashboardAudio.getIsPlaying());
+      setVolume(window.dashboardAudio.getVolume());
+      setVolumeIcon(window.dashboardAudio.getVolumeIcon());
       
-      if (playPromise !== undefined) {
-        playPromise.catch(error => {
-          console.log('Auto-play failed:', error);
-          const handleFirstClick = () => {
-            audioRef.current.play().catch(e => console.log('Play on click failed:', e));
-            document.removeEventListener('click', handleFirstClick);
-          };
-          document.addEventListener('click', handleFirstClick);
-        });
-      }
+      // Set up an interval to periodically check for changes
+      const intervalId = setInterval(() => {
+        if (window.dashboardAudio) {
+          setIsPlaying(window.dashboardAudio.getIsPlaying());
+          setVolume(window.dashboardAudio.getVolume());
+          setVolumeIcon(window.dashboardAudio.getVolumeIcon());
+        }
+      }, 500);
+      
+      return () => clearInterval(intervalId);
     }
-    
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
-      }
-    };
   }, []);
 
   const handleVolumeChange = (e) => {
     const newVolume = parseFloat(e.target.value);
     setVolume(newVolume);
-    setPreviousVolume(newVolume);
-    if (audioRef.current) {
-      audioRef.current.volume = newVolume;
-      localStorage.setItem('musicVolume', newVolume.toString());
-      setIsPlaying(newVolume > 0);
-      localStorage.setItem('musicEnabled', (newVolume > 0).toString());
+    
+    if (typeof window !== 'undefined' && window.dashboardAudio) {
+      window.dashboardAudio.handleVolumeChange(newVolume);
     }
   };
 
   const toggleMute = () => {
-    if (audioRef.current) {
-      if (volume > 0) {
-        // Muting
-        setPreviousVolume(volume);
-        setVolume(0);
-        audioRef.current.volume = 0;
-      } else {
-        // Unmuting
-        setVolume(previousVolume);
-        audioRef.current.volume = previousVolume;
-      }
-      const newState = volume === 0;
-      setIsPlaying(newState);
-      localStorage.setItem('musicEnabled', newState.toString());
+    if (typeof window !== 'undefined' && window.dashboardAudio) {
+      window.dashboardAudio.toggleMute();
     }
   };
 
@@ -108,7 +79,7 @@ export default function Dashboard() {
               onClick={toggleMute}
               className="p-2 rounded hover:bg-gray-600"
             >
-              {volume === 0 ? '🔇' : volume < 0.3 ? '🔈' : volume < 0.7 ? '🔉' : '🔊'}
+              {volumeIcon}
             </button>
             <input
               type="range"
@@ -127,9 +98,11 @@ export default function Dashboard() {
       {/* Replace the static schedule with the TodaySchedule component */}
       <TodaySchedule />
 
-      <script src="https://cdn.botpress.cloud/webchat/v2.2/inject.js"></script>
+      {isMounted && <AIAssistant />}
+
+      {/* <script src="https://cdn.botpress.cloud/webchat/v2.2/inject.js"></script>
       <script src="https://files.bpcontent.cloud/2025/02/28/19/20250228192050-G6ZM6L05.js"></script>
-    
+     */}
     </main>
   )
 }

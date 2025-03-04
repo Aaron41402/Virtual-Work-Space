@@ -11,7 +11,6 @@ const SetupResponseSchema = new mongoose.Schema({
     bedTime: String,
     habits: String,
     priorities: String,
-    freeTime: String,
   }, { timestamps: true });
 
 export default mongoose.models.SetupResponse || mongoose.model('SetupResponse', SetupResponseSchema);

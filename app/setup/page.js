@@ -8,8 +8,7 @@ const questions = [
   { id: "wakeTime", question: "What time do you usually wake up?", type: "time" },
   { id: "bedTime", question: "What time do you usually go to bed?", type: "time" },
   { id: "habits", question: "Do you have any recurring habits or activities?", type: "text" },
-  { id: "priorities", question: "What are your top priorities for most days?", type: "text" },
-  { id: "freeTime", question: "How much free time do you like to have each day?", type: "text" },
+  { id: "priorities", question: "What are your top priorities for most days?", type: "text" }
 ];
 
 export default function SetupPage() {
@@ -81,30 +80,32 @@ export default function SetupPage() {
   };
 
   if (loading) {
-    return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
+    return <div className="flex justify-center items-center min-h-screen"><span className="loading loading-bars loading-xl"></span></div>;
   }
 
   return (
-    <div className="max-w-md mx-auto p-6 bg-white shadow-md rounded-lg">
-      <h2 className="text-xl font-bold mb-4">Setup Survey</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {questions.map((q) => (
-          <div key={q.id}>
-            <label className="block font-medium">{q.question}</label>
-            <input
-              type={q.type}
-              name={q.id}
-              onChange={handleChange}
-              required
-              className="w-full border p-2 rounded-md"
-            />
-          </div>
-        ))}
-        <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded-md">
-          Submit
-        </button>
-      </form>
-      {message && <p className="mt-4 text-center">{message}</p>}
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="max-w-md w-full mx-auto p-6 bg-white shadow-md rounded-lg">
+        <h2 className="text-xl font-bold mb-4 text-center">Setup Survey</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {questions.map((q) => (
+            <div key={q.id}>
+              <label className="block font-medium">{q.question}</label>
+              <input
+                type={q.type}
+                name={q.id}
+                onChange={handleChange}
+                required
+                className="w-full border p-2 rounded-md"
+              />
+            </div>
+          ))}
+          <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded-md">
+            Submit
+          </button>
+        </form>
+        {message && <p className="mt-4 text-center">{message}</p>}
+      </div>
     </div>
   );
 }

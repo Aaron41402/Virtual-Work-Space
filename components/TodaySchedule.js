@@ -119,15 +119,6 @@ function TodaySchedule() {
       });
     }
 
-    // Add free time if specified
-    if (data.freeTime) {
-      const eveningHour = (wakeHour + 12) % 24;
-      scheduleItems.push({
-        time: `${eveningHour.toString().padStart(2, '0')}:00`,
-        activity: 'Free time: ' + data.freeTime,
-        type: 'free'
-      });
-    }
 
     // Add bedtime
     scheduleItems.push({
@@ -169,9 +160,9 @@ function TodaySchedule() {
   if (loading) {
     return (
       <div className="flex-1 p-8 relative z-10">
-        <div className="bg-white/70 backdrop-blur-sm w-1/2 mx-auto mt-16 rounded-lg shadow p-6">
-          <h2 className="text-2xl font-bold mb-6">Today's Schedule</h2>
-          <p>Loading your personalized schedule...</p>
+        <div className="bg-white/70 backdrop-blur-sm w-3/4 mx-auto mt-8 rounded-lg shadow p-4">
+          <h2 className="text-xl font-bold mb-4">Today's Schedule</h2>
+          <p>Loading your personalized schedule <span className="loading loading-dots loading-xs"></span></p>
         </div>
       </div>
     );
@@ -180,8 +171,8 @@ function TodaySchedule() {
   if (error) {
     return (
       <div className="flex-1 p-8 relative z-10">
-        <div className="bg-white/70 backdrop-blur-sm w-1/2 mx-auto mt-16 rounded-lg shadow p-6">
-          <h2 className="text-2xl font-bold mb-6">Today's Schedule</h2>
+        <div className="bg-white/70 backdrop-blur-sm w-3/4 mx-auto mt-8 rounded-lg shadow p-4">
+          <h2 className="text-xl font-bold mb-4">Today's Schedule</h2>
           <p className="text-red-500">{error}</p>
           <p>Please complete the setup process to see your personalized schedule.</p>
         </div>
@@ -192,21 +183,21 @@ function TodaySchedule() {
   return (
     <div className="flex-1 p-8 relative z-10">
       {/* Main Content */}
-      <div className="bg-white/70 backdrop-blur-sm w-1/2 mx-auto mt-16 rounded-lg shadow-lg p-6">
-        <h2 className="text-2xl font-bold mb-6">Today's Schedule</h2>
+      <div className="bg-white/70 backdrop-blur-sm w-3/4 mx-auto mt-8 rounded-lg shadow-lg p-4">
+        <h2 className="text-xl font-bold mb-3">Today's Schedule</h2>
         {timelineHours.length > 0 ? (
-          <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
+          <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
             {timelineHours.map((hour, index) => {
               const activity = getActivityForHour(hour);
               return (
                 <div key={index} className="flex items-start">
-                  <div className="w-24 text-gray-600">{hour}</div>
+                  <div className="w-16 text-sm text-gray-600">{hour}</div>
                   {activity ? (
-                    <div className={`flex-1 ${getBackgroundColor(activity.type)} p-3 rounded`}>
+                    <div className={`flex-1 ${getBackgroundColor(activity.type)} p-2 rounded text-sm`}>
                       {activity.activity}
                     </div>
                   ) : (
-                    <div className="flex-1 bg-gray-50/50 p-3 rounded text-gray-400">
+                    <div className="flex-1 bg-gray-50/50 p-2 rounded text-gray-400 text-sm">
                       Free time
                     </div>
                   )}
@@ -215,7 +206,7 @@ function TodaySchedule() {
             })}
           </div>
         ) : (
-          <p>No schedule items available. Please complete the setup process.</p>
+          <p>Loading your personalized schedule <span className="loading loading-dots loading-xs"></span></p>
         )}
       </div>
     </div>
