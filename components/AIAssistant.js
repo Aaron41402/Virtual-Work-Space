@@ -6,7 +6,7 @@ export default function AIAssistant() {
   const { data: session, status } = useSession();
   const [showMessage, setShowMessage] = useState(false);
   const [message, setMessage] = useState('');
-  const [messageType, setMessageType] = useState(''); // 'schedule' or 'encouragement'
+  const [messageType, setMessageType] = useState('');
   const [isExiting, setIsExiting] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [displayedText, setDisplayedText] = useState('');
@@ -185,8 +185,8 @@ export default function AIAssistant() {
     }
   }, [isTyping, characterIndex, message]);
 
+  // Wait for session to be loaded before showing welcome message
   useEffect(() => {
-    // Wait for session to be loaded before showing welcome message
     if (status === 'authenticated') {
       setTimeout(() => {
         checkWelcomeMessage();
@@ -221,20 +221,12 @@ export default function AIAssistant() {
 
   if (!showMessage) return null;
 
-  // Get avatar based on message type
-  const getAvatar = () => {
-    if (messageType === 'schedule') {
-      return "👨‍🔧"; // Quest giver
-    } else {
-      return "🧙‍♀️"; // Wise mage
-    }
-  };
-
   return (
     <div
-      className={`fixed bottom-0 left-0 right-0 mx-auto w-3/4 z-50 p-4
+      className={`bottom-0 left-0 right-0 mx-auto w-3/4 max-w-2xl z-50 p-4
         transition-all duration-300 ease-in-out
-        ${isExiting ? 'opacity-0 translate-y-5' : 'opacity-100 translate-y-0'}`}
+        ${isExiting ? 'opacity-0 translate-y-5' : 'opacity-100 translate-y-0'}
+        ${!showMessage ? 'hidden' : ''}`}
       style={{ transform: isExiting ? 'scale(0.98)' : 'scale(1)' }}
     >
       {/* RPG Dialogue Box */}
@@ -247,10 +239,10 @@ export default function AIAssistant() {
         </div>
         
         {/* Dialogue Box */}
-        <div className="bg-gray-900/95 border-4 border-purple-400 rounded-lg p-6 pt-8 text-white shadow-2xl min-h-[140px] w-full relative">
+        <div className="bg-gray-900/95 border-4 border-zinc-50 rounded-lg p-6 pt-8 text-white shadow-2xl min-h-[140px] w-full">
           {/* Character Name */}
-          <div className="absolute -top-4 left-32 bg-purple-400 px-4 py-1 rounded-full text-gray-900 font-bold text-base">
-            {messageType === 'schedule' ? 'Quest Master' : 'Wise Sage'}
+          <div className="absolute -top-4 left-32 bg-zinc-50 px-4 py-1 rounded-full text-gray-900 font-bold text-base">
+            {messageType === 'schedule' ? 'Quest Master' : 'Lucy'}
           </div>
           
           {/* Message Text with Typing Effect */}
@@ -264,7 +256,7 @@ export default function AIAssistant() {
             <div className="mt-4 text-right">
               <button 
                 onClick={handleDismiss}
-                className="bg-purple-400 text-gray-900 px-4 py-1 rounded-md hover:bg-purple-200 transition-colors font-bold text-sm"
+                className="bg-zinc-50 text-gray-900 px-4 py-1 rounded-md hover:bg-purple-200 transition-colors font-bold text-sm"
               >
                 [Continue]
               </button>

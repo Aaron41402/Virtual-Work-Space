@@ -12,6 +12,8 @@ function TodaySchedule() {
   const [timelineHours, setTimelineHours] = useState([]);
 
   useEffect(() => {
+    // Comment out the API call and use dummy data instead
+    /*
     const fetchSetupData = async () => {
       if (!session) {
         setLoading(false);
@@ -46,6 +48,18 @@ function TodaySchedule() {
     };
 
     fetchSetupData();
+    */
+
+    // Use dummy data instead
+    const dummyData = {
+      wakeTime: '07:00',
+      bedTime: '22:00',
+      priorities: 'Complete project, Study for exam, Exercise',
+      habits: 'Meditation, Reading, Journaling'
+    };
+
+    generateSchedule(dummyData);
+    setLoading(false);
   }, [session]);
 
   // Generate a schedule based on the user's setup data
@@ -119,6 +133,19 @@ function TodaySchedule() {
       });
     }
 
+    // Add lunch time
+    scheduleItems.push({
+      time: `${(wakeHour + 5).toString().padStart(2, '0')}:00`,
+      activity: 'Lunch break',
+      type: 'routine'
+    });
+
+    // Add dinner time
+    scheduleItems.push({
+      time: `${(wakeHour + 11).toString().padStart(2, '0')}:00`,
+      activity: 'Dinner',
+      type: 'routine'
+    });
 
     // Add bedtime
     scheduleItems.push({
@@ -160,7 +187,7 @@ function TodaySchedule() {
   if (loading) {
     return (
       <div className="flex-1 p-8 relative z-10">
-        <div className="bg-white/70 backdrop-blur-sm w-3/4 mx-auto mt-8 rounded-lg shadow p-4">
+        <div className="bg-white/70 backdrop-blur-sm w-3/4 max-w-2xl mx-auto mt-8 rounded-lg shadow p-4">
           <h2 className="text-xl font-bold mb-4">Today's Schedule</h2>
           <p>Loading your personalized schedule <span className="loading loading-dots loading-xs"></span></p>
         </div>
@@ -171,7 +198,7 @@ function TodaySchedule() {
   if (error) {
     return (
       <div className="flex-1 p-8 relative z-10">
-        <div className="bg-white/70 backdrop-blur-sm w-3/4 mx-auto mt-8 rounded-lg shadow p-4">
+        <div className="bg-white/70 backdrop-blur-sm w-3/4 max-w-2xl mx-auto mt-8 rounded-lg shadow p-4">
           <h2 className="text-xl font-bold mb-4">Today's Schedule</h2>
           <p className="text-red-500">{error}</p>
           <p>Please complete the setup process to see your personalized schedule.</p>
@@ -183,7 +210,7 @@ function TodaySchedule() {
   return (
     <div className="flex-1 p-8 relative z-10">
       {/* Main Content */}
-      <div className="bg-white/70 backdrop-blur-sm w-3/4 mx-auto mt-8 rounded-lg shadow-lg p-4">
+      <div className="bg-white/70 backdrop-blur-sm w-3/4 max-w-2xl mx-auto mt-8 rounded-lg shadow-lg p-4">
         <h2 className="text-xl font-bold mb-3">Today's Schedule</h2>
         {timelineHours.length > 0 ? (
           <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
