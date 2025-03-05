@@ -53,11 +53,11 @@ export default function Sidebar({ activeSection, setActiveSection }) {
   const userAvatar = session?.user?.image || 'https://via.placeholder.com/64';
 
   const navigationItems = [
-    { id: 'home', label: '🏠 Home' },
-    { id: 'analysis', label: '📈 Analysis' },
-    { id: 'todo', label: '📝 To Do' },
-    { id: 'pomodoro', label: '🍅 Pomodoro' },
-    { id: 'theme', label: '🖼️ Theme' },
+    { id: 'home', label: '🏠 Home', type: 'section' },
+    { id: 'analysis', label: '📈 Analysis', type: 'section' },
+    { id: 'todo', label: '📝 To Do', type: 'section' },
+    { id: 'pomodoro', label: '🍅 Pomodoro', type: 'page', href: '/dashboard/pomodoro' },
+    { id: 'theme', label: '🖼️ Theme', type: 'page', href: '/dashboard/theme' },
   ];
 
   return (
@@ -83,15 +83,25 @@ export default function Sidebar({ activeSection, setActiveSection }) {
       <div className="flex-1 flex justify-center">
         <nav className="space-y-4 w-full max-w-[180px]">
           {navigationItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => setActiveSection(item.id)}
-              className={`block w-full text-left p-2 rounded ${
-                activeSection === item.id ? 'bg-gray-700' : 'hover:bg-gray-700'
-              }`}
-            >
-              {item.label}
-            </button>
+            item.type === 'section' ? (
+              <button
+                key={item.id}
+                onClick={() => setActiveSection(item.id)}
+                className={`block w-full text-left p-2 rounded ${
+                  activeSection === item.id ? 'bg-gray-700' : 'hover:bg-gray-700'
+                }`}
+              >
+                {item.label}
+              </button>
+            ) : (
+              <Link
+                key={item.id}
+                href={item.href}
+                className="block w-full text-left p-2 rounded hover:bg-gray-700"
+              >
+                {item.label}
+              </Link>
+            )
           ))}
         </nav>
       </div>
