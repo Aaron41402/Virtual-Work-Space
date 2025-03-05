@@ -87,7 +87,7 @@ function UserAnalysis() {
       {
         label: "Efficiency",
         data: scores,
-        borderColor: "rgb(249 115 22)", // orange-500
+        borderColor: "rgb(249 115 22 / 0.6)", // orange-500
         backgroundColor: "rgb(249 115 22)",
         tension: 0.3,
       },
@@ -103,10 +103,10 @@ function UserAnalysis() {
   };
 
   return (
-    <div className="flex-1 m-8 relative z-10">
-      <div className="bg-white/90 backdrop-blur-sm w-1/2 mx-auto rounded-lg shadow-lg p-6">
+    <div className="flex-1 p-8 relative z-10">
+      <div className="bg-white/70 backdrop-blur-sm w-3/4 max-w-2xl mx-auto mt-8 rounded-lg shadow-lg p-4">
         <div className="flex flex-row justify-between mb-6">
-          <h2 className="text-2xl font-bold">Analysis</h2>
+          <h2 className="text-xl font-bold">Analysis</h2>
           <select
             tabIndex={0}
             aria-label="Select chart duration"
@@ -125,7 +125,7 @@ function UserAnalysis() {
           {/* Efficiency Score */}
           <div className="flex flex-col items-center">
             <p className="text-sm mb-1">Efficiency Score</p>
-            <div className="w-20 h-20 flex items-center justify-center rounded-full border-2">
+            <div className="w-20 h-20 flex items-center justify-center rounded-full border-2 bg-blue-50/90">
               <span className="text-xl font-semibold">{averageEfficiency}</span>
             </div>
           </div>
@@ -133,7 +133,7 @@ function UserAnalysis() {
           {/* Tasks Completed */}
           <div className="flex flex-col items-center">
             <p className="text-sm mb-1">Tasks Completed</p>
-            <div className="w-20 h-20 flex items-center justify-center rounded-full border-2">
+            <div className="w-20 h-20 flex items-center justify-center rounded-full border-2 bg-green-50/90">
               <span className="text-xl font-semibold">{totalTasksCompleted}</span>
             </div>
           </div>

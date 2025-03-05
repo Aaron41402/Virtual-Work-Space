@@ -118,11 +118,12 @@ function ToDoList() {
 
     return (
         <div className="flex-1 p-8 relative z-10">
-            <div className="bg-white/90 backdrop-blur-sm w-1/2 mx-auto rounded-lg shadow-lg p-6">
-                <h2 className="text-2xl font-bold mb-6">To-Do List</h2>
+            {/* Main Content */}
+            <div className="bg-white/70 backdrop-blur-sm w-3/4 max-w-2xl mx-auto mt-8 rounded-lg shadow-lg p-4">
+                <h2 className="text-xl font-bold mb-3">To-Do List</h2>
                 <div className="mb-4 flex flex-col space-y-2">
                     {tasks.map((task) => (
-                    <div key={task.id} className="pl-2 border rounded p-2">
+                    <div key={task.id} className="flex-1 bg-gray-50/90 p-2 rounded text-sm">
                         <div className="flex items-center justify-between space-x-4">
                             <input
                                 type="checkbox"
@@ -131,15 +132,15 @@ function ToDoList() {
                                 className="cursor-pointer"
                                 aria-label={`Mark ${task.title} as completed`}
                             />
-                            <span className="flex-1 p-3 rounded">{task.title}</span>
-                            <span className="w-12 text-gray-600">{task.dueDate}</span>
+                            <span className={`flex-1 p-1 rounded ${task.completed ? "line-through text-gray-400" : ""}`}>{task.title}</span>
+                            <span className="p-1 rounded text-gray-400">{task.dueDate}</span>
                         </div>
 
                         {/* SUBTASKS */}
                         {task.subTasks && task.subTasks.length > 0 && (
                         <div className="ml-6 mt-2">
                             {task.subTasks.map((sub) => (
-                                <div key={sub.id} className="flex items-center space-x-2 mb-1">
+                                <div key={sub.id} className="flex items-center space-x-2 mb-1 p-2 rounded bg-gray-200 text-sm">
                                     <input
                                         type="checkbox"
                                         checked={sub.completed}
