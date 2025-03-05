@@ -141,7 +141,7 @@ function UserAnalysis() {
 
         {/* Chart Container */}
         <div className="border rounded-lg p-4 bg-white mt-6">
-          <div style={{ width: '100%', height: '400px', position: 'relative' }}>
+          <div style={{ width: '100%', height: '300px', position: 'relative' }}>
             {filtered.length > 0 ? (
               <Line 
                 data={chartData}

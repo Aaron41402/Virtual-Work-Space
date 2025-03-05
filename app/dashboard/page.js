@@ -6,6 +6,7 @@ import AIAssistant from '@/components/AIAssistant'
 import Sidebar from '@/components/Sidebar'
 import UserAnalysis from '@/components/UserAnalysis'
 import ToDoList from '@/components/ToDoList'
+import ThemeSelector from '@/components/ThemeSelector'
 
 export default function Dashboard() {
   const [isMounted, setIsMounted] = useState(false);
@@ -23,6 +24,8 @@ export default function Dashboard() {
         return <UserAnalysis />;
       case 'todo':
         return <ToDoList />;
+      case 'theme':
+        return <ThemeSelector />;
       default:
         return <TodaySchedule />;
     }

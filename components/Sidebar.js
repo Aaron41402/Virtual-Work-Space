@@ -3,6 +3,7 @@ import Link from 'next/link'
 import ButtonLogout from './ButtonLogout'
 import { useSession } from 'next-auth/react'
 import { useState, useEffect } from 'react'
+import Pomodoro from './Pomodoro'
 
 export default function Sidebar({ activeSection, setActiveSection }) {
   const { data: session } = useSession();
@@ -56,8 +57,7 @@ export default function Sidebar({ activeSection, setActiveSection }) {
     { id: 'home', label: '🏠 Home', type: 'section' },
     { id: 'analysis', label: '📈 Analysis', type: 'section' },
     { id: 'todo', label: '📝 To Do', type: 'section' },
-    { id: 'pomodoro', label: '🍅 Pomodoro', type: 'page', href: '/dashboard/pomodoro' },
-    { id: 'theme', label: '🖼️ Theme', type: 'page', href: '/dashboard/theme' },
+    { id: 'theme', label: '🖼️ Theme', type: 'section' },
   ];
 
   return (
@@ -80,8 +80,8 @@ export default function Sidebar({ activeSection, setActiveSection }) {
       </div>
       
       {/* Navigation Links */}
-      <div className="flex-1 flex justify-center">
-        <nav className="space-y-4 w-full max-w-[180px]">
+      <div className="flex-1 flex flex-col">
+        <nav className="space-y-4 w-full max-w-[180px] mx-auto">
           {navigationItems.map((item) => (
             item.type === 'section' ? (
               <button
@@ -104,6 +104,11 @@ export default function Sidebar({ activeSection, setActiveSection }) {
             )
           ))}
         </nav>
+        
+        {/* Pomodoro Timer */}
+        <div className="mt-6 w-full max-w-[180px] mx-auto">
+          <Pomodoro />
+        </div>
       </div>
 
       {/* Audio Controls and Logout */}

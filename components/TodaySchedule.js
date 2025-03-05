@@ -211,7 +211,7 @@ function TodaySchedule() {
     <div className="flex-1 p-8 relative z-10">
       {/* Main Content */}
       <div className="bg-white/70 backdrop-blur-sm w-3/4 max-w-2xl mx-auto mt-8 rounded-lg shadow-lg p-4">
-        <h2 className="text-xl font-bold mb-3">Today's Schedule</h2>
+        <h2 className="text-xl text-black font-bold mb-3">Today's Schedule</h2>
         {timelineHours.length > 0 ? (
           <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
             {timelineHours.map((hour, index) => {
@@ -238,6 +238,5 @@ function TodaySchedule() {
       </div>
     </div>
   );
-}
+}export default TodaySchedule;
 
-export default TodaySchedule;
