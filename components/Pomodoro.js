@@ -84,7 +84,7 @@ export default function Pomodoro() {
 
       {/* Timer display (always visible and bigger) */}
       <div className="py-4 px-3 flex justify-center">
-        <div className="text-4xl font-bold tracking-wider">
+        <div className="text-5xl font-bold tracking-wider">
           {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
         </div>
       </div>

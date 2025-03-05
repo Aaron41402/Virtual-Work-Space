@@ -87,7 +87,7 @@ export default function ThemeSelector() {
   };
 
   return (
-    <div className="relative">
+    <div className="flex-1 m-8 relative">
       {/* Background Video Preview */}
       {isLoaded && previewTheme && (
         <div className="fixed inset-0 z-0">
@@ -106,7 +106,7 @@ export default function ThemeSelector() {
         </div>
       )}
 
-      <div className="bg-white/70 backdrop-blur-sm w-3/4 max-w-2xl mx-auto mt-8 rounded-lg shadow-lg p-4 relative z-10">
+      <div className="bg-white/70 backdrop-blur-sm w-3/4 max-w-2xl mx-auto mt-8 rounded-lg shadow-lg p-4">
         <h2 className="text-lg font-bold mb-2">Choose Your Theme</h2>
         
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
