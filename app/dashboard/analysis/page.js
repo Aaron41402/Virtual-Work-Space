@@ -1,7 +1,7 @@
 import React from 'react'
 import VideoBackground from '@/components/VideoBackground'
 import Link from 'next/link'
-import UserAnalysis from '@/components/userAnalysis'
+// import UserAnalysis from '@/components/UserAnalysis'
 
 export default function Analysis() {
   return (
@@ -15,7 +15,7 @@ export default function Analysis() {
           </svg>
         </button>
       </Link>
-      <UserAnalysis />
+      {/* <UserAnalysis /> */}
     </div>
   )
 } 

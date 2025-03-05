@@ -4,7 +4,7 @@ import ButtonLogout from './ButtonLogout'
 import { useSession } from 'next-auth/react'
 import { useState, useEffect } from 'react'
 
-export default function Sidebar() {
+export default function Sidebar({ activeSection, setActiveSection }) {
   const { data: session } = useSession();
   const [isPlaying, setIsPlaying] = useState(true);
   const [volume, setVolume] = useState(0.5);
@@ -52,6 +52,14 @@ export default function Sidebar() {
   // Get user's avatar URL
   const userAvatar = session?.user?.image || 'https://via.placeholder.com/64';
 
+  const navigationItems = [
+    { id: 'home', label: '🏠 Home' },
+    { id: 'analysis', label: '📈 Analysis' },
+    { id: 'todo', label: '📝 To Do' },
+    { id: 'pomodoro', label: '🍅 Pomodoro' },
+    { id: 'theme', label: '🖼️ Theme' },
+  ];
+
   return (
     <div className="w-64 bg-gray-800/90 text-white p-6 flex flex-col justify-between relative z-10">
       {/* Logo */}
@@ -74,21 +82,17 @@ export default function Sidebar() {
       {/* Navigation Links */}
       <div className="flex-1 flex justify-center">
         <nav className="space-y-4 w-full max-w-[180px]">
-          <Link href="/dashboard" className="block hover:bg-gray-700 p-2 rounded text-left">
-            🏠 Home
-          </Link>
-          <Link href="/dashboard/analysis" className="block hover:bg-gray-700 p-2 rounded text-left">
-            📈 Analysis
-          </Link>
-          <Link href="/dashboard/todo" className="block hover:bg-gray-700 p-2 rounded text-left">
-            📝 To Do
-          </Link>
-          <Link href="/dashboard/pomodoro" className="block hover:bg-gray-700 p-2 rounded text-left">
-            🍅 Pomodoro
-          </Link>
-          <Link href="/dashboard/theme" className="block hover:bg-gray-700 p-2 rounded text-left">
-            🖼️ Theme
-          </Link>
+          {navigationItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setActiveSection(item.id)}
+              className={`block w-full text-left p-2 rounded ${
+                activeSection === item.id ? 'bg-gray-700' : 'hover:bg-gray-700'
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
         </nav>
       </div>
 
