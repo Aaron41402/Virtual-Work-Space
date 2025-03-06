@@ -71,7 +71,7 @@ export default function Sidebar({ activeSection, setActiveSection }) {
       
       {/* User Profile Section */}
       <div className="flex flex-col items-center mb-8">
-        <div className="avatar mb-4">
+        <div className="avatar mb-4 z-10">
           <div className="w-20 h-20 rounded-full ring ring-accent ring-offset-base-100 ring-offset-2 overflow-hidden">
             <img src={userAvatar} alt={userName} />
           </div>
@@ -87,7 +87,7 @@ export default function Sidebar({ activeSection, setActiveSection }) {
               <button
                 key={item.id}
                 onClick={() => setActiveSection(item.id)}
-                className={`block w-full text-left p-2 rounded ${
+                className={`block w-full font-bold text-left p-2 rounded ${
                   activeSection === item.id ? 'bg-gray-700' : 'hover:bg-gray-700'
                 }`}
               >
