@@ -186,15 +186,13 @@ function TodaySchedule() {
   const getBackgroundColor = (type) => {
     switch (type) {
       case 'routine':
-        return 'bg-blue-50/90';
+        return 'bg-blue-200/90';
       case 'priority':
-        return 'bg-green-50/90';
+        return 'bg-yellow-200/90';
       case 'habit':
-        return 'bg-purple-50/90';
-      case 'free':
-        return 'bg-yellow-50/90';
+        return 'bg-purple-200/90';
       default:
-        return 'bg-gray-50/90';
+        return 'bg-gray-200/90';
     }
   };
 
@@ -298,7 +296,7 @@ function TodaySchedule() {
         </div>
 
         {/* Current time indicator */}
-        <div className="flex items-center mb-3 text-sm text-gray-600">
+        <div className="flex items-center mb-3 text-sm text-gray-700">
           <Clock size={16} className="mr-1" />
           <span>Current time: {currentTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
         </div>
@@ -306,20 +304,24 @@ function TodaySchedule() {
         {/* Legend */}
         <div className="flex flex-wrap gap-2 mb-3">
           <div className="flex items-center text-xs">
-            <div className="w-3 h-3 bg-blue-50 border border-blue-200 rounded mr-1"></div>
+            <div className="w-3 h-3 bg-blue-100 border border-blue-500 rounded mr-1"></div>
             <span>Routine</span>
           </div>
           <div className="flex items-center text-xs">
-            <div className="w-3 h-3 bg-green-50 border border-green-200 rounded mr-1"></div>
+            <div className="w-3 h-3 bg-yellow-100 border border-yellow-500 rounded mr-1"></div>
             <span>Priority</span>
           </div>
           <div className="flex items-center text-xs">
-            <div className="w-3 h-3 bg-purple-50 border border-purple-200 rounded mr-1"></div>
+            <div className="w-3 h-3 bg-purple-100 border border-purple-500 rounded mr-1"></div>
             <span>Habit</span>
           </div>
           <div className="flex items-center text-xs">
-            <div className="w-3 h-3 bg-yellow-50 border border-yellow-200 rounded mr-1"></div>
+            <div className="w-3 h-3 bg-gray-100 border border-slate-500 rounded mr-1"></div>
             <span>Free Time</span>
+          </div>
+          <div className="flex items-center text-xs">
+            <div className="w-3 h-3 bg-green-100 border border-green-500 rounded mr-1"></div>
+            <span>Current</span>
           </div>
         </div>
 
@@ -336,7 +338,7 @@ function TodaySchedule() {
               return (
                 <div 
                   key={index} 
-                  className={`flex items-start ${isCurrentHour ? 'bg-yellow-100/50 -mx-2 px-2 py-1 rounded' : ''}`}
+                  className={`flex items-start ${isCurrentHour ? 'bg-green-300/80 -mx-2 px-2 py-1 rounded' : ''}`}
                   data-hour={hour.split(':')[0]}
                 >
                   <div className="w-16 text-sm text-gray-600">{hour}</div>
