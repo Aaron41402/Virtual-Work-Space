@@ -76,7 +76,15 @@ export default function Sidebar({ activeSection, setActiveSection }) {
             <img src={userAvatar} alt={userName} className="pixel-image" />
           </div>
         </div>
-        <h3 className="text-lg font-semibold text-[#E6C86E] pixel-shadow">{userName}</h3>
+        <h3 className="text-lg font-semibold text-[#E6C86E] pixel-shadow max-w-[160px] truncate text-center">
+          {userName}
+        </h3>
+        {/* Show tooltip on hover if username is long */}
+        {userName.length > 15 && (
+          <div className="text-xs text-[#8BABBF] mt-1 opacity-80">
+            Hover to see full name
+          </div>
+        )}
       </div>
       
       {/* Navigation Links */}
@@ -263,6 +271,19 @@ export default function Sidebar({ activeSection, setActiveSection }) {
         .avatar > div {
           animation: border-pulse 4s infinite;
           image-rendering: pixelated;
+        }
+        
+        h3.truncate:hover {
+          white-space: normal;
+          overflow: visible;
+          text-overflow: clip;
+          word-break: break-word;
+          max-width: 160px;
+          position: relative;
+          z-index: 20;
+          background-color: rgba(42, 33, 54, 0.9);
+          padding: 2px 4px;
+          border-radius: 2px;
         }
       `}</style>
     </div>

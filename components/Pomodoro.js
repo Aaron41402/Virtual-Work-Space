@@ -75,7 +75,7 @@ export default function Pomodoro() {
       >
         <div className="flex items-center">
           <span className="mr-2">🍅</span>
-          <span className="font-medium text-[#E6C86E] text-sm">Pomodoro</span>
+          <span className="font-medium text-[#ffffff] text-sm">Pomodoro</span>
         </div>
         <button className="text-[#8BABBF] hover:text-[#E6C86E]">
           {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
@@ -84,7 +84,7 @@ export default function Pomodoro() {
 
       {/* Timer display (always visible and bigger) */}
       <div className="py-2 px-2 flex justify-center bg-[#3A2E56]">
-        <div className="text-3xl font-bold tracking-wider text-[#FF6B97] pixel-shadow">
+        <div className="text-3xl font-bold tracking-wider text-[#E6C86E] pixel-shadow">
           {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
         </div>
       </div>
@@ -122,7 +122,7 @@ export default function Pomodoro() {
               }}
               className={`px-2 py-1 text-xs border-2 ${
                 mode === 'work'
-                  ? 'bg-[#4A3F6B] border-[#FF6B97] text-[#FF6B97]'
+                  ? 'bg-[#4A3F6B] border-[#E6C86E] text-[#E6C86E]'
                   : 'bg-[#2A2136] border-[#8BABBF] text-[#8BABBF] hover:border-[#E6C86E] hover:text-[#E6C86E]'
               } pixel-button-sm`}
             >
@@ -137,7 +137,7 @@ export default function Pomodoro() {
               }}
               className={`px-2 py-1 text-xs border-2 ${
                 mode === 'break'
-                  ? 'bg-[#4A3F6B] border-[#FF6B97] text-[#FF6B97]'
+                  ? 'bg-[#4A3F6B] border-[#E6C86E] text-[#E6C86E]'
                   : 'bg-[#2A2136] border-[#8BABBF] text-[#8BABBF] hover:border-[#E6C86E] hover:text-[#E6C86E]'
               } pixel-button-sm`}
             >
