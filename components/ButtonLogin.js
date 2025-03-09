@@ -12,7 +12,7 @@ function ButtonLogin({ session, extraStyle }) {
 
     if (session) {
         return (
-            <Link href={targetUrl} className={`btn btn-primary ${extraStyle || ""}`}>
+            <Link href={targetUrl} className={`btn btn-neutral ${extraStyle || ""}`}>
                 Welcome Back {session.user.name || "friend"}
             </Link>
         );
@@ -20,7 +20,7 @@ function ButtonLogin({ session, extraStyle }) {
 
     return (
         <button
-            className={`btn btn-primary ${extraStyle || ""}`}
+            className={`btn btn-neutral ${extraStyle || ""}`}
             onClick={() => signIn(undefined, { callbackUrl: targetUrl })}
         >
             Get Started

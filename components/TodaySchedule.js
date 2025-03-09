@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { useSession } from 'next-auth/react';
-import { Edit2, Check, X, Plus, Clock, Trash2 } from 'lucide-react';
+import { Edit2, Check, X, Plus, Clock, Trash2, AlertCircle } from 'lucide-react';
 
 function TodaySchedule() {
   const { data: session } = useSession();
@@ -52,6 +52,18 @@ function TodaySchedule() {
   }, [showAddModal]);
 
   useEffect(() => {
+    // Generate all 24 hours for timeline
+    const hours = [];
+    for (let i = 0; i < 24; i++) {
+      hours.push(`${i.toString().padStart(2, '0')}:00`);
+    }
+    setTimelineHours(hours);
+    
+    // Load schedule data
+    loadScheduleData();
+  }, [session]);
+
+  useEffect(() => {
     // Scroll to current time when component loads
     if (timelineRef.current) {
       const now = new Date();
@@ -74,56 +86,119 @@ function TodaySchedule() {
     }
   }, [timelineHours, loading]);
 
-  useEffect(() => {
-    // Generate all 24 hours for timeline
-    const hours = [];
-    for (let i = 0; i < 24; i++) {
-      hours.push(`${i.toString().padStart(2, '0')}:00`);
+  // Check if we need to fetch new data or use cached data
+  const loadScheduleData = async () => {
+    try {
+      const today = new Date().toDateString();
+      const cachedData = localStorage.getItem('scheduleData');
+      const cachedDate = localStorage.getItem('scheduleDate');
+      
+      // If we have cached data from today, use it
+      if (cachedData && cachedDate === today) {
+        console.log('Using cached schedule data');
+        setSchedule(JSON.parse(cachedData));
+        setLoading(false);
+        return;
+      }
+      
+      // Otherwise fetch new data
+      await fetchScheduleData();
+    } catch (error) {
+      console.error('Error loading schedule data:', error);
+      setError('Failed to load schedule data');
+      setLoading(false);
     }
-    setTimelineHours(hours);
-    
-    // Use dummy data instead
-    const dummyData = {
-      wakeTime: '07:00',
-      bedTime: '22:00',
-      priorities: 'Complete project, Study for exam, Exercise',
-      habits: 'Meditation, Reading, Journaling'
-    };
+  };
 
-    generateSchedule(dummyData);
-    setLoading(false);
-  }, [session]);
+  // Fetch data from API
+  const fetchScheduleData = async () => {
+    if (!session) {
+      setError('Please sign in to view your schedule');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      // Fetch the user's setup data
+      const response = await fetch('/api/setup');
+      const data = await response.json();
+      
+      if (response.ok && data.hasSetup) {
+        // Fetch the actual setup response data
+        const detailsResponse = await fetch('/api/setup/details');
+        const setupDetails = await detailsResponse.json();
+        
+        if (detailsResponse.ok) {
+          setSetupData(setupDetails.data);
+          const scheduleItems = generateScheduleFromSetup(setupDetails.data);
+          setSchedule(scheduleItems);
+          
+          // Cache the generated schedule
+          const today = new Date().toDateString();
+          localStorage.setItem('scheduleDate', today);
+          localStorage.setItem('scheduleData', JSON.stringify(scheduleItems));
+          setLoading(false);
+        } else {
+          setError(setupDetails.error || 'Failed to fetch setup details');
+          setLoading(false);
+        }
+      } else {
+        setError('Please complete your setup to generate a schedule');
+        setLoading(false);
+      }
+    } catch (err) {
+      console.error('Error fetching setup data:', err);
+      setError('Failed to load schedule data');
+      setLoading(false);
+    }
+  };
 
   // Generate a schedule based on the user's setup data
-  const generateSchedule = (data) => {
-    if (!data) return;
+  const generateScheduleFromSetup = (data) => {
+    if (!data) return [];
 
     const scheduleItems = [];
     
     // Add wake up time
-    scheduleItems.push({
-      id: 'wake',
-      time: data.wakeTime || '07:00',
-      activity: 'Wake up',
-      type: 'routine'
-    });
+    if (data.wakeTime) {
+      scheduleItems.push({
+        id: 'wake',
+        time: data.wakeTime,
+        activity: 'Wake up',
+        type: 'routine'
+      });
+    }
 
-    // Add morning routine
-    scheduleItems.push({
-      id: 'morning',
-      time: '08:00',
-      activity: 'Morning routine',
-      type: 'routine'
-    });
+    // Add morning routine (30 min after wake time)
+    if (data.wakeTime) {
+      const wakeHour = parseInt(data.wakeTime.split(':')[0]);
+      const wakeMinute = parseInt(data.wakeTime.split(':')[1]);
+      
+      let morningRoutineHour = wakeHour;
+      let morningRoutineMinute = wakeMinute + 30;
+      
+      if (morningRoutineMinute >= 60) {
+        morningRoutineHour = (morningRoutineHour + 1) % 24;
+        morningRoutineMinute = morningRoutineMinute - 60;
+      }
+      
+      scheduleItems.push({
+        id: 'morning',
+        time: `${morningRoutineHour.toString().padStart(2, '0')}:${morningRoutineMinute.toString().padStart(2, '0')}`,
+        activity: 'Morning routine',
+        type: 'routine'
+      });
+    }
 
     // Add priorities from setup
     if (data.priorities) {
       const priorities = data.priorities.split(',').map(p => p.trim());
       
-      priorities.slice(0, 2).forEach((priority, index) => {
+      priorities.forEach((priority, index) => {
+        const priorityHour = (9 + index) % 24;
         scheduleItems.push({
           id: `priority-${index}`,
-          time: `${(10 + index * 2).toString().padStart(2, '0')}:00`,
+          time: `${priorityHour.toString().padStart(2, '0')}:00`,
           activity: priority,
           type: 'priority'
         });
@@ -142,10 +217,11 @@ function TodaySchedule() {
     if (data.habits) {
       const habits = data.habits.split(',').map(h => h.trim());
       
-      habits.slice(0, 2).forEach((habit, index) => {
+      habits.forEach((habit, index) => {
+        const habitHour = (14 + index) % 24;
         scheduleItems.push({
           id: `habit-${index}`,
-          time: `${(14 + index * 2).toString().padStart(2, '0')}:00`,
+          time: `${habitHour.toString().padStart(2, '0')}:00`,
           activity: habit,
           type: 'habit'
         });
@@ -161,14 +237,25 @@ function TodaySchedule() {
     });
 
     // Add bedtime
-    scheduleItems.push({
-      id: 'bed',
-      time: data.bedTime || '22:00',
-      activity: 'Bedtime',
-      type: 'routine'
-    });
+    if (data.bedTime) {
+      scheduleItems.push({
+        id: 'bed',
+        time: data.bedTime,
+        activity: 'Bedtime',
+        type: 'routine'
+      });
+    }
 
-    setSchedule(scheduleItems);
+    // Sort schedule by time
+    return scheduleItems.sort((a, b) => {
+      const timeA = a.time.split(':').map(Number);
+      const timeB = b.time.split(':').map(Number);
+      
+      if (timeA[0] !== timeB[0]) {
+        return timeA[0] - timeB[0];
+      }
+      return timeA[1] - timeB[1];
+    });
   };
 
   // Get activity for a specific hour
@@ -180,6 +267,15 @@ function TodaySchedule() {
     });
     
     return activity || null;
+  };
+
+  // Check if an hour is in the past
+  const isHourPast = (hour) => {
+    const now = new Date();
+    const currentHour = now.getHours();
+    const hourNum = parseInt(hour.split(':')[0]);
+    
+    return hourNum < currentHour;
   };
 
   // Get background color based on activity type
@@ -196,18 +292,6 @@ function TodaySchedule() {
     }
   };
 
-  // Check if an hour is in the past
-  const isHourPast = (hour) => {
-    const now = new Date();
-    const currentHour = now.getHours();
-    const currentMinute = now.getMinutes();
-    
-    const hourNum = parseInt(hour.split(':')[0]);
-    const minuteNum = parseInt(hour.split(':')[1] || '0');
-    
-    return hourNum < currentHour || (hourNum === currentHour && minuteNum < currentMinute);
-  };
-
   // Start editing an item
   const startEditing = (item) => {
     setEditingItem(item.id);
@@ -215,47 +299,87 @@ function TodaySchedule() {
     setNewTime(item.time);
   };
 
-  // Save edited item
-  const saveEdit = (itemId) => {
-    setSchedule(prev => prev.map(item => 
-      item.id === itemId 
-        ? { ...item, activity: newActivity, time: newTime }
-        : item
-    ));
-    setEditingItem(null);
-  };
-
   // Cancel editing
   const cancelEdit = () => {
     setEditingItem(null);
+    setNewActivity('');
+    setNewTime('');
+  };
+
+  // Save edited item
+  const saveEdit = (itemId) => {
+    if (!newActivity.trim()) return;
+
+    const updatedSchedule = schedule.map(item => {
+      if (item.id === itemId) {
+        return {
+          ...item,
+          activity: newActivity.trim(),
+          time: newTime
+        };
+      }
+      return item;
+    });
+
+    setSchedule(updatedSchedule);
+    setEditingItem(null);
+    setNewActivity('');
+    setNewTime('');
+    
+    // Update localStorage
+    localStorage.setItem('scheduleData', JSON.stringify(updatedSchedule));
   };
 
   // Delete an item
   const deleteItem = (itemId) => {
-    setSchedule(prev => prev.filter(item => item.id !== itemId));
+    const updatedSchedule = schedule.filter(item => item.id !== itemId);
+    setSchedule(updatedSchedule);
+    
+    // Update localStorage
+    localStorage.setItem('scheduleData', JSON.stringify(updatedSchedule));
   };
 
-  // Add new item
+  // Add a new item
   const addNewItem = () => {
-    if (newItemActivity.trim() && newItemTime) {
-      const newItem = {
-        id: `item-${Date.now()}`,
-        time: newItemTime,
-        activity: newItemActivity.trim(),
-        type: newItemType
-      };
+    if (!newItemActivity.trim() || !newItemTime) return;
+
+    const newItem = {
+      id: `item-${Date.now()}`,
+      time: newItemTime,
+      activity: newItemActivity.trim(),
+      type: newItemType
+    };
+
+    const updatedSchedule = [...schedule, newItem].sort((a, b) => {
+      const timeA = a.time.split(':').map(Number);
+      const timeB = b.time.split(':').map(Number);
       
-      setSchedule(prev => [...prev, newItem]);
-      setNewItemActivity('');
-      setNewItemTime('');
-      setShowAddModal(false);
-    }
+      if (timeA[0] !== timeB[0]) {
+        return timeA[0] - timeB[0];
+      }
+      return timeA[1] - timeB[1];
+    });
+    
+    setSchedule(updatedSchedule);
+    setNewItemActivity('');
+    setNewItemTime('');
+    setShowAddModal(false);
+    
+    // Update localStorage
+    localStorage.setItem('scheduleData', JSON.stringify(updatedSchedule));
   };
 
-  // Open add modal with current hour pre-filled
+  // Open add modal with hour pre-filled
   const openAddModalWithHour = (hour) => {
     setNewItemTime(hour);
     setShowAddModal(true);
+  };
+
+  // Reset schedule data (for testing)
+  const resetScheduleData = () => {
+    localStorage.removeItem('scheduleData');
+    localStorage.removeItem('scheduleDate');
+    window.location.reload();
   };
 
   if (loading) {
@@ -274,8 +398,21 @@ function TodaySchedule() {
       <div className="flex-1 p-8 relative z-10">
         <div className="bg-white/70 backdrop-blur-sm w-3/4 max-w-2xl mx-auto mt-8 rounded-lg shadow p-4">
           <h2 className="text-xl font-bold mb-4">Today's Schedule</h2>
-          <p className="text-red-500">{error}</p>
-          <p>Please complete the setup process to see your personalized schedule.</p>
+          <div className="flex items-center text-red-500 mb-2">
+            <AlertCircle size={18} className="mr-2" />
+            <p>{error}</p>
+          </div>
+          <p className="text-sm text-gray-600">
+            You can create a custom schedule by clicking the "+" button.
+          </p>
+          <div className="mt-4 flex justify-end">
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+            >
+              Create Schedule
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -328,7 +465,7 @@ function TodaySchedule() {
         {timelineHours.length > 0 ? (
           <div 
             ref={timelineRef}
-            className="space-y-2 max-h-[400px] overflow-y-auto pr-2 relative"
+            className="space-y-2 max-h-[350px] overflow-y-auto pr-2 relative"
           >
             {timelineHours.map((hour, index) => {
               const activity = getActivityForHour(hour);
@@ -408,7 +545,27 @@ function TodaySchedule() {
             })}
           </div>
         ) : (
-          <p>Loading your personalized schedule <span className="loading loading-dots loading-xs"></span></p>
+          <div className="py-8 text-center">
+            <p className="text-gray-500 mb-4">No schedule items yet</p>
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+            >
+              Create Your Schedule
+            </button>
+          </div>
+        )}
+        
+        {/* Debug button - only visible in development */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="mt-4 text-right">
+            <button 
+              onClick={resetScheduleData}
+              className="text-xs text-gray-500 hover:text-red-500"
+            >
+              Reset Schedule Data
+            </button>
+          </div>
         )}
       </div>
 

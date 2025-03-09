@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@auth/mongodb-adapter": "^3.7.4",
+    "@google/generative-ai": "^0.24.0",
     "@heroicons/react": "^2.2.0",
     "canvas-confetti": "^1.9.3",
     "chart.js": "^4.4.8",

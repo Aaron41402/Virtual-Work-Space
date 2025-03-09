@@ -131,7 +131,7 @@ export default function Pomodoro() {
             <button
               onClick={() => {
                 setMode('break')
-                setMinutes(1)
+                setMinutes(5)
                 setSeconds(0)
                 setIsActive(false)
               }}

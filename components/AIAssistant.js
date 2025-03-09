@@ -1,17 +1,109 @@
 'use client'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useSession } from 'next-auth/react'
+import { Send, X, Minimize2, Calendar, BookOpen, Clock, Coffee } from 'lucide-react'
 
 export default function AIAssistant() {
-  const { data: session, status } = useSession();
-  const [showMessage, setShowMessage] = useState(false);
-  const [message, setMessage] = useState('');
-  const [messageType, setMessageType] = useState('');
-  const [isExiting, setIsExiting] = useState(false);
+  const { data: session } = useSession();
+  const [isOpen, setIsOpen] = useState(false);
+  const [messages, setMessages] = useState([]);
+  const [inputMessage, setInputMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [displayedText, setDisplayedText] = useState('');
-  const [characterIndex, setCharacterIndex] = useState(0);
   const [hasShownWelcome, setHasShownWelcome] = useState(false);
+  const [showNotification, setShowNotification] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState('');
+  const messagesEndRef = useRef(null);
+  const chatInputRef = useRef(null);
+
+  // Add pixel art styles
+  useEffect(() => {
+    // Add pixel art font and animations to the document
+    const style = document.createElement('style');
+    style.textContent = `
+      @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+      
+      .font-pixel {
+        font-family: 'Press Start 2P', cursive;
+      }
+      
+      .pixel-shadow {
+        box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.4);
+      }
+      
+      @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-5px); }
+        100% { transform: translateY(0px); }
+      }
+      
+      @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+      }
+      
+      @keyframes pixel-fade-in {
+        0% { opacity: 0; transform: translateY(10px); }
+        100% { opacity: 1; transform: translateY(0); }
+      }
+      
+      .animate-float {
+        animation: float 3s ease-in-out infinite;
+      }
+      
+      .animate-pulse-slow {
+        animation: pulse 2s ease-in-out infinite;
+      }
+      
+      .animate-pixel-fade-in {
+        animation: pixel-fade-in 0.3s ease-out forwards;
+      }
+      
+      .pixel-border {
+        border-style: solid;
+        border-width: 4px;
+        border-image: url("data:image/svg+xml,%3Csvg width='3' height='3' viewBox='0 0 3 3' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M0 0H3V3H0V0Z' fill='%23422e37'/%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M1 1H2V2H1V1Z' fill='%23e9d8a6'/%3E%3C/svg%3E")
+        9 stretch;
+      }
+      
+      .pixel-button {
+        image-rendering: pixelated;
+        background-color: #705e78;
+        color: #f2e9e4;
+        border: 0;
+        box-shadow: 
+          0 4px 0 0 #422e37,
+          inset -4px -4px 0 0 #422e37,
+          inset 4px 4px 0 0 #9c89b8;
+      }
+      
+      .pixel-button:hover {
+        background-color: #9c89b8;
+      }
+      
+      .pixel-button:active {
+        transform: translateY(4px);
+        box-shadow: 
+          0 0px 0 0 #422e37,
+          inset -4px -4px 0 0 #422e37,
+          inset 4px 4px 0 0 #9c89b8;
+      }
+      
+      .pixel-input {
+        background-color: #f2e9e4;
+        color: #422e37;
+        border: 0;
+        box-shadow: 
+          inset 4px 4px 0 0 #422e37,
+          inset -4px -4px 0 0 #9c89b8;
+      }
+    `;
+    document.head.appendChild(style);
+    
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
 
   // Welcome messages based on time of day
   const getWelcomeMessage = () => {
@@ -21,249 +113,481 @@ export default function AIAssistant() {
                     (session?.user?.email ? session.user.email.split('@')[0] : 'brave adventurer');
     
     if (hour >= 5 && hour < 12) {
-      return [
-        `Good morning, ${userName}! A new day of quests awaits. May your coffee be strong and your focus stronger!`,
-        `Rise and shine, ${userName}! The morning sun brings new opportunities for adventure and productivity.`,
-        `Welcome to a fresh morning, ${userName}! What epic tasks shall we conquer before noon?`
-      ];
+      return `Good morning, ${userName}! Ready for today's quests?`;
     } else if (hour >= 12 && hour < 17) {
-      return [
-        `Good afternoon, ${userName}! How goes your quest today? There's still time to accomplish great things!`,
-        `The day is at its peak, ${userName}! Let's harness this energy to tackle your most important tasks.`,
-        `Greetings, ${userName}! The afternoon sun shines upon your journey. What challenges will you overcome today?`
-      ];
+      return `Good afternoon, ${userName}! How goes your adventure today?`;
     } else if (hour >= 17 && hour < 22) {
-      return [
-        `Good evening, ${userName}! As the day winds down, let's review what you've accomplished and plan for tomorrow.`,
-        `The evening brings reflection, ${userName}. What victories did you claim today? What lessons did you learn?`,
-        `Welcome back, ${userName}! The evening is a perfect time to tie up loose ends and prepare for tomorrow's adventures.`
-      ];
+      return `Good evening, ${userName}! Time to complete your final quests for the day?`;
     } else {
-      return [
-        `Working late, ${userName}? Your dedication is admirable, but remember that rest is also part of the hero's journey.`,
-        `The midnight hour approaches, ${userName}. Even the most valiant heroes need their rest to face tomorrow's challenges.`,
-        `Greetings, night owl ${userName}! May your late-hour productivity be legendary, but don't forget to rest soon.`
-      ];
+      return `Hello ${userName}! Burning the midnight oil? Don't forget to rest and restore your energy!`;
     }
   };
 
-  // Encouraging messages to display randomly
+  // RPG-themed encouraging messages
   const encouragingMessages = [
-    "You're doing great today! Keep it up! 🌟",
-    "Remember to take a short break and stretch! 💪",
-    "Stay hydrated! Grab a glass of water. 💧",
-    "You've got this! I believe in you! 🚀",
-    "Don't forget to breathe and take a moment for yourself. 🧘",
-    "Your hard work will pay off! Keep going! 🌈",
-    "Every small step counts towards your goals! 👣",
-    "You're making progress, even if you don't see it yet! 🌱",
-    "Remember your 'why' and stay motivated! 💭",
-    "You're capable of amazing things! 💫"
+    "Your FOCUS stat increased! Keep up the great work, brave adventurer! 🌟",
+    "Time for a quick REST to restore your energy points! Stand up and stretch! 💪",
+    "Don't forget to refill your HYDRATION meter! Grab a potion (water)! 💧",
+    "You've gained +5 CONFIDENCE! This challenge is no match for you! 🚀",
+    "Cast SELF-CARE spell! Take a moment to breathe deeply. 🧘",
+    "Your PERSEVERANCE skill is leveling up! Keep going! 🌈",
+    "Each small quest completed brings you closer to the legendary achievement! 👣",
+    "Your character is gaining EXP even when progress feels slow! 🌱",
+    "Remember your MAIN QUEST motivation! Stay on your path! 💭",
+    "You've unlocked the POTENTIAL ability! Use it wisely! 💫"
   ];
 
-  // Function to check if we should show a welcome message
-  const checkWelcomeMessage = () => {
-    // Only show welcome message if session is loaded
-    if (status === 'loading' || hasShownWelcome) return;
-    
-    // Check if this is a new login session
-    const lastLoginTimestamp = localStorage.getItem('lastLoginTimestamp');
-    const currentTimestamp = Date.now();
-    const sessionTimeout = 30 * 60 * 1000; // 30 minutes in milliseconds
-    
-    // If no previous login or login expired (30+ minutes ago), show welcome message
-    if (!lastLoginTimestamp || (currentTimestamp - parseInt(lastLoginTimestamp)) > sessionTimeout) {
-      const welcomeMessages = getWelcomeMessage();
-      const randomIndex = Math.floor(Math.random() * welcomeMessages.length);
-      
-      setMessage(welcomeMessages[randomIndex]);
-      setMessageType('encouragement');
-      setShowMessage(true);
-      setIsTyping(true);
-      setCharacterIndex(0);
-      setDisplayedText('');
-      
-      // Save current timestamp as last login
-      localStorage.setItem('lastLoginTimestamp', currentTimestamp.toString());
-      setHasShownWelcome(true);
-      
-      setTimeout(() => {
-        handleDismiss();
-      }, 15000);
-    } else {
-      // Update the timestamp but don't show welcome message
-      localStorage.setItem('lastLoginTimestamp', currentTimestamp.toString());
-      setHasShownWelcome(true);
-    }
-  };
-
-  // Function to check schedule and display reminders
-  const checkSchedule = () => {
-    // Get current time
-    const now = new Date();
-    const hours = now.getHours();
-    const minutes = now.getMinutes();
-    
-    // Get schedule data from localStorage if available
-    const scheduleData = localStorage.getItem('todaySchedule');
-    
-    if (scheduleData) {
-      try {
-        const schedule = JSON.parse(scheduleData);
-        
-        // Check if there's an upcoming task in the next 15 minutes
-        schedule.forEach(task => {
-          if (task.time) {
-            const [taskHours, taskMinutes] = task.time.split(':').map(Number);
-            
-            // Calculate time difference in minutes
-            const currentTotalMinutes = hours * 60 + minutes;
-            const taskTotalMinutes = taskHours * 60 + taskMinutes;
-            const minutesDifference = taskTotalMinutes - currentTotalMinutes;
-            
-            // If task is coming up in the next 15 minutes and we're not already showing a message
-            if (minutesDifference > 0 && minutesDifference <= 15 && !showMessage) {
-              setMessage(`Upcoming task in ${minutesDifference} minutes: ${task.title}`);
-              setMessageType('schedule');
-              setShowMessage(true);
-              setIsTyping(true);
-              setCharacterIndex(0);
-              setDisplayedText('');
-              
-              // Hide message after 15 seconds
-              setTimeout(() => {
-                handleDismiss();
-              }, 15000);
-            }
-          }
-        });
-      } catch (error) {
-        console.error('Error parsing schedule data:', error);
-      }
-    }
-  };
-
-  // Function to show random encouraging message
-  const showRandomEncouragement = () => {
-    if (!showMessage) {
-      const randomIndex = Math.floor(Math.random() * encouragingMessages.length);
-      setMessage(encouragingMessages[randomIndex]);
-      setMessageType('encouragement');
-      setShowMessage(true);
-      setIsTyping(true);
-      setCharacterIndex(0);
-      setDisplayedText('');
-      
-      // Hide message after 12 seconds
-      setTimeout(() => {
-        handleDismiss();
-      }, 12000);
-    }
-  };
-
-  // Handle smooth dismissal with CSS transition
-  const handleDismiss = () => {
-    setIsExiting(true);
-    setTimeout(() => {
-      setShowMessage(false);
-      setIsExiting(false);
-    }, 300); // Match this with the CSS transition duration
-  };
-
-  // Text typing effect
   useEffect(() => {
-    if (isTyping && characterIndex < message.length) {
-      const typingSpeed = 30; // milliseconds per character
-      const timer = setTimeout(() => {
-        setDisplayedText(message.substring(0, characterIndex + 1));
-        setCharacterIndex(characterIndex + 1);
-      }, typingSpeed);
-      
-      return () => clearTimeout(timer);
-    } else if (characterIndex >= message.length) {
-      setIsTyping(false);
+    // Scroll to bottom of messages when new messages are added
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [isTyping, characterIndex, message]);
+  }, [messages]);
 
-  // Wait for session to be loaded before showing welcome message
   useEffect(() => {
-    if (status === 'authenticated') {
+    // Focus input when chat is opened
+    if (isOpen && chatInputRef.current) {
+      chatInputRef.current.focus();
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    // Check if this is a new session to show welcome message
+    if (session && !hasShownWelcome && isOpen) {
+      const welcomeMessage = getWelcomeMessage();
+      
+      // Add welcome message with a slight delay
       setTimeout(() => {
-        checkWelcomeMessage();
+        addBotMessage(welcomeMessage);
+        setHasShownWelcome(true);
       }, 1000);
     }
-  }, [status]); // Re-run when session status changes
+  }, [session, isOpen, hasShownWelcome]);
 
-  useEffect(() => {
-    // Check schedule every minute
-    const scheduleInterval = setInterval(checkSchedule, 60000);
+  const addBotMessage = (text) => {
+    setIsTyping(true);
     
-    // Show initial schedule check
-    checkSchedule();
+    // Simulate typing delay based on message length
+    const typingDelay = Math.min(1000, Math.max(500, text.length * 10));
     
-    // Set up random encouragement messages (every 20-40 minutes)
-    const randomTimeInterval = Math.floor(Math.random() * (40 - 20 + 1) + 20) * 60000;
-    const encouragementInterval = setInterval(() => {
-      showRandomEncouragement();
+    setTimeout(() => {
+      setMessages(prev => [...prev, { sender: 'bot', text }]);
+      setIsTyping(false);
+    }, typingDelay);
+  };
+
+  const handleSendMessage = (e) => {
+    e.preventDefault();
+    
+    if (!inputMessage.trim()) return;
+    
+    // Add user message to chat
+    setMessages(prev => [...prev, { sender: 'user', text: inputMessage.trim() }]);
+    
+    // Clear input
+    setInputMessage('');
+    
+    // Simulate bot response
+    setIsTyping(true);
+    
+    setTimeout(() => {
+      // Simple responses based on keywords
+      const userMsg = inputMessage.toLowerCase();
       
-      // Reset the interval with a new random time
-      clearInterval(encouragementInterval);
-      const newRandomInterval = Math.floor(Math.random() * (40 - 20 + 1) + 20) * 60000;
-      setInterval(showRandomEncouragement, newRandomInterval);
-    }, randomTimeInterval);
+      if (userMsg.includes('hello') || userMsg.includes('hi')) {
+        addBotMessage("Greetings, adventurer! How may I assist you on your journey today?");
+      } 
+      else if (userMsg.includes('help')) {
+        addBotMessage("I can provide guidance on your quests (tasks), offer wisdom about your journey (schedule), or provide encouragement when your spirit needs lifting!");
+      }
+      else if (userMsg.includes('task') || userMsg.includes('todo')) {
+        addBotMessage("To conquer your quests effectively, break them into smaller battles, prioritize them by importance, and set achievable deadlines. The Quest Log (To-Do section) in your inventory allows you to track your progress!");
+      }
+      else if (userMsg.includes('schedule') || userMsg.includes('today') || userMsg.includes('plan')) {
+        // Show schedule information
+        showSchedule();
+      }
+      else if (userMsg.includes('next') || userMsg.includes('upcoming')) {
+        // Show next event
+        try {
+          const scheduleData = localStorage.getItem('scheduleData');
+          if (!scheduleData) {
+            addBotMessage("I don't see any upcoming quests in your journey log!");
+            return;
+          }
+          
+          const schedule = JSON.parse(scheduleData);
+          const now = new Date();
+          const currentHour = now.getHours();
+          const currentMinute = now.getMinutes();
+          
+          // Find next event
+          const nextEvents = schedule.filter(event => {
+            const [eventHour, eventMinute] = event.time.split(':').map(Number);
+            return (eventHour > currentHour) || 
+                   (eventHour === currentHour && eventMinute > currentMinute);
+          }).sort((a, b) => {
+            const [aHour, aMinute] = a.time.split(':').map(Number);
+            const [bHour, bMinute] = b.time.split(':').map(Number);
+            return (aHour * 60 + aMinute) - (bHour * 60 + bMinute);
+          });
+          
+          if (nextEvents.length === 0) {
+            addBotMessage("You have no more quests scheduled for today! Time to rest or plan for tomorrow's adventures.");
+          } else {
+            const nextEvent = nextEvents[0];
+            addBotMessage(`Your next quest is "${nextEvent.activity}" at ${nextEvent.time}. Would you like some tips to prepare?`);
+          }
+        } catch (error) {
+          console.error('Error checking next event:', error);
+          addBotMessage("I'm having trouble reading your quest scroll. Please try again later!");
+        }
+      }
+      else if (userMsg.includes('tired') || userMsg.includes('exhausted')) {
+        addBotMessage("Even the mightiest heroes need rest! Consider taking a short break to restore your energy. The Pomodoro spell (25 minutes of focus followed by 5 minutes of rest) is quite effective!");
+      }
+      else {
+        // Check if message might be about a scheduled activity
+        try {
+          const scheduleData = localStorage.getItem('scheduleData');
+          if (scheduleData) {
+            const schedule = JSON.parse(scheduleData);
+            
+            // Look for activities that match words in the user's message
+            const matchingActivities = schedule.filter(event => {
+              const activityWords = event.activity.toLowerCase().split(' ');
+              return activityWords.some(word => userMsg.includes(word) && word.length > 3);
+            });
+            
+            if (matchingActivities.length > 0) {
+              const activity = matchingActivities[0];
+              addBotMessage(`I see you're asking about "${activity.activity}" scheduled at ${activity.time}. Is there something specific you need help with for this quest?`);
+              return;
+            }
+          }
+        } catch (error) {
+          console.error('Error matching schedule:', error);
+        }
+        
+        addBotMessage("I understand your message, brave adventurer! While I'm still learning the ways of this realm, I'll do my best to assist you on your journey. Is there something specific about your quests or schedule you need help with?");
+      }
+    }, 1000);
+  };
+
+  // Show notification bubble
+  const showNotificationBubble = (message) => {
+    setNotificationMessage(message);
+    setShowNotification(true);
+    
+    // Auto-hide notification after 10 seconds
+    setTimeout(() => {
+      setShowNotification(false);
+    }, 10000);
+  };
+
+  // Toggle chat open/closed
+  const toggleChat = () => {
+    setIsOpen(!isOpen);
+    
+    // Only add welcome message if opening chat AND no messages exist yet
+    if (!isOpen && messages.length === 0 && !hasShownWelcome) {
+      addBotMessage(getWelcomeMessage());
+      setHasShownWelcome(true);
+    }
+  };
+
+  // Dismiss notification
+  const dismissNotification = () => {
+    setShowNotification(false);
+  };
+
+  // Show random encouragement
+  const showRandomEncouragement = () => {
+    const randomIndex = Math.floor(Math.random() * encouragingMessages.length);
+    const message = encouragingMessages[randomIndex];
+    
+    if (isOpen) {
+      // If chat is open, add as a message
+      addBotMessage(message);
+    } else {
+      // Otherwise show as notification
+      showNotificationBubble(message);
+    }
+  };
+
+  // Check schedule for upcoming events
+  const checkSchedule = () => {
+    try {
+      // Get schedule data from localStorage
+      const scheduleData = localStorage.getItem('scheduleData');
+      if (!scheduleData) return;
+      
+      const schedule = JSON.parse(scheduleData);
+      const now = new Date();
+      const currentHour = now.getHours();
+      const currentMinute = now.getMinutes();
+      
+      // Find upcoming events in the next hour
+      const upcomingEvents = schedule.filter(event => {
+        const [eventHour, eventMinute] = event.time.split(':').map(Number);
+        
+        // Check if event is within the next 15 minutes
+        if (eventHour === currentHour) {
+          return eventMinute > currentMinute && eventMinute - currentMinute <= 15;
+        } else if (eventHour === currentHour + 1) {
+          return eventMinute + (60 - currentMinute) <= 15;
+        }
+        return false;
+      });
+      
+      // Notify about upcoming events
+      if (upcomingEvents.length > 0) {
+        const nextEvent = upcomingEvents[0];
+        const message = `⚔️ QUEST ALERT: "${nextEvent.activity}" begins at ${nextEvent.time}! Prepare yourself, adventurer!`;
+        showNotificationBubble(message);
+        
+        // Add suggestions based on event type
+        setTimeout(() => {
+          const activity = nextEvent.activity.toLowerCase();
+          
+          if (activity.includes('meeting') || activity.includes('call')) {
+            showNotificationBubble("📜 PREPARATION TIP: Gather your notes and prepare key points before your meeting. A prepared adventurer is a successful one!");
+          } else if (activity.includes('study') || activity.includes('learn')) {
+            showNotificationBubble("📚 STUDY TIP: Find a quiet location and remove distractions to maximize your FOCUS stat during your study quest!");
+          } else if (activity.includes('exercise') || activity.includes('workout')) {
+            showNotificationBubble("💪 TRAINING TIP: Remember to hydrate before your workout to increase your STAMINA stat by +15%!");
+          } else if (activity.includes('write') || activity.includes('report')) {
+            showNotificationBubble("✍️ WRITING TIP: Start with an outline to organize your thoughts and boost your CLARITY stat!");
+          }
+        }, 5000);
+      }
+    } catch (error) {
+      console.error('Error checking schedule:', error);
+    }
+  };
+
+  // Show schedule information
+  const showSchedule = () => {
+    try {
+      // Get schedule data from localStorage
+      const scheduleData = localStorage.getItem('scheduleData');
+      
+      if (!scheduleData) {
+        addBotMessage("I don't see any quests in your journey log! You can create a schedule in the Home section. Would you like some tips on effective quest planning?");
+        return;
+      }
+      
+      const schedule = JSON.parse(scheduleData);
+      const now = new Date();
+      const currentHour = now.getHours();
+      
+      // Filter for upcoming events today
+      const upcomingEvents = schedule.filter(event => {
+        const eventHour = parseInt(event.time.split(':')[0]);
+        return eventHour >= currentHour;
+      }).slice(0, 3); // Show next 3 events
+      
+      if (upcomingEvents.length === 0) {
+        addBotMessage("You have completed all your quests for today! Rest well, brave adventurer, for tomorrow brings new challenges!");
+        return;
+      }
+      
+      let response = "Your upcoming quests:\n\n";
+      upcomingEvents.forEach(event => {
+        response += `• ${event.time} - ${event.activity}\n`;
+      });
+      
+      // Add a random RPG-themed tip
+      const tips = [
+        "\nTIP: Prepare for your next quest 5-10 minutes early to boost your READINESS stat.",
+        "\nTIP: Take a short rest between quests to restore your FOCUS points.",
+        "\nTIP: Staying hydrated throughout your journey increases your STAMINA by +20%.",
+        "\nTIP: If you're feeling overwhelmed, use the DEEP BREATHING spell for 1 minute before your next quest.",
+        "\nTIP: Review your quest log at the end of the day to prepare for tomorrow's adventures."
+      ];
+      
+      response += tips[Math.floor(Math.random() * tips.length)];
+      
+      addBotMessage(response);
+    } catch (error) {
+      console.error('Error showing schedule:', error);
+      addBotMessage("I seem to have misplaced my quest scroll. Please try again later!");
+    }
+  };
+
+  // Add this useEffect to check schedule periodically
+  useEffect(() => {
+    // Check schedule every 5 minutes
+    const scheduleInterval = setInterval(() => {
+      checkSchedule();
+    }, 300000); // 5 minutes
+    
+    // Initial check after component mounts
+    const initialCheck = setTimeout(() => {
+      checkSchedule();
+    }, 10000); // Check 10 seconds after mounting
     
     // Clean up intervals on unmount
     return () => {
       clearInterval(scheduleInterval);
-      clearInterval(encouragementInterval);
+      clearTimeout(initialCheck);
     };
   }, []);
 
-  if (!showMessage) return null;
-
   return (
-    <div
-      className={`bottom-0 left-0 right-0 mx-auto w-3/4 max-w-2xl z-50 p-4
-        transition-all duration-300 ease-in-out
-        ${isExiting ? 'opacity-0 translate-y-5' : 'opacity-100 translate-y-0'}
-        ${!showMessage ? 'hidden' : ''}`}
-      style={{ transform: isExiting ? 'scale(0.98)' : 'scale(1)' }}
-    >
-      {/* RPG Dialogue Box */}
-      <div className="relative">
-        {/* Character Avatar */}
-        <div className="avatar absolute -top-12 left-8 z-10">
-          <div className="ring-primary ring-offset-base-100 w-20 h-20 rounded-full ring ring-offset-2">
-            <img src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" />
-          </div>
+    <div className="fixed bottom-4 right-4 z-50 font-pixel">
+      {/* Notification Bubble - Position it above the avatar */}
+      {showNotification && !isOpen && (
+        <div className="absolute bottom-24 right-0 bg-gray-900/90 text-white p-4 rounded-none shadow-lg max-w-xs animate-pixel-fade-in pixel-border">
+          <button 
+            onClick={dismissNotification}
+            className="absolute top-1 right-1 text-gray-400 hover:text-white"
+          >
+            <X size={16} />
+          </button>
+          <p className="pr-4 text-xs leading-relaxed">{notificationMessage}</p>
         </div>
-        
-        {/* Dialogue Box */}
-        <div className="bg-gray-900/95 border-4 border-zinc-50 rounded-lg p-6 pt-8 text-white shadow-2xl min-h-[140px] w-full">
-          {/* Character Name */}
-          <div className="absolute -top-4 left-32 bg-zinc-50 px-4 py-1 rounded-full text-gray-900 font-bold text-base">
-            {messageType === 'schedule' ? 'Quest Master' : 'Lucy'}
+      )}
+      
+      {/* Chat Window with Avatar on Top */}
+      {isOpen && (
+        <div className="relative mb-4">
+          {/* Avatar on top of chat */}
+          <div className="absolute -top-24 right-4 z-10">
+            <div className="w-24 h-24 rounded-none overflow-hidden pixel-border animate-float">
+              <img 
+                src="/woman_nice.png" 
+                alt="Assistant" 
+                className="w-full h-full object-cover"
+                style={{imageRendering: 'pixelated'}}
+              />
+            </div>
           </div>
           
-          {/* Message Text with Typing Effect */}
-          <div className="mt-2 font-pixel leading-relaxed text-base max-w-3xl mx-auto">
-            {displayedText}
-            {isTyping && <span className="animate-pulse">▌</span>}
-          </div>
-          
-          {/* Continue/Dismiss Button */}
-          {!isTyping && (
-            <div className="mt-4 text-right">
-              <button 
-                onClick={handleDismiss}
-                className="bg-zinc-50 text-gray-900 px-4 py-1 rounded-md hover:bg-purple-200 transition-colors font-bold text-sm"
-              >
-                [Continue]
+          {/* Chat Window */}
+          <div className="bg-[#705e78] rounded-none shadow-xl w-80 md:w-96 overflow-hidden pixel-border mt-12">
+            {/* Chat Header */}
+            <div className="bg-[#422e37] text-[#f2e9e4] p-3 flex justify-between items-center">
+              <div className="flex items-center">
+                <span className="font-medium text-xs">Emi</span>
+              </div>
+              <button onClick={toggleChat} className="text-[#f2e9e4] hover:text-white">
+                <Minimize2 size={18} />
               </button>
             </div>
-          )}
+            
+            {/* Quick Action Buttons */}
+            <div className="bg-[#9c89b8] p-2 flex justify-around">
+              <button 
+                onClick={() => showSchedule()}
+                className="p-2 rounded-none hover:bg-[#705e78] flex flex-col items-center text-xs pixel-button"
+                title="Show Schedule"
+              >
+                <Calendar size={16} className="mb-1" />
+                <span>QUESTS</span>
+              </button>
+              <button 
+                onClick={() => addBotMessage("For your current task, try breaking it down into smaller steps to make it more manageable!")}
+                className="p-2 rounded-none hover:bg-[#705e78] flex flex-col items-center text-xs pixel-button"
+                title="Task Tips"
+              >
+                <BookOpen size={16} className="mb-1" />
+                <span>SKILLS</span>
+              </button>
+              <button 
+                onClick={() => addBotMessage("To boost productivity, try the Pomodoro technique: 25 minutes of focused work followed by a 5-minute break.")}
+                className="p-2 rounded-none hover:bg-[#705e78] flex flex-col items-center text-xs pixel-button"
+                title="Productivity Tips"
+              >
+                <Clock size={16} className="mb-1" />
+                <span>WISDOM</span>
+              </button>
+              <button 
+                onClick={showRandomEncouragement}
+                className="p-2 rounded-none hover:bg-[#705e78] flex flex-col items-center text-xs pixel-button"
+                title="Get Encouragement"
+              >
+                <Coffee size={16} className="mb-1" />
+                <span>BOOST</span>
+              </button>
+            </div>
+            
+            {/* Chat Messages */}
+            <div className="h-64 overflow-y-auto p-3 bg-[#f2e9e4]">
+              {messages.map((msg, index) => (
+                <div 
+                  key={index} 
+                  className={`mb-3 flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div 
+                    className={`max-w-[80%] p-2 rounded-none pixel-border ${
+                      msg.sender === 'user' 
+                        ? 'bg-[#9c89b8] text-[#f2e9e4]' 
+                        : 'bg-[#e9d8a6] text-[#422e37]'
+                    }`}
+                  >
+                    <p className="whitespace-pre-line text-xs leading-relaxed">{msg.text}</p>
+                  </div>
+                </div>
+              ))}
+              {isTyping && (
+                <div className="flex justify-start mb-3">
+                  <div className="bg-[#e9d8a6] text-[#422e37] p-2 rounded-none pixel-border">
+                    <div className="flex space-x-2">
+                      <div className="w-2 h-2 bg-[#422e37] rounded-sm animate-bounce"></div>
+                      <div className="w-2 h-2 bg-[#422e37] rounded-sm animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                      <div className="w-2 h-2 bg-[#422e37] rounded-sm animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+            
+            {/* Chat Input */}
+            <form onSubmit={handleSendMessage} className="p-3 flex bg-[#422e37]">
+              <input
+                ref={chatInputRef}
+                type="text"
+                value={inputMessage}
+                onChange={(e) => setInputMessage(e.target.value)}
+                placeholder="TYPE MESSAGE..."
+                className="flex-1 rounded-none px-3 py-2 text-xs pixel-input"
+              />
+              <button 
+                type="submit"
+                className="px-4 py-2 rounded-none text-[#f2e9e4] pixel-button"
+                disabled={!inputMessage.trim()}
+              >
+                <Send size={18} />
+              </button>
+            </form>
+          </div>
         </div>
-      </div>
+      )}
+      
+      {/* Chat Button - Pixel Art Style (Bigger) - Always at the bottom right */}
+      {!isOpen && (
+        <div className="relative">
+          <button
+            onClick={toggleChat}
+            className="w-20 h-20 rounded-none overflow-hidden pixel-border animate-float"
+          >
+            <div className="w-full h-full relative">
+              <img 
+                src="/woman_nice.png" 
+                alt="Assistant" 
+                className="w-full h-full object-cover animate-pulse-slow"
+                style={{imageRendering: 'pixelated'}}
+              />
+              {/* Notification indicator */}
+              {showNotification && (
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-none pixel-border animate-pulse"></div>
+              )}
+            </div>
+          </button>
+        </div>
+      )}
     </div>
   );
-} 
+}
