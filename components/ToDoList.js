@@ -120,7 +120,11 @@ function ToDoList() {
         <div className="flex-1 p-8 relative z-10">
             {/* Main Content */}
             <div className="bg-white/70 backdrop-blur-sm w-3/4 max-w-2xl mx-auto mt-8 rounded-lg shadow-lg p-4">
-                <h2 className="text-xl font-bold mb-3">To-Do List</h2>
+            <h2 className="text-xl text-[#E6C86E] font-bold mb-4" style={{
+            fontFamily: "'Press Start 2P', monospace",
+            letterSpacing: "0.5px",
+            textShadow: "2px 2px 0 #000"
+          }}>Quests</h2>
                 <div className="mb-4 flex flex-col space-y-2">
                     {tasks.map((task) => (
                     <div key={task.id} className="flex-1 bg-gray-50/90 p-2 rounded text-sm">

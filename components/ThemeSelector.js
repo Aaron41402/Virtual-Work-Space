@@ -107,7 +107,11 @@ export default function ThemeSelector() {
       )}
 
       <div className="bg-white/70 backdrop-blur-sm w-3/4 max-w-2xl mx-auto mt-8 rounded-lg shadow-lg p-4">
-        <h2 className="text-lg font-bold mb-2">Choose Your Theme</h2>
+      <h2 className="text-xl text-[#E6C86E] font-bold mb-4" style={{
+            fontFamily: "'Press Start 2P', monospace",
+            letterSpacing: "0.5px",
+            textShadow: "2px 2px 0 #000"
+          }}>Choose Your Theme</h2>
         
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
           {themes.map((theme) => (
@@ -163,6 +167,18 @@ export default function ThemeSelector() {
           </div>
         )}
       </div>
+
+      <style jsx>{`
+        .font-pixel {
+          font-family: 'Press Start 2P', monospace;
+          letter-spacing: 0.5px;
+        }
+        
+        .pixel-shadow {
+          text-shadow: 2px 2px 0 #000;
+        }
+      `}</style>
     </div>
   );
 } 
+

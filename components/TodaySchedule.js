@@ -386,7 +386,11 @@ function TodaySchedule() {
     return (
       <div className="flex-1 p-8 relative z-10">
         <div className="bg-white/70 backdrop-blur-sm w-3/4 max-w-2xl mx-auto mt-8 rounded-lg shadow p-4">
-          <h2 className="text-xl font-bold mb-4">Today's Schedule</h2>
+          <h2 className="text-2xl text-[#E6C86E] font-bold mb-4" style={{
+            fontFamily: "'Press Start 2P', monospace",
+            letterSpacing: "0.5px",
+            textShadow: "2px 2px 0 #000"
+          }}>TODAY'S ADVENTURE</h2>
           <p>Loading your personalized schedule <span className="loading loading-dots loading-xs"></span></p>
         </div>
       </div>
@@ -397,7 +401,11 @@ function TodaySchedule() {
     return (
       <div className="flex-1 p-8 relative z-10">
         <div className="bg-white/70 backdrop-blur-sm w-3/4 max-w-2xl mx-auto mt-8 rounded-lg shadow p-4">
-          <h2 className="text-xl font-bold mb-4">Today's Schedule</h2>
+          <h2 className="text-2xl text-[#E6C86E] font-bold mb-4" style={{
+            fontFamily: "'Press Start 2P', monospace",
+            letterSpacing: "0.5px",
+            textShadow: "2px 2px 0 #000"
+          }}>TODAY'S ADVENTURE</h2>
           <div className="flex items-center text-red-500 mb-2">
             <AlertCircle size={18} className="mr-2" />
             <p>{error}</p>
@@ -423,7 +431,11 @@ function TodaySchedule() {
       {/* Main Content */}
       <div className="bg-white/70 backdrop-blur-sm w-3/4 max-w-2xl mx-auto mt-8 rounded-lg shadow-lg p-4">
         <div className="flex justify-between items-center mb-3">
-          <h2 className="text-xl text-black font-bold">Today's Schedule</h2>
+          <h2 className="text-2xl text-[#E6C86E] font-bold mb-4" style={{
+            fontFamily: "'Press Start 2P', monospace",
+            letterSpacing: "0.5px",
+            textShadow: "2px 2px 0 #000"
+          }}>TODAY'S ADVENTURE</h2>
           <button 
             onClick={() => setShowAddModal(true)}
             className="bg-blue-500 hover:bg-blue-600 text-white rounded-full p-1"
@@ -637,4 +649,15 @@ function TodaySchedule() {
 }
 
 export default TodaySchedule;
+
+<style jsx>{`
+  .font-pixel {
+    font-family: 'Press Start 2P', monospace;
+    letter-spacing: 0.5px;
+  }
+  
+  .pixel-shadow {
+    text-shadow: 2px 2px 0 #000;
+  }
+`}</style>
 

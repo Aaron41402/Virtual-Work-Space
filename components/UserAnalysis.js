@@ -106,7 +106,11 @@ function UserAnalysis() {
     <div className="flex-1 p-8 relative z-10">
       <div className="bg-white/70 backdrop-blur-sm w-3/4 max-w-2xl mx-auto mt-8 rounded-lg shadow-lg p-4">
         <div className="flex flex-row justify-between mb-6">
-          <h2 className="text-xl font-bold">Analysis</h2>
+        <h2 className="text-xl text-[#E6C86E] font-bold mb-4" style={{
+            fontFamily: "'Press Start 2P', monospace",
+            letterSpacing: "0.5px",
+            textShadow: "2px 2px 0 #000"
+          }}>Analysis</h2>
           <select
             tabIndex={0}
             aria-label="Select chart duration"
@@ -157,4 +161,15 @@ function UserAnalysis() {
   );
 }
 
-export default UserAnalysis
+export default UserAnalysis;
+
+<style jsx>{`
+  .font-pixel {
+    font-family: 'Press Start 2P', monospace;
+    letter-spacing: 0.5px;
+  }
+  
+  .pixel-shadow {
+    text-shadow: 2px 2px 0 #000;
+  }
+`}</style>

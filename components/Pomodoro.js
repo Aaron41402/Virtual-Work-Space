@@ -67,47 +67,47 @@ export default function Pomodoro() {
   }
 
   return (
-    <div className="mt-4 bg-gray-700 rounded-lg overflow-hidden">
+    <div className="mt-2 overflow-hidden">
       {/* Header with title */}
       <div 
-        className="p-3 flex justify-between items-center cursor-pointer bg-gray-600"
+        className="p-2 flex justify-between items-center cursor-pointer bg-[#4A3F6B] border-b-2 border-[#8BABBF]"
         onClick={toggleExpand}
       >
         <div className="flex items-center">
-          <span className="text-red-400 mr-2">🍅</span>
-          <span className="font-medium">Pomodoro</span>
+          <span className="mr-2">🍅</span>
+          <span className="font-medium text-[#E6C86E] text-sm">Pomodoro</span>
         </div>
-        <button className="text-gray-300 hover:text-white">
-          {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+        <button className="text-[#8BABBF] hover:text-[#E6C86E]">
+          {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
         </button>
       </div>
 
       {/* Timer display (always visible and bigger) */}
-      <div className="py-4 px-3 flex justify-center">
-        <div className="text-5xl font-bold tracking-wider">
+      <div className="py-2 px-2 flex justify-center bg-[#3A2E56]">
+        <div className="text-3xl font-bold tracking-wider text-[#FF6B97] pixel-shadow">
           {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
         </div>
       </div>
 
       {/* Expanded controls */}
       {isExpanded && (
-        <div className="p-3 pt-0 border-t border-gray-600">
-          <div className="flex justify-between items-center mb-3">
-            <span className="text-sm text-gray-300">
+        <div className="p-2 border-t-2 border-[#8BABBF] bg-[#3A2E56]">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-xs text-center text-[#8BABBF]">
               {mode === 'work' ? 'Work Time' : 'Break Time'}
             </span>
             <div className="flex space-x-2">
               <button 
                 onClick={toggleTimer}
-                className="p-1 rounded hover:bg-gray-600"
+                className="p-1 border border-[#8BABBF] hover:bg-[#4A3F6B] hover:border-[#E6C86E] pixel-button-sm"
               >
-                {isActive ? <Pause size={16} /> : <Play size={16} />}
+                {isActive ? <Pause size={14} /> : <Play size={14} />}
               </button>
               <button 
                 onClick={resetTimer}
-                className="p-1 rounded hover:bg-gray-600"
+                className="p-1 border border-[#8BABBF] hover:bg-[#4A3F6B] hover:border-[#E6C86E] pixel-button-sm"
               >
-                <RefreshCw size={16} />
+                <RefreshCw size={14} />
               </button>
             </div>
           </div>
@@ -120,11 +120,11 @@ export default function Pomodoro() {
                 setSeconds(0)
                 setIsActive(false)
               }}
-              className={`px-2 py-1 text-xs rounded ${
+              className={`px-2 py-1 text-xs border-2 ${
                 mode === 'work'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-600 hover:bg-gray-500'
-              }`}
+                  ? 'bg-[#4A3F6B] border-[#FF6B97] text-[#FF6B97]'
+                  : 'bg-[#2A2136] border-[#8BABBF] text-[#8BABBF] hover:border-[#E6C86E] hover:text-[#E6C86E]'
+              } pixel-button-sm`}
             >
               Work (25m)
             </button>
@@ -135,17 +135,40 @@ export default function Pomodoro() {
                 setSeconds(0)
                 setIsActive(false)
               }}
-              className={`px-2 py-1 text-xs rounded ${
+              className={`px-2 py-1 text-xs border-2 ${
                 mode === 'break'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-600 hover:bg-gray-500'
-              }`}
+                  ? 'bg-[#4A3F6B] border-[#FF6B97] text-[#FF6B97]'
+                  : 'bg-[#2A2136] border-[#8BABBF] text-[#8BABBF] hover:border-[#E6C86E] hover:text-[#E6C86E]'
+              } pixel-button-sm`}
             >
               Break (5m)
             </button>
           </div>
         </div>
       )}
+      
+      <style jsx>{`
+        .pixel-button-sm {
+          image-rendering: pixelated;
+          transition: all 0.1s ease;
+          box-shadow: 2px 2px 0 #000;
+          position: relative;
+        }
+        
+        .pixel-button-sm:hover {
+          transform: translateY(-1px);
+          box-shadow: 3px 3px 0 #000;
+        }
+        
+        .pixel-button-sm:active {
+          transform: translate(1px, 1px);
+          box-shadow: 1px 1px 0 #000;
+        }
+        
+        .pixel-shadow {
+          text-shadow: 2px 2px 0 #000;
+        }
+      `}</style>
     </div>
   )
 } 

@@ -1,7 +1,7 @@
 'use client'
 import React, { useState, useEffect, useRef } from 'react'
 import { useSession } from 'next-auth/react'
-import { Send, X, Minimize2, Calendar, BookOpen, Clock, Coffee } from 'lucide-react'
+import { Send, X, Minimize2, Calendar, BookOpen, Clock, Coffee, Activity } from 'lucide-react'
 
 export default function AIAssistant() {
   const { data: session } = useSession();
@@ -14,6 +14,9 @@ export default function AIAssistant() {
   const [notificationMessage, setNotificationMessage] = useState('');
   const messagesEndRef = useRef(null);
   const chatInputRef = useRef(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [userEfficiency, setUserEfficiency] = useState(null);
+  const [avatarExpression, setAvatarExpression] = useState('nice'); // Default expression
 
   // Add pixel art styles
   useEffect(() => {
@@ -164,8 +167,40 @@ export default function AIAssistant() {
     }
   }, [session, isOpen, hasShownWelcome]);
 
+  // Add this function to determine the appropriate expression based on message content
+  const determineExpression = (message) => {
+    const text = message.toLowerCase();
+    
+    // Detect emotions from text content
+    if (text.includes('congratulations') || text.includes('great job') || 
+        text.includes('well done') || text.includes('amazing') || 
+        text.includes('excellent') || text.includes('perfect')) {
+      return 'happy';
+    }
+    
+    if (text.includes('impressive') || text.includes('wow') || 
+        text.includes('incredible') || text.includes('outstanding') ||
+        text.includes('remarkable')) {
+      return 'impressed';
+    }
+    
+    if (text.includes('warning') || text.includes('careful') || 
+        text.includes('danger') || text.includes('error') ||
+        text.includes('failed') || text.includes('limit')) {
+      return 'angry';
+    }
+    
+    // Default to nice expression
+    return 'nice';
+  };
+
+  // Update the addBotMessage function to set avatar expression
   const addBotMessage = (text) => {
     setIsTyping(true);
+    
+    // Determine expression based on message content
+    const expression = determineExpression(text);
+    setAvatarExpression(expression);
     
     // Simulate typing delay based on message length
     const typingDelay = Math.min(1000, Math.max(500, text.length * 10));
@@ -173,7 +208,124 @@ export default function AIAssistant() {
     setTimeout(() => {
       setMessages(prev => [...prev, { sender: 'bot', text }]);
       setIsTyping(false);
+      
+      // Reset expression to default after a delay
+      setTimeout(() => {
+        setAvatarExpression('nice');
+      }, 5000);
     }, typingDelay);
+  };
+
+  const askGemini = async (prompt) => {
+    setIsTyping(true);
+    
+    try {
+      // Get schedule data
+      const scheduleData = localStorage.getItem('scheduleData');
+      const schedule = scheduleData ? JSON.parse(scheduleData) : [];
+      
+      // Get completed tasks
+      const completedTasks = localStorage.getItem('completedTasks');
+      const tasks = completedTasks ? JSON.parse(completedTasks) : [];
+      
+      // Call the API route
+      const response = await fetch('/api/gemini', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          prompt,
+          type: 'general',
+          context: {
+            schedule,
+            tasks,
+            currentDate: new Date().toLocaleDateString(),
+            currentTime: new Date().toLocaleTimeString()
+          }
+        }),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        // Handle rate limiting specifically
+        if (response.status === 429) {
+          addBotMessage(`🛡️ ${data.error || "You've reached your limit of AI queries. Please wait a moment before trying again."}`);
+          
+          // If we have a reset time, tell the user when they can try again
+          if (data.rateLimitReset) {
+            const resetTime = new Date(data.rateLimitReset);
+            const minutes = Math.ceil((resetTime - new Date()) / 60000);
+            addBotMessage(`You can try again in about ${minutes} minute${minutes !== 1 ? 's' : ''}.`);
+          }
+        } else {
+          throw new Error(data.error || 'API request failed');
+        }
+        return;
+      }
+      
+      // Add the response to chat
+      addBotMessage(data.response);
+      
+      // Optionally show remaining requests
+      if (data.remainingRequests !== undefined && data.remainingRequests <= 2) {
+        addBotMessage(`⚠️ You have ${data.remainingRequests} AI queries remaining. Use them wisely!`);
+      }
+    } catch (error) {
+      console.error('Error with Gemini API:', error);
+      addBotMessage("I'm having trouble connecting to my knowledge base. Please try again later.");
+    } finally {
+      setIsTyping(false);
+    }
+  };
+
+  const analyzeUserEfficiency = async () => {
+    setIsAnalyzing(true);
+    setIsTyping(true);
+    
+    try {
+      // Get schedule and task data
+      const scheduleData = localStorage.getItem('scheduleData');
+      const completedTasks = localStorage.getItem('completedTasks');
+      
+      if (!scheduleData || !completedTasks) {
+        addBotMessage("I don't have enough data to analyze your efficiency yet. Complete some quests and check back later!");
+        setIsAnalyzing(false);
+        setIsTyping(false);
+        return;
+      }
+      
+      const schedule = JSON.parse(scheduleData);
+      const tasks = JSON.parse(completedTasks);
+      
+      // Call the API route
+      const response = await fetch('/api/gemini', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          prompt: { schedule, tasks },
+          type: 'analysis'
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('API request failed');
+      }
+      
+      const data = await response.json();
+      
+      setUserEfficiency(data.efficiencyScore);
+      addBotMessage(data.response);
+    } catch (error) {
+      console.error('Error analyzing efficiency:', error);
+      addBotMessage("I encountered a magical barrier while trying to analyze your efficiency. Please try again later!");
+    } finally {
+      setIsAnalyzing(false);
+      setIsTyping(false);
+    }
   };
 
   const handleSendMessage = (e) => {
@@ -184,92 +336,31 @@ export default function AIAssistant() {
     // Add user message to chat
     setMessages(prev => [...prev, { sender: 'user', text: inputMessage.trim() }]);
     
+    // Store the message for processing
+    const userMsg = inputMessage.trim().toLowerCase();
+    
     // Clear input
     setInputMessage('');
     
-    // Simulate bot response
+    // Scroll to bottom
+    setTimeout(() => {
+      if (messagesEndRef.current) {
+        messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 100);
+    
+    // Show typing indicator
     setIsTyping(true);
     
+    // Process message after a short delay
     setTimeout(() => {
-      // Simple responses based on keywords
-      const userMsg = inputMessage.toLowerCase();
-      
-      if (userMsg.includes('hello') || userMsg.includes('hi')) {
-        addBotMessage("Greetings, adventurer! How may I assist you on your journey today?");
-      } 
-      else if (userMsg.includes('help')) {
-        addBotMessage("I can provide guidance on your quests (tasks), offer wisdom about your journey (schedule), or provide encouragement when your spirit needs lifting!");
+      // Check for specific commands
+      if (userMsg.includes('analyze my efficiency') || userMsg.includes('how productive am i')) {
+        analyzeUserEfficiency();
       }
-      else if (userMsg.includes('task') || userMsg.includes('todo')) {
-        addBotMessage("To conquer your quests effectively, break them into smaller battles, prioritize them by importance, and set achievable deadlines. The Quest Log (To-Do section) in your inventory allows you to track your progress!");
-      }
-      else if (userMsg.includes('schedule') || userMsg.includes('today') || userMsg.includes('plan')) {
-        // Show schedule information
-        showSchedule();
-      }
-      else if (userMsg.includes('next') || userMsg.includes('upcoming')) {
-        // Show next event
-        try {
-          const scheduleData = localStorage.getItem('scheduleData');
-          if (!scheduleData) {
-            addBotMessage("I don't see any upcoming quests in your journey log!");
-            return;
-          }
-          
-          const schedule = JSON.parse(scheduleData);
-          const now = new Date();
-          const currentHour = now.getHours();
-          const currentMinute = now.getMinutes();
-          
-          // Find next event
-          const nextEvents = schedule.filter(event => {
-            const [eventHour, eventMinute] = event.time.split(':').map(Number);
-            return (eventHour > currentHour) || 
-                   (eventHour === currentHour && eventMinute > currentMinute);
-          }).sort((a, b) => {
-            const [aHour, aMinute] = a.time.split(':').map(Number);
-            const [bHour, bMinute] = b.time.split(':').map(Number);
-            return (aHour * 60 + aMinute) - (bHour * 60 + bMinute);
-          });
-          
-          if (nextEvents.length === 0) {
-            addBotMessage("You have no more quests scheduled for today! Time to rest or plan for tomorrow's adventures.");
-          } else {
-            const nextEvent = nextEvents[0];
-            addBotMessage(`Your next quest is "${nextEvent.activity}" at ${nextEvent.time}. Would you like some tips to prepare?`);
-          }
-        } catch (error) {
-          console.error('Error checking next event:', error);
-          addBotMessage("I'm having trouble reading your quest scroll. Please try again later!");
-        }
-      }
-      else if (userMsg.includes('tired') || userMsg.includes('exhausted')) {
-        addBotMessage("Even the mightiest heroes need rest! Consider taking a short break to restore your energy. The Pomodoro spell (25 minutes of focus followed by 5 minutes of rest) is quite effective!");
-      }
+      // For all other messages, use Gemini
       else {
-        // Check if message might be about a scheduled activity
-        try {
-          const scheduleData = localStorage.getItem('scheduleData');
-          if (scheduleData) {
-            const schedule = JSON.parse(scheduleData);
-            
-            // Look for activities that match words in the user's message
-            const matchingActivities = schedule.filter(event => {
-              const activityWords = event.activity.toLowerCase().split(' ');
-              return activityWords.some(word => userMsg.includes(word) && word.length > 3);
-            });
-            
-            if (matchingActivities.length > 0) {
-              const activity = matchingActivities[0];
-              addBotMessage(`I see you're asking about "${activity.activity}" scheduled at ${activity.time}. Is there something specific you need help with for this quest?`);
-              return;
-            }
-          }
-        } catch (error) {
-          console.error('Error matching schedule:', error);
-        }
-        
-        addBotMessage("I understand your message, brave adventurer! While I'm still learning the ways of this realm, I'll do my best to assist you on your journey. Is there something specific about your quests or schedule you need help with?");
+        askGemini(userMsg);
       }
     }, 1000);
   };
@@ -436,9 +527,9 @@ export default function AIAssistant() {
 
   return (
     <div className="fixed bottom-4 right-4 z-50 font-pixel">
-      {/* Notification Bubble - Position it above the avatar */}
+      {/* Notification Bubble */}
       {showNotification && !isOpen && (
-        <div className="absolute bottom-24 right-0 bg-gray-900/90 text-white p-4 rounded-none shadow-lg max-w-xs animate-pixel-fade-in pixel-border">
+        <div className="mb-4 bg-gray-900/90 text-white p-4 rounded-none shadow-lg max-w-xs animate-pixel-fade-in relative pixel-border">
           <button 
             onClick={dismissNotification}
             className="absolute top-1 right-1 text-gray-400 hover:text-white"
@@ -456,7 +547,7 @@ export default function AIAssistant() {
           <div className="absolute -top-24 right-4 z-10">
             <div className="w-24 h-24 rounded-none overflow-hidden pixel-border animate-float">
               <img 
-                src="/woman_nice.png" 
+                src={`/woman_${avatarExpression}.png`} 
                 alt="Assistant" 
                 className="w-full h-full object-cover"
                 style={{imageRendering: 'pixelated'}}
@@ -566,27 +657,25 @@ export default function AIAssistant() {
         </div>
       )}
       
-      {/* Chat Button - Pixel Art Style (Bigger) - Always at the bottom right */}
+      {/* Chat Button - Pixel Art Style (Bigger) */}
       {!isOpen && (
-        <div className="relative">
-          <button
-            onClick={toggleChat}
-            className="w-20 h-20 rounded-none overflow-hidden pixel-border animate-float"
-          >
-            <div className="w-full h-full relative">
-              <img 
-                src="/woman_nice.png" 
-                alt="Assistant" 
-                className="w-full h-full object-cover animate-pulse-slow"
-                style={{imageRendering: 'pixelated'}}
-              />
-              {/* Notification indicator */}
-              {showNotification && (
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-none pixel-border animate-pulse"></div>
-              )}
-            </div>
-          </button>
-        </div>
+        <button
+          onClick={toggleChat}
+          className="w-20 h-20 rounded-none overflow-hidden pixel-border animate-float"
+        >
+          <div className="w-full h-full relative">
+            <img 
+              src={`/woman_${avatarExpression}.png`} 
+              alt="Assistant" 
+              className="w-full h-full object-cover animate-pulse-slow"
+              style={{imageRendering: 'pixelated'}}
+            />
+            {/* Notification indicator */}
+            {showNotification && (
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-none pixel-border animate-pulse"></div>
+            )}
+          </div>
+        </button>
       )}
     </div>
   );
