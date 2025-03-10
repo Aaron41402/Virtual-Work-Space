@@ -4,6 +4,7 @@ import ButtonLogout from './ButtonLogout'
 import { useSession } from 'next-auth/react'
 import { useState, useEffect } from 'react'
 import Pomodoro from './Pomodoro'
+import Image from 'next/image'
 
 export default function Sidebar({ activeSection, setActiveSection }) {
   const { data: session } = useSession();
@@ -63,9 +64,16 @@ export default function Sidebar({ activeSection, setActiveSection }) {
   return (
     <div className="w-64 bg-[#2A2136] text-white p-6 flex flex-col justify-between relative z-10 border-r-4 border-[#E6C86E] font-pixel">
       {/* Logo */}
-      <div className="text-center mb-6">
+      <div className="text-center mb-6 flex items-center justify-center">
+        <Image 
+          src="/favicon.ico" 
+          alt="TaskHero Logo" 
+          width={24} 
+          height={24} 
+          className="mr-2"
+        />
         <h1 className="text-2xl font-bold text-[#E6C86E] bg-clip-text pixel-shadow">
-          Taskhero
+          TaskHero
         </h1>
       </div>
       

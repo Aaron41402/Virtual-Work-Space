@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import Loader from "@/components/Loader";
 
 const questions = [
   { id: "wakeTime", question: "What time do you usually wake up?", type: "time" },
@@ -103,7 +104,11 @@ export default function SetupPage() {
   };
 
   if (loading) {
-    return <div className="flex justify-center items-center min-h-screen"><span className="loading loading-bars loading-xl"></span></div>;
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-white">
+        <Loader />
+      </div>
+    );
   }
 
   return (
