@@ -29,6 +29,34 @@ function ToDoList() {
           completed: false,
           dueDate: "3/2",
         },
+        {
+            id: 4,
+            title: "Task 4",
+            completed: false,
+            dueDate: "3/1",
+            subTasks: [
+              { id: 21, title: "Task 2-1", completed: false },
+              {
+                id: 22,
+                title: "Task 2-2",
+                completed: false,
+              },
+            ],
+          },
+          {
+            id: 5,
+            title: "Task 2",
+            completed: false,
+            dueDate: "3/1",
+            subTasks: [
+              { id: 21, title: "Task 2-1", completed: false },
+              {
+                id: 22,
+                title: "Task 2-2",
+                completed: false,
+              },
+            ],
+          },
     ]);
 
     // For the Add-Task modal
@@ -177,32 +205,38 @@ function ToDoList() {
             {/* ADD-TASK MODAL */}
             {showAddTaskModal && (
                 <div
-                    tabIndex={0}
                     aria-label="Add Task Modal Overlay"
-                    className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+                    className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
                 >
-                    <div className="bg-white p-4 rounded shadow w-80">
-                        <h2 className="text-lg font-bold mb-2">Add New Task</h2>
-                        
+                    <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
+                        <h3 className="text-lg font-semibold mb-4">Add New To Do</h3>
                         {/* TITLE INPUT */}
-                        <label className="block mb-1" htmlFor="taskTitle">Title</label>
-                        <input
-                            id="taskTitle"
-                            type="text"
-                            value={newTaskTitle}
-                            onChange={(e) => setNewTaskTitle(e.target.value)}
-                            className="border rounded p-1 w-full mb-2"
-                        />
+                        <div className="mb-2">
+                            <label className="text-sm text-gray-600 block mb-1">Title</label>
+                            <input 
+                                id="taskTitle"
+                                type="text" 
+                                value={newTaskTitle}
+                                onChange={(e) => setNewTaskTitle(e.target.value)}
+                                placeholder="Enter to do name"
+                                className="w-full p-2 text-sm border rounded"
+                                autoFocus
+                            />
+                        </div>
 
                         {/* DUE DATE INPUT */}
-                        <label className="block mb-1" htmlFor="dueDate">Due Date</label>
-                        <input
-                            id="dueDate"
-                            type="text"
-                            value={newTaskDueDate}
-                            onChange={(e) => setNewTaskDueDate(e.target.value)}
-                            className="border rounded p-1 w-full mb-2"
-                        />
+                        <div className="mb-4">
+                            <label className="text-sm text-gray-600 block mb-1">Due Date</label>
+                            <input 
+                                id="taskTitle"
+                                type="text" 
+                                value={newTaskDueDate}
+                                nChange={(e) => setNewTaskDueDate(e.target.value)}
+                                placeholder="Enter due date"
+                                className="w-full p-2 text-sm border rounded"
+                                autoFocus
+                            />
+                        </div>
 
                         {/* SUB-TASKS */}
                         <div className="mb-2">
@@ -255,22 +289,20 @@ function ToDoList() {
                         </div>
 
                         {/* ACTION BUTTONS */}
-                        <div className="flex justify-end space-x-2">
-                            <button
-                                tabIndex={0}
-                                aria-label="Cancel add task"
+                        <div className="flex justify-end space-x-3">
+                            <button 
+                                aria-label="Cancel add to do"
                                 onClick={handleCloseAddTaskModal}
-                                className="bg-gray-300 px-3 py-1 rounded"
+                                className="px-4 py-2 text-sm bg-gray-200 hover:bg-gray-300 rounded"
                             >
                                 Cancel
                             </button>
-                            <button
-                                tabIndex={0}
-                                aria-label="Save new task"
+                            <button 
+                                aria-label="Save new to do"
                                 onClick={handleSaveTask}
-                                className="bg-orange-400 text-white px-3 py-1 rounded"
+                                className="px-4 py-2 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded"
                             >
-                                Save
+                                Add
                             </button>
                         </div>
                     </div>
