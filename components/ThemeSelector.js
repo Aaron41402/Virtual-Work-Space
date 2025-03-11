@@ -87,7 +87,7 @@ export default function ThemeSelector() {
   };
 
   return (
-    <div className="flex-1 m-8 relative">
+    <div className="flex-1 p-8 mt-24 relative">
       {/* Background Video Preview */}
       {isLoaded && previewTheme && (
         <div className="fixed inset-0 z-0">

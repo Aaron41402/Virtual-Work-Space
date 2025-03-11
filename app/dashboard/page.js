@@ -7,6 +7,7 @@ import Sidebar from '@/components/Sidebar'
 import UserAnalysis from '@/components/UserAnalysis'
 import ToDoList from '@/components/ToDoList'
 import ThemeSelector from '@/components/ThemeSelector'
+import CapybaraPomodoro from '@/components/CapybaraPomodoro'
 
 export default function Dashboard() {
   const [isMounted, setIsMounted] = useState(false);
@@ -39,8 +40,13 @@ export default function Dashboard() {
       <Sidebar activeSection={activeSection} setActiveSection={setActiveSection} />
 
       {/* Main content area */}
-      <div className="flex-1 flex flex-col p-6">
-        <h2 className="text-xl font-bold mb-6">Dashboard</h2>
+      <div className="flex-1 flex flex-col p-6 relative">
+        {/* Position CapybaraPomodoro at the top level so it appears on all pages */}
+        <div className="absolute top-0 left-0 right-0 z-20 flex justify-center">
+          <CapybaraPomodoro />
+        </div>
+        
+        
         {renderContent()}
         
         {/* Position AIAssistant at the bottom */}

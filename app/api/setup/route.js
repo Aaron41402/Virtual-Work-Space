@@ -21,7 +21,7 @@ export async function POST(req) {
       // Update existing response
       await SetupResponse.findByIdAndUpdate(existingResponse._id, body);
       return NextResponse.json({ 
-        message: "Survey response updated", 
+        message: "Survey response updated, redirecting for you", 
         redirect: "/dashboard" 
       }, { status: 200 });
     } else {
@@ -33,7 +33,7 @@ export async function POST(req) {
 
       await newResponse.save();
       return NextResponse.json({ 
-        message: "Survey response saved", 
+        message: "Survey response saved, redirecting for you", 
         redirect: "/dashboard" 
       }, { status: 201 });
     }
