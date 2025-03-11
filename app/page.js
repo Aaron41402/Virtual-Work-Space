@@ -76,6 +76,62 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* Capybara Pomodoro Section */}
+      <section className="bg-[#3A2E56] text-white py-20 border-t-4 border-b-4 border-[#E6C86E]">
+        <div className="max-w-5xl mx-auto px-8">
+          <h2 className="text-3xl font-bold text-center text-[#E6C86E] mb-8 pixel-shadow">Meet Your Productivity Companion</h2>
+          
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+            <div className="md:w-1/2">
+              <div className="bg-[#2A2136] p-6 border-4 border-[#FF6B97] rounded-lg shadow-pixel">
+                <h3 className="text-2xl font-bold text-[#FF6B97] mb-4">Train Your Capybara!</h3>
+                <p className="text-[#8BABBF] mb-6 text-lg">
+                  Your capybara is getting lazy! Introduce the Capydoro - a cute capybara friend that helps you stay focused with the Pomodoro technique.
+                </p>
+                <ul className="list-disc list-inside text-[#8BABBF] mb-6 space-y-2">
+                  <li>Work alongside your capybara companion</li>
+                  <li>Take breaks together when the timer rings</li>
+                  <li>Watch your capybara's mood change as you progress</li>
+                  <li>Boost productivity with a furry friend by your side</li>
+                </ul>
+                <div className="flex justify-center">
+                  <ButtonLogin session={session} extraClass="px-6 py-2 bg-[#FF6B97] text-white font-bold rounded-none border-4 border-[#E6C86E] pixel-button hover:bg-[#FF8CAD] transition-transform"/>
+                </div>
+              </div>
+            </div>
+            
+            <div className="md:w-1/2">
+              <div className="relative">
+                {/* Video showcase */}
+                <div className="border-4 border-[#E6C86E] shadow-pixel mb-6 overflow-hidden">
+                  <video 
+                    width="100%" 
+                    height="auto" 
+                    controls 
+                    className="bg-[#2A2136]"
+                  >
+                    <source src="/capydoro.mp4" type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
+                </div>
+                
+                {/* Capybara animations */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="border-2 border-[#8BABBF] p-2 bg-[#2A2136] shadow-pixel">
+                    <img src="/Capybara_sleep_left.gif" alt="Sleeping Capybara" className="w-full" />
+                    <p className="text-center text-sm mt-2 text-[#8BABBF]">Taking a break</p>
+                  </div>
+                  <div className="border-2 border-[#8BABBF] p-2 bg-[#2A2136] shadow-pixel">
+                    <img src="/Capybara_walk_left.gif" alt="Walking Capybara" className="w-full" />
+                    <p className="text-center text-sm mt-2 text-[#8BABBF]">Getting to work</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Features */}
       <section className="bg-[#2A2136] text-white py-20">
         <div className="max-w-5xl mx-auto px-8">
