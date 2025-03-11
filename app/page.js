@@ -132,6 +132,86 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* AI Assistant Emi Section */}
+      <section className="bg-[#2A2136] text-white py-20 border-t-4 border-[#E6C86E]">
+        <div className="max-w-5xl mx-auto px-8">
+          <h2 className="text-3xl font-bold text-center text-[#E6C86E] mb-8 pixel-shadow">Meet Emi, Your AI Companion</h2>
+          
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+            <div className="md:w-1/2 order-2 md:order-1">
+              <div className="relative">
+                {/* Video showcase */}
+                <div className="border-4 border-[#FF6B97] shadow-pixel mb-6 overflow-hidden">
+                  <video 
+                    width="100%" 
+                    height="auto" 
+                    controls 
+                    className="bg-[#2A2136]"
+                  >
+                    <source src="/Emi_exhibition.mp4" type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
+                </div>
+                
+                {/* Emi's expressions */}
+                <div className="grid grid-cols-4 gap-2">
+                  <div className="border-2 border-[#8BABBF] p-2 bg-[#3A2E56] shadow-pixel">
+                    <img src="/woman_nice.png" alt="Emi being nice" className="w-full" />
+                    
+                  </div>
+                  <div className="border-2 border-[#8BABBF] p-2 bg-[#3A2E56] shadow-pixel">
+                    <img src="/woman_happy.png" alt="Emi being happy" className="w-full" />
+                    
+                  </div>
+                  <div className="border-2 border-[#8BABBF] p-2 bg-[#3A2E56] shadow-pixel">
+                    <img src="/woman_impressed.png" alt="Emi being impressed" className="w-full" />
+                   
+                  </div>
+                  <div className="border-2 border-[#8BABBF] p-2 bg-[#3A2E56] shadow-pixel">
+                    <img src="/woman_angry.png" alt="Emi being stern" className="w-full" />
+                   
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="md:w-1/2 order-1 md:order-2">
+              <div className="bg-[#3A2E56] p-6 border-4 border-[#8BABBF] rounded-lg shadow-pixel">
+                <h3 className="text-2xl font-bold text-[#FF6B97] mb-4">Your Intelligent Assistant</h3>
+                <p className="text-white mb-6 text-lg">
+                  Emi is your AI-powered productivity assistant who helps you stay on track and maximize your potential every day.
+                </p>
+                <ul className="space-y-4 mb-6">
+                  <li className="flex items-start">
+                    <span className="text-[#E6C86E] mr-2">✓</span>
+                    <span className="text-[#8BABBF]">Keeps track of your schedule and upcoming tasks</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-[#E6C86E] mr-2">✓</span>
+                    <span className="text-[#8BABBF]">Analyzes your daily efficiency and productivity patterns</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-[#E6C86E] mr-2">✓</span>
+                    <span className="text-[#8BABBF]">Provides timely reminders and personalized tips</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-[#E6C86E] mr-2">✓</span>
+                    <span className="text-[#8BABBF]">Answers your questions with AI-powered intelligence</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-[#E6C86E] mr-2">✓</span>
+                    <span className="text-[#8BABBF]">Adapts to your work style and offers encouragement</span>
+                  </li>
+                </ul>
+                <div className="flex justify-center">
+                  <ButtonLogin session={session} extraClass="px-6 py-2 bg-[#FF6B97] text-white font-bold rounded-none border-4 border-[#E6C86E] pixel-button hover:bg-[#FF8CAD] transition-transform"/>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Features */}
       <section className="bg-[#2A2136] text-white py-20">
         <div className="max-w-5xl mx-auto px-8">
