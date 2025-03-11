@@ -4,7 +4,8 @@ import ButtonLogout from './ButtonLogout'
 import { useSession } from 'next-auth/react'
 import { useState } from 'react'
 import Image from 'next/image'
-import SpotifyPlayer from './SpotifyPlayer'
+import SpotifyIntegration from './SpotifyIntegration'
+
 
 export default function Sidebar({ activeSection, setActiveSection }) {
   const { data: session } = useSession();
@@ -89,6 +90,9 @@ export default function Sidebar({ activeSection, setActiveSection }) {
 
         {/* Logout with enhanced accessibility */}
         <div className="mt-auto space-y-4 relative" style={{ zIndex: 999, position: 'relative' }}>
+          {/* Spotify Integration */}
+          <SpotifyIntegration />
+          
           <div className="pixel-container" style={{ position: 'relative', zIndex: 999 }}>
             <ButtonLogout />
           </div>

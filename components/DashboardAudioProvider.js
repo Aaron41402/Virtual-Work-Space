@@ -2,6 +2,10 @@
 import React, { useEffect, useState, useRef } from 'react'
 
 export default function DashboardAudioProvider({ children }) {
+  // Simply return children without initializing audio
+  return children;
+  
+  /* Original audio implementation commented out
   const [isPlaying, setIsPlaying] = useState(true);
   const [volume, setVolume] = useState(0.5);
   const [previousVolume, setPreviousVolume] = useState(0.5);
@@ -120,4 +124,5 @@ export default function DashboardAudioProvider({ children }) {
   }, []);
 
   return children;
+  */
 } 
