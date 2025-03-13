@@ -2,13 +2,125 @@
 import Link from 'next/link'
 import ButtonLogout from './ButtonLogout'
 import { useSession } from 'next-auth/react'
-import { useState } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import Image from 'next/image'
-import SpotifyIntegration from './SpotifyIntegration'
-
 
 export default function Sidebar({ activeSection, setActiveSection }) {
   const { data: session } = useSession();
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
+  const audioRef = useRef(null);
+  
+  // Music tracks
+  const musicTracks = [
+    { id: 1, name: "Music 0", file: "/music0.mp3" },
+    { id: 2, name: "Music 1", file: "/music1.mp3" },
+    { id: 3, name: "Music 2", file: "/music2.mp3" },
+    { id: 4, name: "Music 3", file: "/music3.mp3" },
+    { id: 5, name: "Music 4", file: "/music4.mp3" },
+  ];
+  
+  // Define nextTrack as a regular function to avoid dependency issues
+  const nextTrack = () => {
+    if (!audioRef.current) return;
+    
+    const newIndex = (currentTrackIndex + 1) % musicTracks.length;
+    console.log(`Moving to next track: ${newIndex}`);
+    
+    // Change track
+    audioRef.current.src = musicTracks[newIndex].file;
+    setCurrentTrackIndex(newIndex);
+    
+    // If it was playing before, continue playing
+    if (isPlaying) {
+      const playPromise = audioRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(e => console.error('Auto-play next failed:', e));
+      }
+    }
+  };
+  
+  // Initialize audio
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    // Create new audio element if it doesn't exist
+    if (!audioRef.current) {
+      audioRef.current = new Audio(musicTracks[0].file);
+      audioRef.current.loop = false;
+      audioRef.current.volume = 0.5;
+      
+      console.log('Audio element initialized');
+    }
+    
+    // Function to handle when track ends
+    const handleTrackEnded = () => {
+      console.log('Track ended event fired');
+      nextTrack();
+    };
+    
+    // Add event listener
+    audioRef.current.addEventListener('ended', handleTrackEnded);
+    
+    // Cleanup function
+    return () => {
+      if (audioRef.current) {
+        console.log('Cleaning up audio element');
+        audioRef.current.removeEventListener('ended', handleTrackEnded);
+      }
+    };
+  }, [currentTrackIndex]); // Only re-run when currentTrackIndex changes
+  
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
+  
+  // Play/pause toggle
+  const togglePlay = () => {
+    if (!audioRef.current) return;
+    
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      const playPromise = audioRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(e => {
+          console.error('Play failed:', e);
+          // Try to recover by reloading the audio
+          audioRef.current.load();
+          audioRef.current.play().catch(e => console.error('Retry play failed:', e));
+        });
+      }
+    }
+    
+    setIsPlaying(!isPlaying);
+  };
+  
+  // Previous track
+  const previousTrack = () => {
+    if (!audioRef.current) return;
+    
+    const newIndex = currentTrackIndex === 0 ? musicTracks.length - 1 : currentTrackIndex - 1;
+    console.log(`Moving to previous track: ${newIndex}`);
+    
+    // Change track
+    audioRef.current.src = musicTracks[newIndex].file;
+    setCurrentTrackIndex(newIndex);
+    
+    // If it was playing before, continue playing
+    if (isPlaying) {
+      const playPromise = audioRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(e => console.error('Play previous failed:', e));
+      }
+    }
+  };
   
   // Get user's name or email
   const userName = session?.user?.name || 
@@ -88,18 +200,68 @@ export default function Sidebar({ activeSection, setActiveSection }) {
           </nav>
         </div>
 
-        {/* Logout with enhanced accessibility */}
-        <div className="mt-auto space-y-4 relative" style={{ zIndex: 999, position: 'relative' }}>
-          {/* Spotify Integration */}
-          <SpotifyIntegration />
+        {/* Music Player */}
+        <div className="mt-auto mb-4 space-y-4">
+          <div className="bg-[#3A2E56] p-3 border-2 border-[#E6C86E] rounded-md shadow-lg">
+            <h4 className="text-[#E6C86E] text-sm font-bold mb-2 text-center">Music Player</h4>
+            
+            {/* Music Player Animation */}
+            <div className="flex justify-center mb-3">
+              {isPlaying ? (
+                <div className="music-player-animation">
+                  <Image 
+                    src="/musicPlayer.gif" 
+                    alt="Music playing" 
+                    width={160} 
+                    height={200} 
+                    className="pixel-image"
+                  />
+                </div>
+              ) : (
+                <div className="music-player-static">
+                  <div className="pixel-music-icon">
+                    <div className="music-note">♪</div>
+                    
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            {/* Music Controls */}
+            <div className="flex justify-between items-center">
+              <button 
+                onClick={previousTrack}
+                className="w-8 h-8 flex items-center justify-center bg-[#2A2136] text-[#8BABBF] border border-[#8BABBF] rounded-full hover:text-[#E6C86E] hover:border-[#E6C86E]"
+                aria-label="Previous track"
+              >
+                ⏮
+              </button>
+              
+              <button 
+                onClick={togglePlay}
+                className="w-10 h-10 flex items-center justify-center bg-[#2A2136] text-[#E6C86E] border-2 border-[#E6C86E] rounded-full hover:bg-[#4A3F6B]"
+                aria-label={isPlaying ? "Pause" : "Play"}
+              >
+                {isPlaying ? "⏸" : "▶"}
+              </button>
+              
+              <button 
+                onClick={nextTrack}
+                className="w-8 h-8 flex items-center justify-center bg-[#2A2136] text-[#8BABBF] border border-[#8BABBF] rounded-full hover:text-[#E6C86E] hover:border-[#E6C86E]"
+                aria-label="Next track"
+              >
+                ⏭
+              </button>
+            </div>
+          </div>
           
+          {/* Logout Button */}
           <div className="pixel-container" style={{ position: 'relative', zIndex: 999 }}>
             <ButtonLogout />
           </div>
         </div>
         
-        <style jsx global>{`
-          @font-face {
+        <style jsx global>{`          @font-face {
             font-family: 'PixelFont';
             src: url('/fonts/PressStart2P-Regular.ttf') format('truetype');
             font-weight: normal;
@@ -216,11 +378,51 @@ export default function Sidebar({ activeSection, setActiveSection }) {
             padding: 2px 4px;
             border-radius: 2px;
           }
+          
+          /* Remove vinyl record styles */
+          .vinyl-record {
+            display: none;
+          }
+          
+          /* Music player animation styles */
+          .music-player-animation {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 160px;
+            height: 200px;
+            margin-top: 2px;
+          }
+          
+          .music-player-static {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 160px;
+            height: 200px;
+            margin-top: 2px;
+          }
+          
+          .pixel-music-icon {
+            width: 160px;
+            height: 200px;
+            background-color: #2A2136;
+            border: 2px solid #8BABBF;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+          }
+          
+          .music-note {
+            font-size: 32px;
+            color: #E6C86E;
+            text-shadow: 2px 2px 0 #000;
+          }
+          
+          
         `}</style>
       </div>
-      
-      {/* Spotify Player that slides out from behind the sidebar */}
-      {/* <SpotifyPlayer /> */}
     </>
   );
 } 

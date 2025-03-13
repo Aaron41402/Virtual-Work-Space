@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import { ChevronUp, ChevronDown, Play, Pause, RefreshCw, X } from 'lucide-react'
+import React, { useState, useEffect, useRef } from 'react'
+import { Play, Pause, RefreshCw, X, ChevronRight, ChevronLeft } from 'lucide-react'
 import Image from 'next/image'
 
 export default function CapybaraPomodoro() {
@@ -9,10 +9,14 @@ export default function CapybaraPomodoro() {
   const [seconds, setSeconds] = useState(0)
   const [isActive, setIsActive] = useState(false)
   const [mode, setMode] = useState('work') // 'work' or 'break'
-  const [isExpanded, setIsExpanded] = useState(false)
   const [showPomodoro, setShowPomodoro] = useState(false)
-  const [capybaraState, setCapybaraState] = useState('sleep') // 'sleep', 'idle', 'walk'
+  const [isExpanded, setIsExpanded] = useState(false)
+  const [capybaraState, setCapybaraState] = useState('sleep') // 'sleep', 'idle', 'walk-left', 'walk-right'
+  const [capybaraPosition, setCapybaraPosition] = useState(0) // Position for horizontal movement
+  const [walkingDirection, setWalkingDirection] = useState('right') // 'left' or 'right'
+  const walkIntervalRef = useRef(null)
 
+  // Timer logic
   useEffect(() => {
     let interval = null
     if (isActive) {
@@ -20,14 +24,14 @@ export default function CapybaraPomodoro() {
         if (seconds === 0) {
           if (minutes === 0) {
             clearInterval(interval)
-            playAlarm() // Play sound when timer reaches zero
+            playAlarm()
             
-            // Switch modes after timer completes
+            // Switch modes
             const nextMode = mode === 'work' ? 'break' : 'work'
             setMode(nextMode)
             setMinutes(nextMode === 'work' ? 25 : 5)
             setSeconds(0)
-            setCapybaraState('idle') // Reset to idle when timer completes
+            setCapybaraState('idle')
           } else {
             setMinutes(minutes - 1)
             setSeconds(59)
@@ -40,51 +44,77 @@ export default function CapybaraPomodoro() {
     return () => clearInterval(interval)
   }, [isActive, minutes, seconds, mode])
 
-  // Update capybara state based on timer status
+  // Capybara walking animation
   useEffect(() => {
-    if (isActive) {
-      setCapybaraState('walk')
+    if (walkIntervalRef.current) {
+      clearInterval(walkIntervalRef.current)
+      walkIntervalRef.current = null
+    }
+    
+    if (isActive && mode === 'work') {
+      setCapybaraState(`walk-${walkingDirection}`)
+      
+      walkIntervalRef.current = setInterval(() => {
+        setCapybaraPosition(prevPosition => {
+          let newPosition = walkingDirection === 'right' 
+            ? prevPosition + 5 
+            : prevPosition - 5
+          
+          if (newPosition > 180) {
+            setWalkingDirection('left')
+            setCapybaraState('walk-left')
+            return 180
+          } else if (newPosition < -180) {
+            setWalkingDirection('right')
+            setCapybaraState('walk-right')
+            return -180
+          }
+          
+          return newPosition
+        })
+      }, 100)
     } else if (showPomodoro) {
       setCapybaraState('idle')
+      setCapybaraPosition(0)
     } else {
       setCapybaraState('sleep')
+      setCapybaraPosition(0)
     }
-  }, [isActive, showPomodoro])
+    
+    return () => {
+      if (walkIntervalRef.current) {
+        clearInterval(walkIntervalRef.current)
+      }
+    }
+  }, [isActive, showPomodoro, mode, walkingDirection])
 
+  // Toggle timer
   const toggleTimer = () => {
     setIsActive(!isActive)
   }
 
+  // Reset timer
   const resetTimer = () => {
     setIsActive(false)
     setMode('work')
     setMinutes(25)
     setSeconds(0)
     setCapybaraState('idle')
+    setCapybaraPosition(0)
   }
   
   // Play notification sound
   const playAlarm = () => {
     try {
       const audio = new Audio('/notification.mp3')
-      audio.volume = 0.7 // Set volume to 70%
-      const playPromise = audio.play()
-      
-      // Handle potential play() promise rejection (browser policy)
-      if (playPromise !== undefined) {
-        playPromise.catch(error => {
-          console.error("Audio play failed:", error)
-        })
-      }
+      audio.volume = 0.7
+      audio.play().catch(e => console.error("Audio play failed:", e))
     } catch (error) {
       console.error("Error playing notification:", error)
     }
   }
 
-  const toggleExpand = () => {
-    setIsExpanded(!isExpanded)
-  }
-
+  // Toggle pomodoro visibility
   const togglePomodoro = () => {
     setShowPomodoro(!showPomodoro)
     if (!showPomodoro) {
@@ -92,230 +122,314 @@ export default function CapybaraPomodoro() {
     } else {
       setIsActive(false)
       setCapybaraState('sleep')
+      setCapybaraPosition(0)
     }
   }
 
-  // Get the appropriate capybara GIF based on state
+  // Toggle expanded panel
+  const toggleExpanded = () => {
+    setIsExpanded(!isExpanded)
+  }
+
+  // Switch between work and break modes
+  const switchMode = (newMode) => {
+    setMode(newMode)
+    setMinutes(newMode === 'work' ? 25 : 5)
+    setSeconds(0)
+    setIsActive(false)
+    setCapybaraState('idle')
+  }
+
+  // Get capybara animation
   const getCapybaraGif = () => {
     switch (capybaraState) {
-      case 'sleep':
-        return '/Capybara_sleep_left.gif'
-      case 'idle':
-        return '/Capybara_idle_relax.gif'
-      case 'walk':
-        return '/Capybara_walk_left.gif'
-      default:
-        return '/Capybara_sleep_left.gif'
+      case 'sleep': return '/Capybara_sleep_left.gif'
+      case 'idle': return '/Capybara_idle_relax.gif'
+      case 'walk-left': return '/Capybara_walk_left.gif'
+      case 'walk-right': return '/Capybara_walk_right.gif'
+      default: return '/Capybara_sleep_left.gif'
     }
   }
 
   return (
-    <div className="capybara-pomodoro-container">
-      {/* Capybara Image */}
+    <div className="capybara-container">
+      {/* Pomodoro Timer */}
+      {showPomodoro && (
+        <div className={`timer-container ${isExpanded ? 'expanded' : ''}`}>
+          {/* Header */}
+          <div className="timer-header">
+            <div className="timer-title">
+              <Image 
+                src="/Capybara_static_left.png" 
+                alt="Capybara" 
+                width={20} 
+                height={20} 
+                className="mr-2"
+              />
+              <span>Capydoro</span>
+            </div>
+            <div className="header-controls">
+              <button onClick={toggleExpanded} className="expand-btn">
+                {isExpanded ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
+              </button>
+              <button onClick={togglePomodoro} className="close-btn">
+                <X size={16} />
+              </button>
+            </div>
+          </div>
+
+          <div className="timer-content">
+            {/* Main Timer */}
+            <div className="timer-main">
+              <div className="timer-display">
+                {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
+              </div>
+            </div>
+
+            {/* Expandable Panel */}
+            {isExpanded && (
+              <div className="timer-panel">
+                <div className="panel-row">
+                  <div className="panel-section">
+                    <div className="panel-label">Mode</div>
+                    <div className="mode-buttons">
+                      <button 
+                        onClick={() => switchMode('work')}
+                        className={mode === 'work' ? 'active' : ''}
+                      >
+                        Work
+                      </button>
+                      <button 
+                        onClick={() => switchMode('break')}
+                        className={mode === 'break' ? 'active' : ''}
+                      >
+                        Break
+                      </button>
+                    </div>
+                  </div>
+                  
+                  {/* Vertical separator */}
+                  <div className="panel-separator"></div>
+                  
+                  <div className="panel-section">
+                    <div className="panel-label">Controls</div>
+                    <div className="timer-controls">
+                      <button onClick={toggleTimer} className="control-btn">
+                        {isActive ? <Pause size={16} /> : <Play size={16} />}
+                      </button>
+                      <button onClick={resetTimer} className="control-btn">
+                        <RefreshCw size={16} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+      
+      {/* Capybara */}
       <div 
-        className={`capybara-image ${showPomodoro ? 'with-pomodoro' : ''}`}
+        className={`capybara ${capybaraState}`}
         onClick={togglePomodoro}
+        style={{ transform: `translateX(${capybaraPosition}px)` }}
       >
         <Image 
           src={getCapybaraGif()} 
           alt="Capybara" 
           width={80} 
           height={80} 
-          className="pixel-image cursor-pointer"
         />
       </div>
-
-      {/* Pomodoro Timer */}
-      {showPomodoro && (
-        <div className="pomodoro-container bg-[#2A2136] border-2 border-[#8BABBF] pixel-container">
-          {/* Header with title */}
-          <div className="p-2 flex justify-between items-center bg-[#4A3F6B] border-b-2 border-[#8BABBF]">
-            <div className="flex items-center">
-              <Image 
-                src="/Capybara_static_left.png" 
-                alt="Capybara" 
-                width={24} 
-                height={24} 
-                className="mr-2 pixel-image"
-              />
-              <span className="font-medium text-[#ffffff] text-sm font-pixel">Capydoro</span>
-            </div>
-            <div className="flex">
-              <button 
-                className="text-[#8BABBF] hover:text-[#E6C86E] mr-2"
-                onClick={toggleExpand}
-              >
-                {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-              </button>
-              <button 
-                className="text-[#8BABBF] hover:text-[#E6C86E]"
-                onClick={togglePomodoro}
-              >
-                <X size={16} />
-              </button>
-            </div>
-          </div>
-
-          {/* Timer display (always visible and bigger) */}
-          <div className="py-3 px-2 flex justify-center bg-[#3A2E56]">
-            <div className="timer-display font-bold tracking-wider text-[#E6C86E] pixel-shadow font-pixel">
-              {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
-            </div>
-          </div>
-
-          {/* Expanded controls */}
-          {isExpanded && (
-            <div className="p-2 border-t-2 border-[#8BABBF] bg-[#3A2E56]">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-xs text-right text-[#8BABBF] font-pixel">
-                  {mode === 'work' ? 'Work Time' : 'Break Time'}
-                </span>
-                <div className="flex space-x-2">
-                  <button 
-                    onClick={toggleTimer}
-                    className="p-1 border border-[#8BABBF] hover:bg-[#4A3F6B] hover:border-[#E6C86E] pixel-button-sm"
-                  >
-                    {isActive ? <Pause color="white" size={14} /> : <Play color="white" size={14} />}
-                  </button>
-                  <button 
-                    onClick={resetTimer}
-                    className="p-1 border border-[#8BABBF] hover:bg-[#4A3F6B] hover:border-[#E6C86E] pixel-button-sm"
-                  >
-                    <RefreshCw color="white" size={14} />
-                  </button>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => {
-                    setMode('work')
-                    setMinutes(25)
-                    setSeconds(0)
-                    setIsActive(false)
-                    setCapybaraState('idle')
-                  }}
-                  className={`px-2 py-1 text-xs border-2 font-pixel ${
-                    mode === 'work'
-                      ? 'bg-[#4A3F6B] border-[#E6C86E] text-[#E6C86E]'
-                      : 'bg-[#2A2136] border-[#8BABBF] text-[#8BABBF] hover:border-[#E6C86E] hover:text-[#E6C86E]'
-                  } pixel-button-sm`}
-                >
-                  Work (25m)
-                </button>
-                <button
-                  onClick={() => {
-                    setMode('break')
-                    setMinutes(5)
-                    setSeconds(0)
-                    setIsActive(false)
-                    setCapybaraState('idle')
-                  }}
-                  className={`px-2 py-1 text-xs border-2 font-pixel ${
-                    mode === 'break'
-                      ? 'bg-[#4A3F6B] border-[#E6C86E] text-[#E6C86E]'
-                      : 'bg-[#2A2136] border-[#8BABBF] text-[#8BABBF] hover:border-[#E6C86E] hover:text-[#E6C86E]'
-                  } pixel-button-sm`}
-                >
-                  Break (5m)
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
       
       <style jsx>{`
-        .capybara-pomodoro-container {
+        .capybara-container {
           position: absolute;
-          top: 120px;
+          top: 22px;
           left: 50%;
           transform: translateX(-50%);
           z-index: 30;
           display: flex;
-          flex-direction: row;
-          align-items: flex-start;
+          flex-direction: column;
+          align-items: center;
+          width: 100%;
+          max-width: 600px;
         }
         
-        .capybara-image {
-          transition: all 0.3s ease;
-          filter: drop-shadow(3px 3px 0 rgba(0,0,0,0.7));
-          image-rendering: pixelated;
-        }
-        
-        .capybara-image.with-pomodoro {
-          margin-right: 10px;
-        }
-        
-        .pomodoro-container {
-          width: 250px;
+        .timer-container {
+          background-color: #2A2136;
+          border: 2px solid #8BABBF;
           box-shadow: 4px 4px 0 #000;
-          top: -60px;
-          position: relative;
-          image-rendering: pixelated;
-          border-width: 4px;
-          border-style: solid;
-          border-color: #8BABBF;
-          border-radius: 0;
+          margin-bottom: 20px;
+          z-index: 31;
+          overflow: hidden;
+          width: 220px;
+          transition: width 0.3s ease;
         }
         
-        .pomodoro-container:after {
-          content: '';
-          position: absolute;
-          width: 4px;
-          height: 4px;
-          background-color: #2A2136;
-          bottom: 0;
-          right: 0;
-          z-index: 2;
+        .timer-container.expanded {
+          width: 540px; /* Increased width to accommodate controls */
         }
         
-        .pixel-button-sm {
-          image-rendering: pixelated;
-          transition: all 0.1s ease;
-          box-shadow: 2px 2px 0 #000;
-          position: relative;
-          border-width: 2px;
-          border-style: solid;
-          border-radius: 0;
+        .timer-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 8px;
+          background-color: #4A3F6B;
+          border-bottom: 2px solid #8BABBF;
+        }
+        
+        .timer-title {
+          display: flex;
+          align-items: center;
+          color: white;
+          font-size: 14px;
           font-family: 'PixelFont', monospace;
-          letter-spacing: 0.5px;
         }
         
-        .pixel-button-sm:after {
-          content: '';
-          position: absolute;
-          width: 2px;
-          height: 2px;
-          background-color: #2A2136;
-          bottom: 0;
-          right: 0;
-          z-index: 2;
+        .header-controls {
+          display: flex;
+          gap: 8px;
         }
         
-        .pixel-button-sm:hover {
-          transform: translateY(-1px);
-          box-shadow: 3px 3px 0 #000;
+        .close-btn, .expand-btn {
+          color: #8BABBF;
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 0;
         }
         
-        .pixel-button-sm:active {
-          transform: translate(1px, 1px);
-          box-shadow: 1px 1px 0 #000;
+        .close-btn:hover, .expand-btn:hover {
+          color: #E6C86E;
         }
         
-        .pixel-shadow {
-          text-shadow: 4px 4px 0 #000;
-          font-family: 'PixelFont', monospace;
-          letter-spacing: 1px;
+        .timer-content {
+          display: flex;
+          height: 80px; /* Fixed height for the content area */
         }
         
+        .timer-main {
+          width: 220px;
+          flex-shrink: 0;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+        }
+        
+        .timer-panel {
+          width: 320px; /* Increased panel width */
+          border-left: 2px solid #8BABBF;
+          background-color: #3A2E56;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+        }
+        
+        .panel-row {
+          display: flex;
+          justify-content: space-around;
+          align-items: center;
+          width: 100%;
+          padding: 0 15px;
+        }
+        
+        .panel-separator {
+          width: 1px;
+          height: 50px;
+          background-color: #8BABBF;
+          margin: 0 15px;
+        }
         
         .timer-display {
-          font-size: 2rem !important;
-          line-height: 1.2 !important;
-          padding: 0.25rem 0;
-          animation: timer-pulse 2s infinite ease-in-out;
-          transform-origin: center;
+          font-size: 32px;
+          font-weight: bold;
+          text-align: center;
+          color: #E6C86E;
+          font-family: 'PixelFont', monospace;
+          text-shadow: 2px 2px 0 #000;
+        }
+        
+        .panel-section {
+          padding: 0 8px;
+          width: 130px; /* Increased width for each section */
+        }
+        
+        .panel-label {
+          font-size: 12px;
+          color: #8BABBF;
+          margin-bottom: 6px;
+          font-family: 'PixelFont', monospace;
+          text-align: center;
+        }
+        
+        .mode-buttons {
+          display: flex;
+          gap: 8px; /* Increased gap between buttons */
+        }
+        
+        .mode-buttons button {
+          flex: 1;
+          padding: 6px 10px; /* Added horizontal padding */
+          background-color: #2A2136;
+          border: 1px solid #8BABBF;
+          color: #8BABBF;
+          font-size: 10px; /* Reduced font size */
+          cursor: pointer;
+          font-family: 'PixelFont', monospace;
+          white-space: nowrap;
+          min-width: 56px; /* Ensure minimum width */
+          height: 28px; /* Fixed height for buttons */
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          line-height: 1;
+        }
+        
+        .mode-buttons button.active {
+          background-color: #4A3F6B;
+          color: #E6C86E;
+          border-color: #E6C86E;
+        }
+        
+        .timer-controls {
+          display: flex;
+          justify-content: center;
+          gap: 12px;
+        }
+        
+        .control-btn {
+          width: 32px;
+          height: 32px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background-color: #2A2136;
+          border: 1px solid #8BABBF;
+          color: white;
+          cursor: pointer;
+        }
+        
+        .control-btn:hover {
+          border-color: #E6C86E;
+          background-color: #4A3F6B;
+        }
+        
+        .capybara {
+          transition: transform 0.1s linear;
+          filter: drop-shadow(3px 3px 0 rgba(0,0,0,0.7));
+          image-rendering: pixelated;
+          position: relative;
+          z-index: 32;
+          cursor: pointer;
+          margin-top: -45px;
+        }
+        
+        /* Position adjustment for sleeping capybara */
+        .capybara.sleep {
+          margin-top: 100px;
         }
       `}</style>
     </div>

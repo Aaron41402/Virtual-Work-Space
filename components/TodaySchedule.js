@@ -18,7 +18,9 @@ function TodaySchedule() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [newItemActivity, setNewItemActivity] = useState('');
   const [newItemTime, setNewItemTime] = useState('');
+  const [newItemEndTime, setNewItemEndTime] = useState('');
   const [newItemType, setNewItemType] = useState('routine');
+  const [isTimeRange, setIsTimeRange] = useState(false);
   const timelineRef = useRef(null);
   const modalRef = useRef(null);
 
@@ -260,10 +262,37 @@ function TodaySchedule() {
 
   // Get activity for a specific hour
   const getActivityForHour = (hour) => {
+    const hourNum = parseInt(hour.split(':')[0]);
+    const minuteNum = parseInt(hour.split(':')[1] || '00');
+    
+    // Find activities that include this hour
     const activity = schedule.find(item => {
-      const itemHour = item.time.split(':')[0].padStart(2, '0');
-      const itemMinute = item.time.split(':')[1] || '00';
-      return `${itemHour}:${itemMinute}` === hour || itemHour === hour.split(':')[0];
+      const itemHour = parseInt(item.time.split(':')[0]);
+      const itemMinute = parseInt(item.time.split(':')[1] || '00');
+      
+      // If the item has an end time, check if current hour is within range
+      if (item.endTime) {
+        const endHour = parseInt(item.endTime.split(':')[0]);
+        const endMinute = parseInt(item.endTime.split(':')[1] || '00');
+        
+        // Check if hour is between start and end times
+        if (itemHour < endHour) {
+          // Simple case: start hour is less than end hour
+          return (hourNum > itemHour || (hourNum === itemHour && minuteNum >= itemMinute)) && 
+                 (hourNum < endHour || (hourNum === endHour && minuteNum < endMinute));
+        } else if (itemHour > endHour) {
+          // Case where time range crosses midnight
+          return (hourNum > itemHour || (hourNum === itemHour && minuteNum >= itemMinute)) || 
+                 (hourNum < endHour || (hourNum === endHour && minuteNum < endMinute));
+        } else {
+          // Case where start and end hours are the same
+          return hourNum === itemHour && minuteNum >= itemMinute && minuteNum < endMinute;
+        }
+      }
+      
+      // For items without end time, use the original logic
+      return `${itemHour.toString().padStart(2, '0')}:${itemMinute.toString().padStart(2, '0')}` === hour || 
+             itemHour === hourNum;
     });
     
     return activity || null;
@@ -342,12 +371,20 @@ function TodaySchedule() {
   // Add a new item
   const addNewItem = () => {
     if (!newItemActivity.trim() || !newItemTime) return;
+    
+    // Validate end time if using time range
+    if (isTimeRange && (!newItemEndTime || newItemEndTime <= newItemTime)) {
+      alert("End time must be after start time");
+      return;
+    }
 
     const newItem = {
       id: `item-${Date.now()}`,
       time: newItemTime,
       activity: newItemActivity.trim(),
-      type: newItemType
+      type: newItemType,
+      // Add end time if using time range
+      ...(isTimeRange && { endTime: newItemEndTime })
     };
 
     const updatedSchedule = [...schedule, newItem].sort((a, b) => {
@@ -363,6 +400,8 @@ function TodaySchedule() {
     setSchedule(updatedSchedule);
     setNewItemActivity('');
     setNewItemTime('');
+    setNewItemEndTime(''); // Reset end time
+    setIsTimeRange(false); // Reset time range toggle
     setShowAddModal(false);
     
     // Update localStorage
@@ -372,6 +411,13 @@ function TodaySchedule() {
   // Open add modal with hour pre-filled
   const openAddModalWithHour = (hour) => {
     setNewItemTime(hour);
+    
+    // Calculate a default end time (1 hour later)
+    const [hourStr, minuteStr] = hour.split(':');
+    let endHour = parseInt(hourStr) + 1;
+    if (endHour >= 24) endHour = 0;
+    setNewItemEndTime(`${endHour.toString().padStart(2, '0')}:${minuteStr}`);
+    
     setShowAddModal(true);
   };
 
@@ -591,9 +637,23 @@ function TodaySchedule() {
             >
               <h3 className="text-lg font-semibold mb-4">Add New Activity</h3>
               
-              <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="mb-3">
+                <label className="flex items-center text-sm text-gray-600">
+                  <input 
+                    type="checkbox" 
+                    checked={isTimeRange}
+                    onChange={(e) => setIsTimeRange(e.target.checked)}
+                    className="mr-2"
+                  />
+                  Use time range
+                </label>
+              </div>
+              
+              <div className={`grid ${isTimeRange ? 'grid-cols-2' : 'grid-cols-2'} gap-4 mb-4`}>
                 <div>
-                  <label className="text-sm text-gray-600 block mb-1">Time</label>
+                  <label className="text-sm text-gray-600 block mb-1">
+                    {isTimeRange ? 'Start Time' : 'Time'}
+                  </label>
                   <input 
                     type="time" 
                     value={newItemTime}
@@ -601,6 +661,19 @@ function TodaySchedule() {
                     className="w-full p-2 text-sm border rounded"
                   />
                 </div>
+                
+                {isTimeRange && (
+                  <div>
+                    <label className="text-sm text-gray-600 block mb-1">End Time</label>
+                    <input 
+                      type="time" 
+                      value={newItemEndTime}
+                      onChange={(e) => setNewItemEndTime(e.target.value)}
+                      className="w-full p-2 text-sm border rounded"
+                    />
+                  </div>
+                )}
+                
                 <div>
                   <label className="text-sm text-gray-600 block mb-1">Type</label>
                   <select 

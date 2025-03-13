@@ -7,10 +7,30 @@ import Image from "next/image";
 import Loader from "@/components/Loader";
 
 const questions = [
-  { id: "wakeTime", question: "What time do you usually wake up?", type: "time" },
-  { id: "bedTime", question: "What time do you usually go to bed?", type: "time" },
-  { id: "habits", question: "Do you have any recurring habits or activities?", type: "text" },
-  { id: "priorities", question: "What are your top priorities for most days?", type: "text" }
+  { 
+    id: "wakeTime", 
+    question: "What time do you usually wake up?", 
+    type: "time",
+    placeholder: "06:30" 
+  },
+  { 
+    id: "bedTime", 
+    question: "What time do you usually go to bed?", 
+    type: "time",
+    placeholder: "22:30"
+  },
+  { 
+    id: "habits", 
+    question: "What are your recurring habits or activities?", 
+    type: "text",
+    placeholder: "Exercise, Reading, Meditation (separate with commas)"
+  },
+  { 
+    id: "priorities", 
+    question: "What are your top priorities for most days?", 
+    type: "text",
+    placeholder: "Work on project, Study Spanish (separate with commas)"
+  }
 ];
 
 export default function SetupPage() {
@@ -164,8 +184,12 @@ export default function SetupPage() {
                     name={q.id}
                     onChange={handleChange}
                     required
+                    placeholder={q.placeholder}
                     className="w-full border p-2 rounded-md"
                   />
+                  {q.type === "text" && (
+                    <p className="text-xs text-gray-500 mt-1">Example: {q.placeholder}</p>
+                  )}
                 </div>
               ))}
               <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded-md">

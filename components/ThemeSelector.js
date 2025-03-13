@@ -6,7 +6,7 @@ const themes = [
   { id: 'lofi', name: 'Lo-Fi Study', file: '/lofi.mp4', description: 'Relaxing lo-fi beats for studying and focusing' },
   { id: 'lofi_city', name: 'Lo-Fi City', file: '/lofi_city.mp4', description: 'Urban cityscape with calming lo-fi music' },
   { id: 'fire', name: 'Fireplace', file: '/fire.mp4', description: 'Cozy fireplace ambiance for relaxation' },
-  { id: 'rain', name: 'Rainy Day', file: '/rain.mp4', description: 'Peaceful rain sounds for concentration' },
+  { id: 'rain', name: 'Rain Day', file: '/rain.mp4', description: 'Mario room chill vibe' },
   { id: 'wave', name: 'Ocean Waves', file: '/wave.mp4', description: 'Calming ocean waves for a serene environment' },
   { id: 'coffee', name: 'Coffee Shop', file: '/coffee.mp4', description: 'Coffee shop ambiance for productivity' }
 ];
