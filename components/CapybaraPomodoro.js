@@ -15,6 +15,7 @@ export default function CapybaraPomodoro() {
   const [capybaraPosition, setCapybaraPosition] = useState(0) // Position for horizontal movement
   const [walkingDirection, setWalkingDirection] = useState('right') // 'left' or 'right'
   const walkIntervalRef = useRef(null)
+  const [showTooltip, setShowTooltip] = useState(false)
 
   // Timer logic
   useEffect(() => {
@@ -229,10 +230,12 @@ export default function CapybaraPomodoro() {
         </div>
       )}
       
-      {/* Capybara */}
+      {/* Capybara with Tooltip */}
       <div 
         className={`capybara ${capybaraState}`}
         onClick={togglePomodoro}
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
         style={{ transform: `translateX(${capybaraPosition}px)` }}
       >
         <Image 
@@ -241,6 +244,14 @@ export default function CapybaraPomodoro() {
           width={80} 
           height={80} 
         />
+        {!showPomodoro && showTooltip && (
+          <div className="capybara-tooltip">
+            <div className="tooltip-content">
+              <p className="tooltip-title">Meet Capydoro! 🌟</p>
+              <p className="tooltip-text">Click me to start your productivity journey together!</p>
+            </div>
+          </div>
+        )}
       </div>
       
       <style jsx>{`
@@ -428,6 +439,70 @@ export default function CapybaraPomodoro() {
         }
         
         /* Position adjustment for sleeping capybara */
+        .capybara.sleep {
+          margin-top: 100px;
+        }
+        
+        /* Tooltip Styles */
+        .capybara-tooltip {
+          position: absolute;
+          bottom: 70%;
+          left: 50%;
+          transform: translateX(-50%);
+          background-color: #2A2136;
+          border: 2px solid #E6C86E;
+          padding: 12px;
+          border-radius: 4px;
+          width: max-content;
+          max-width: 200px;
+          margin-bottom: 8px;
+          box-shadow: 4px 4px 0 #000;
+          z-index: 40;
+          pointer-events: none;
+          animation: tooltipFadeIn 0.3s ease;
+        }
+
+        .capybara-tooltip::after {
+          content: '';
+          position: absolute;
+          top: 100%;
+          left: 50%;
+          transform: translateX(-50%);
+          border-width: 8px;
+          border-style: solid;
+          border-color: #E6C86E transparent transparent transparent;
+        }
+
+        .tooltip-content {
+          text-align: center;
+        }
+
+        .tooltip-title {
+          color: #E6C86E;
+          font-weight: bold;
+          font-size: 14px;
+          margin-bottom: 4px;
+          font-family: 'PixelFont', monospace;
+        }
+
+        .tooltip-text {
+          color: #8BABBF;
+          font-size: 12px;
+          line-height: 1.4;
+        }
+
+        @keyframes tooltipFadeIn {
+          from {
+            opacity: 0;
+            transform: translate(-50%, 10px);
+          }
+          to {
+            opacity: 1;
+            transform: translate(-50%, 0);
+          }
+        }
+
+        /* Adjust sleeping capybara position for tooltip visibility */
         .capybara.sleep {
           margin-top: 100px;
         }

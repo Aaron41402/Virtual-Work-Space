@@ -78,4 +78,113 @@
 
 .shadow-pixel {
   box-shadow: 6px 6px 0 #000;
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  /* Base styles for dark mode */
+  html, body {
+    color-scheme: dark;
+  }
+  
+  body {
+    background-color: #2A2136;
+    color: #E6C86E;
+  }
+  
+  /* Form elements */
+  input, 
+  select, 
+  textarea {
+    background-color: #3A2E56 !important;
+    color: #E6C86E !important;
+    border-color: #8BABBF !important;
+  }
+  
+  input::placeholder {
+    color: #8BABBF !important;
+    opacity: 0.8;
+  }
+  
+  /* Background colors */
+  .bg-white {
+    background-color: #2A2136 !important;
+  }
+  
+  .bg-white\/70 {
+    background-color: rgba(42, 33, 54, 0.8) !important;
+  }
+  
+  .bg-gray-200 {
+    background-color: #3A2E56 !important;
+  }
+  
+  .bg-gray-300 {
+    background-color: #4A3F6B !important;
+  }
+  
+  /* Text colors */
+  .text-black {
+    color: #E6C86E !important;
+  }
+  
+  .text-gray-500, 
+  .text-gray-600, 
+  .text-gray-700 {
+    color: #8BABBF !important;
+  }
+  
+  /* Borders */
+  .border, .border-2, .border-4 {
+    border-color: #8BABBF;
+  }
+  
+  /* Buttons */
+  .btn-neutral {
+    background-color: #3A2E56 !important;
+    color: #E6C86E !important;
+    border-color: #8BABBF !important;
+  }
+  
+  /* Modal backgrounds */
+  .bg-black\/50 {
+    background-color: rgba(0, 0, 0, 0.7) !important;
+  }
+  
+  /* Specific component overrides */
+  .timer-container {
+    background-color: #2A2136 !important;
+    border-color: #8BABBF !important;
+  }
+  
+  .timer-header {
+    background-color: #3A2E56 !important;
+  }
+  
+  /* Shadows in dark mode */
+  .shadow-md, .shadow-lg, .shadow-xl {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5) !important;
+  }
+}
+
+/* Force dark mode class for manual toggling */
+.dark-mode {
+  background-color: #2A2136;
+  color: #E6C86E;
+}
+
+.dark-mode input,
+.dark-mode select,
+.dark-mode textarea {
+  background-color: #3A2E56 !important;
+  color: #E6C86E !important;
+  border-color: #8BABBF !important;
+}
+
+.dark-mode .bg-white {
+  background-color: #2A2136 !important;
+}
+
+.dark-mode .text-gray-600 {
+  color: #8BABBF !important;
 } 

@@ -91,7 +91,6 @@ export default async function Home() {
                 <ul className="list-disc list-inside text-[#8BABBF] mb-6 space-y-2">
                   <li>Work alongside your capybara companion</li>
                   <li>Take breaks together when the timer rings</li>
-                  <li>Watch your capybara's mood change as you progress</li>
                   <li>Boost productivity with a furry friend by your side</li>
                 </ul>
                 <div className="flex justify-center">
@@ -212,6 +211,79 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* Music Player Section */}
+      <section className="bg-[#3A2E56] text-white py-20 border-t-4 border-b-4 border-[#E6C86E]">
+        <div className="max-w-5xl mx-auto px-8">
+          <h2 className="text-3xl font-bold text-center text-[#E6C86E] mb-8 pixel-shadow">
+            Level Up Your Focus with Music
+          </h2>
+          
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+            <div className="md:w-1/2">
+              <div className="bg-[#2A2136] p-6 border-4 border-[#FF6B97] rounded-lg shadow-pixel">
+                <h3 className="text-2xl font-bold text-[#FF6B97] mb-4">
+                  Built-in Music Player
+                </h3>
+                <p className="text-[#8BABBF] mb-6 text-lg">
+                  Enhance your productivity with our curated collection of pixel-perfect background music. Get in the zone with retro-inspired tunes!
+                </p>
+                <ul className="list-disc list-inside text-[#8BABBF] mb-6 space-y-2">
+                  <li>Handpicked background music</li>
+                  <li>Pixel-art music player interface</li>
+                  <li>Perfect for focus and productivity</li>
+                  <li>Toggle music on/off anytime</li>
+                </ul>
+                <div className="flex justify-center">
+                  <ButtonLogin 
+                    session={session} 
+                    extraClass="px-6 py-2 bg-[#FF6B97] text-white font-bold rounded-none border-4 border-[#E6C86E] pixel-button hover:bg-[#FF8CAD] transition-transform"
+                  />
+                </div>
+              </div>
+            </div>
+            
+            <div className="md:w-1/2 h-1/2">
+              <div className="relative">
+                {/* Video showcase */}
+                <div className=" shadow-pixel mb-6 overflow-hidden">
+                  <video 
+                    width="100%" 
+                    height="auto" 
+                    controls 
+                    className="bg-[#2A2136]"
+                  >
+                    <source src="/music.mp4" type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
+                </div>
+                
+                {/* Music tracks preview */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="border-2 border-[#8BABBF] p-4 bg-[#2A2136] shadow-pixel">
+                    <div className="flex items-center justify-center">
+                      <div className="text-4xl text-[#E6C86E] mr-2">♪</div>
+                      <div className="text-[#8BABBF]">
+                        <div className="font-bold">Retro Beats</div>
+                        <div className="text-sm">Perfect for coding</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="border-2 border-[#8BABBF] p-4 bg-[#2A2136] shadow-pixel">
+                    <div className="flex items-center justify-center">
+                      <div className="text-4xl text-[#E6C86E] mr-2">♫</div>
+                      <div className="text-[#8BABBF]">
+                        <div className="font-bold">Pixel Tunes</div>
+                        <div className="text-sm">Focus enhancer</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Features */}
       <section className="bg-[#2A2136] text-white py-20">
         <div className="max-w-5xl mx-auto px-8">
@@ -250,7 +322,9 @@ export default async function Home() {
         <div className="max-w-3xl mx-auto px-8 text-center">
           <h2 className="text-3xl font-bold text-[#E6C86E] mb-6 pixel-shadow">Begin Your Hero's Journey</h2>
           <p className="text-lg mb-8">Join thousands of productivity heroes conquering their daily quests</p>
-          <ButtonLogin session={session} extraClass="px-8 py-3 bg-[#FF6B97] text-white font-bold rounded-none border-4 border-[#E6C86E] pixel-button hover:bg-[#FF8CAD] transition-transform"/>
+          <div className="flex justify-center">
+            <ButtonLogin session={session} extraClass="px-8 py-3 bg-[#FF6B97] text-white font-bold rounded-none border-4 border-[#E6C86E] pixel-button hover:bg-[#FF8CAD] transition-transform"/>
+          </div>
         </div>
       </section>
 
