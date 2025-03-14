@@ -17,7 +17,70 @@ export default function Dashboard() {
 
   useEffect(() => {
     setIsMounted(true);
+    fetchTasks();
+    checkAndUpdateAnalysis();
   }, []);
+
+  const fetchTasks = async () => {
+    try {
+      const response = await fetch('/api/task');
+      const data = await response.json();
+      if (data.tasks) {
+        localStorage.setItem('tasks', JSON.stringify(data.tasks));
+      }
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
+    }
+  };
+
+  const checkAndUpdateAnalysis = async () => {
+    const analysisData = localStorage.getItem('analysis');
+    
+    // Get yesterday's date in YYYY-MM-DD format in local timezone
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
+    
+    const tasksData = localStorage.getItem('tasks');
+
+    if (!analysisData || JSON.parse(analysisData).date !== yesterdayStr) {
+      try {
+        const tasks = tasksData ? JSON.parse(tasksData) : [];
+
+        const response = await fetch('/api/gemini', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ 
+            type: 'analysis',
+            data: { tasks }
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch analysis: ${data.error || 'Unknown error'}`);
+        }
+        
+        if (!data.response) {
+          throw new Error('No response text in analysis data');
+        }
+
+        const newAnalysis = {
+          date: yesterdayStr,
+          report: data.response,
+          efficiencyScore: data.efficiencyScore || 0,
+          tasksCompleted: data.tasksCompleted || 0
+        };
+
+        localStorage.setItem('analysis', JSON.stringify(newAnalysis));
+      } catch (error) {
+        console.error('Error generating analysis:', error);
+      }
+    }
+  };
 
   const renderContent = () => {
     switch (activeSection) {

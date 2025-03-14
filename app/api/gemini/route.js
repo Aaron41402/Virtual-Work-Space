@@ -2,7 +2,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 
 export async function POST(request) {
   try {
-    const { prompt, type } = await request.json();
+    const { type, data } = await request.json();
     
     // Get API key from environment variable
     const apiKey = process.env.GEMINI_API_KEY;
@@ -23,11 +23,9 @@ export async function POST(request) {
     let finalPrompt;
     
     if (type === 'analysis') {
-      // Create analysis prompt
-      finalPrompt = createAnalysisPrompt(prompt);
+      finalPrompt = createAnalysisPrompt(data);
     } else {
-      // Create context-aware prompt for general questions
-      finalPrompt = createContextPrompt(prompt);
+      finalPrompt = createContextPrompt(data);
     }
     
     // Get response from Gemini
@@ -36,14 +34,31 @@ export async function POST(request) {
     
     // Extract efficiency score if it's an analysis
     let efficiencyScore = null;
-    if (type === 'analysis') {
-      const scoreMatch = response.match(/efficiency score.*?(\d+)/i);
-      efficiencyScore = scoreMatch ? parseInt(scoreMatch[1]) : null;
-    }
+    let tasksCompleted = 0;
     
+    if (type === 'analysis') {
+      // Extract efficiency score from response
+      const scoreMatch = response.match(/efficiency score.*?(\d+)/i);
+      efficiencyScore = scoreMatch ? parseInt(scoreMatch[1]) : 5; // Default to 5 if no score found
+      
+      // Count completed tasks from yesterday
+      const yesterdayTasks = data.tasks.filter(task => {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStart = new Date(yesterday.setHours(0, 0, 0, 0));
+        const yesterdayEnd = new Date(yesterday.setHours(23, 59, 59, 999));
+        const updatedAt = new Date(task.updatedAt);
+        return updatedAt >= yesterdayStart && 
+               updatedAt <= yesterdayEnd && 
+               task.status === "Completed";
+      });
+      tasksCompleted = yesterdayTasks.length;
+    }
+
     return new Response(JSON.stringify({ 
       response,
-      efficiencyScore
+      efficiencyScore,
+      tasksCompleted
     }), { 
       status: 200,
       headers: { 'Content-Type': 'application/json' }
@@ -51,9 +66,9 @@ export async function POST(request) {
     
   } catch (error) {
     console.error('Error with Gemini API:', error);
-    
     return new Response(JSON.stringify({ 
-      error: 'Failed to process request' 
+      error: 'Failed to process request',
+      details: error.message 
     }), { 
       status: 500,
       headers: { 'Content-Type': 'application/json' }
@@ -77,24 +92,61 @@ function createContextPrompt(userPrompt) {
 
 // Create analysis prompt for efficiency analysis
 function createAnalysisPrompt(data) {
-  const { schedule, tasks } = data;
+  const { tasks } = data;
   
+  // Get yesterday's date in local timezone
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStart = new Date(
+    yesterday.getFullYear(),
+    yesterday.getMonth(),
+    yesterday.getDate(),
+    0, 0, 0
+  );
+  const yesterdayEnd = new Date(
+    yesterday.getFullYear(),
+    yesterday.getMonth(),
+    yesterday.getDate(),
+    23, 59, 59
+  );
+
+  // Filter tasks updated yesterday
+  const yesterdayTasks = tasks.filter(task => {
+    const updatedAt = new Date(task.updatedAt);
+    return updatedAt >= yesterdayStart && updatedAt <= yesterdayEnd;
+  });
+
+  // Separate completed and in-progress tasks
+  const completedTasks = yesterdayTasks.filter(task => task.status === "Completed");
+  const inProgressTasks = yesterdayTasks.filter(task => task.status === "In Progress");
+
   return `
-    Analyze this user's productivity and efficiency:
+    Analyze this user's productivity and efficiency for yesterday:
+
+    Completed tasks from yesterday:
+    ${completedTasks.map(task => 
+      `- ${task.title} (Priority: ${task.priority}, Completed at: ${new Date(task.updatedAt).toLocaleTimeString()})`
+    ).join('\n')}
     
-    Schedule:
-    ${schedule.map(item => `- ${item.time}: ${item.activity} (${item.type})`).join('\n')}
+    Tasks in progress from yesterday:
+    ${inProgressTasks.map(task => 
+      `- ${task.title} (Priority: ${task.priority}, Last updated: ${new Date(task.updatedAt).toLocaleTimeString()})`
+    ).join('\n')}
     
-    Completed tasks:
-    ${tasks.map(task => `- ${task.text} (completed at ${task.completedAt})`).join('\n')}
-    
+    Summary:
+    - Total tasks completed: ${completedTasks.length}
+    - Tasks in progress: ${inProgressTasks.length}
+
     Provide:
     1. An efficiency score (0-100)
-    2. What they're doing well
+    2. What they did well yesterday (consider both completed and in-progress tasks)
     3. Areas for improvement
-    4. 2-3 specific suggestions
+    4. 2-3 specific suggestions for today
     
     Format your response in RPG terms, like they're on a quest to improve productivity.
     Keep it encouraging and positive.
+    
+    Note: If no tasks were worked on yesterday, focus on motivation and getting started.
+    Consider task priorities when evaluating efficiency.
   `;
 }

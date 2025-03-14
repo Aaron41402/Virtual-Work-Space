@@ -285,19 +285,17 @@ export default function AIAssistant() {
     setIsTyping(true);
     
     try {
-      // Get schedule and task data
-      const scheduleData = localStorage.getItem('scheduleData');
-      const completedTasks = localStorage.getItem('completedTasks');
+      // Get task data
+      let tasks = localStorage.getItem('tasks');
       
-      if (!scheduleData || !completedTasks) {
+      if (!tasks) {
         addBotMessage("I don't have enough data to analyze your efficiency yet. Complete some quests and check back later!");
         setIsAnalyzing(false);
         setIsTyping(false);
         return;
       }
       
-      const schedule = JSON.parse(scheduleData);
-      const tasks = JSON.parse(completedTasks);
+      tasks = JSON.parse(tasks);
       
       // Call the API route
       const response = await fetch('/api/gemini', {
@@ -306,7 +304,7 @@ export default function AIAssistant() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ 
-          prompt: { schedule, tasks },
+          prompt: { tasks },
           type: 'analysis'
         }),
       });
