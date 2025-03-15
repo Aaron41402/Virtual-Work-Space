@@ -16,6 +16,7 @@ export default function CapybaraPomodoro() {
   const [walkingDirection, setWalkingDirection] = useState('right') // 'left' or 'right'
   const walkIntervalRef = useRef(null)
   const [showTooltip, setShowTooltip] = useState(false)
+  const [selectedSkin, setSelectedSkin] = useState('default')
 
   // Timer logic
   useEffect(() => {
@@ -143,14 +144,24 @@ export default function CapybaraPomodoro() {
 
   // Get capybara animation
   const getCapybaraGif = () => {
+    const skinPrefix = selectedSkin === 'default' ? '' : `_${selectedSkin}`;
+    
     switch (capybaraState) {
-      case 'sleep': return '/Capybara_sleep_left.gif'
-      case 'idle': return '/Capybara_idle_relax.gif'
-      case 'walk-left': return '/Capybara_walk_left.gif'
-      case 'walk-right': return '/Capybara_walk_right.gif'
-      default: return '/Capybara_sleep_left.gif'
+      case 'sleep': return `/Capybara_sleep_left${skinPrefix}.gif`
+      case 'idle': return `/Capybara_idle_relax${skinPrefix}.gif`
+      case 'walk-left': return `/Capybara_walk_left${skinPrefix}.gif`
+      case 'walk-right': return `/Capybara_walk_right${skinPrefix}.gif`
+      default: return `/Capybara_sleep_left${skinPrefix}.gif`
     }
   }
+
+  // Add this useEffect
+  useEffect(() => {
+    const savedSkin = localStorage.getItem('selectedCapybaraSkin');
+    if (savedSkin) {
+      setSelectedSkin(savedSkin);
+    }
+  }, []);
 
   return (
     <div className="capybara-container">

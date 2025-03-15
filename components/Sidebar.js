@@ -203,7 +203,7 @@ export default function Sidebar({ activeSection, setActiveSection }) {
         {/* Music Player */}
         <div className="mt-auto mb-4 space-y-4">
           <div className="bg-[#3A2E56] p-3 border-2 border-[#E6C86E] rounded-md shadow-lg">
-            <h4 className="text-[#E6C86E] text-sm font-bold mb-2 text-center">Music Player</h4>
+            <h4 className="text-[#E6C86E] text-sm font-bold mb-2 text-center"></h4>
             
             {/* Music Player Animation */}
             <div className="flex justify-center mb-3">
@@ -213,7 +213,7 @@ export default function Sidebar({ activeSection, setActiveSection }) {
                     src="/musicPlayer.gif" 
                     alt="Music playing" 
                     width={160} 
-                    height={200} 
+                    height={180} 
                     className="pixel-image"
                   />
                 </div>
@@ -390,8 +390,9 @@ export default function Sidebar({ activeSection, setActiveSection }) {
             justify-content: center;
             align-items: center;
             width: 160px;
-            height: 200px;
-            margin-top: 2px;
+            height: 180px;
+            margin-top: 4px;
+            margin-bottom: 6px;
           }
           
           .music-player-static {
@@ -399,13 +400,14 @@ export default function Sidebar({ activeSection, setActiveSection }) {
             justify-content: center;
             align-items: center;
             width: 160px;
-            height: 200px;
+            height: 180px;
             margin-top: 2px;
+            margin-bottom: 6px;
           }
           
           .pixel-music-icon {
             width: 160px;
-            height: 200px;
+            height: 180px;
             background-color: #2A2136;
             border: 2px solid #8BABBF;
             display: flex;

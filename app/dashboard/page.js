@@ -8,6 +8,7 @@ import UserAnalysis from '@/components/UserAnalysis'
 import ToDoList from '@/components/ToDoList'
 import ThemeSelector from '@/components/ThemeSelector'
 import CapybaraPomodoro from '@/components/CapybaraPomodoro'
+import LoginTracker from '@/components/LoginTracker'
 
 export default function Dashboard() {
   const [isMounted, setIsMounted] = useState(false);
@@ -46,6 +47,10 @@ export default function Dashboard() {
           <CapybaraPomodoro />
         </div>
         
+        {/* Login Tracker in top right corner */}
+        <div className="absolute top-4 right-4 z-20">
+          {isMounted && <LoginTracker />}
+        </div>
         
         {renderContent()}
         
