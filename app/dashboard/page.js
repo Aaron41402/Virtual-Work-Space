@@ -9,6 +9,7 @@ import ToDoList from '@/components/ToDoList'
 import ThemeSelector from '@/components/ThemeSelector'
 import CapybaraPomodoro from '@/components/CapybaraPomodoro'
 import LoginTracker from '@/components/LoginTracker'
+import LoginReminder from '@/components/LoginReminder'
 
 export default function Dashboard() {
   const [isMounted, setIsMounted] = useState(false);
@@ -59,6 +60,9 @@ export default function Dashboard() {
           {isMounted && <AIAssistant />}
         </div>
       </div>
+      
+      {/* Login reminder popup */}
+      {isMounted && <LoginReminder />}
     </main>
   )
 }

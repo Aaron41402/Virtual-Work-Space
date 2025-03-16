@@ -152,7 +152,16 @@ export default function LoginTracker() {
       {showPopup && (
         <div className="absolute right-0 top-12 w-80 bg-white rounded-lg shadow-xl z-50 p-4">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="font-bold text-lg font-pixel">Login Tracker</h3>
+              <span>
+                <Image 
+                  src="/Hero.png" 
+                  alt="Hero" 
+                  width={32} 
+                  height={32} 
+                />
+              </span>
+            <h3 className="font-bold text-lg font-pixel">Adventurer's Log
+            </h3>
             <button 
               onClick={togglePopup}
               className="text-gray-500 hover:text-gray-700"
@@ -165,7 +174,13 @@ export default function LoginTracker() {
             <p className="text-sm text-gray-600 mb-1 font-pixel">Total Coins Earned:</p>
             <p className="font-bold text-yellow-500 flex items-center">
               <span className="text-xl">{loginData.coins}</span>
-              <span className="ml-1 text-lg">🪙</span>
+              <span className="ml-1 text-lg"><Image 
+                src="/coin.png" 
+                alt="Coin" 
+                width={20} 
+                height={20} 
+                />
+                </span>
             </p>
           </div>
           

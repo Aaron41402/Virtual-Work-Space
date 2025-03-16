@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import CapybaraSkins from './CapybaraSkins';
+import Image from 'next/image';
 
 const themes = [
   { id: 'lofi', name: 'Lo-Fi Study', file: '/lofi.mp4', description: 'Relaxing lo-fi beats for studying and focusing', price: 0 },
@@ -229,7 +230,14 @@ export default function ThemeSelector() {
             <p className="font-medium font-pixel">Your Coins:</p>
             <p className="font-bold text-yellow-500 flex items-center">
               <span className="text-xl">{userCoins}</span>
-              <span className="ml-1 text-lg">🪙</span>
+              <span className="ml-1 text-lg">
+                <Image 
+                  src="/coin.png" 
+                  alt="Coin" 
+                  width={20} 
+                  height={20} 
+                />
+              </span>
             </p>
           </div>
           
@@ -277,7 +285,14 @@ export default function ThemeSelector() {
                       <div className="absolute inset-0 flex items-center justify-center bg-black/30">
                         <div className="flex items-center bg-black/70 px-2 py-1 rounded text-white text-xs">
                           <span className="mr-1">{theme.price}</span>
-                          <span>🪙</span>
+                          <span>
+                          <Image 
+                            src="/coin.png" 
+                            alt="Coin" 
+                            width={20} 
+                            height={20} 
+                          />
+                          </span>
                         </div>
                       </div>
                     )}
@@ -308,13 +323,19 @@ export default function ThemeSelector() {
                         <button
                           onClick={() => unlockTheme(theme.id)}
                           disabled={loading || userCoins < theme.price}
-                          className={`w-full text-xs px-2 py-1 rounded ${
+                          className={`flex items-center justify-center gap-2 w-full text-xs px-2 py-1 rounded ${
                             loading || userCoins < theme.price
                               ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
                               : 'bg-green-500 text-white hover:bg-green-600'
                           }`}
                         >
-                          {loading ? 'Processing...' : `Unlock (${theme.price} 🪙)`}
+                          {loading ? 'Processing...' : `Unlock (${theme.price})`}
+                          <Image 
+                            src="/coin.png" 
+                            alt="Coin" 
+                            width={20} 
+                            height={20} 
+                            />
                         </button>
                       )}
                     </div>

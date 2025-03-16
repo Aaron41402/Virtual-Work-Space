@@ -219,7 +219,14 @@ export default function CapybaraSkins() {
         <p className="font-medium font-pixel">Your Coins:</p>
         <p className="font-bold text-yellow-500 flex items-center">
           <span className="text-xl">{userCoins}</span>
-          <span className="ml-1 text-lg">🪙</span>
+          <span className="ml-1 text-lg">
+            <Image 
+              src="/coin.png" 
+              alt="Coin" 
+              width={20} 
+              height={20} 
+            />
+          </span>
         </p>
       </div>
       
@@ -286,7 +293,7 @@ export default function CapybaraSkins() {
             <div 
               key={skin.id}
               className={`
-                relative rounded-lg overflow-hidden border-2 transition-all
+                relative rounded-lg overflow-hidden border-2 transition-all flex flex-col
                 ${borderClass}
               `}
             >
@@ -308,7 +315,14 @@ export default function CapybaraSkins() {
                   <div className="absolute inset-0 flex items-center justify-center bg-black/30">
                     <div className="flex items-center bg-black/70 px-2 py-1 rounded text-white text-xs">
                       <span className="mr-1">{skin.price}</span>
-                      <span>🪙</span>
+                      <span>
+                        <Image 
+                          src="/coin.png" 
+                          alt="Coin" 
+                          width={20} 
+                          height={20} 
+                        />
+                      </span>
                     </div>
                   </div>
                 )}
@@ -326,11 +340,11 @@ export default function CapybaraSkins() {
                 )}
               </div>
               
-              <div className="p-2 bg-white">
+              <div className="p-2 bg-white flex-1 flex flex-col">
                 <h3 className="text-xs font-semibold">{skin.name}</h3>
                 <p className="text-xs text-gray-500 truncate">{skin.description}</p>
                 
-                <div className="mt-2">
+                <div className="mt-auto pt-2">
                   {isUnlocked ? (
                     <button
                       onClick={() => previewSkinSelect(skin.id)}
@@ -346,13 +360,19 @@ export default function CapybaraSkins() {
                     <button
                       onClick={() => unlockSkin(skin.id)}
                       disabled={loading || userCoins < skin.price}
-                      className={`w-full text-xs px-2 py-1 rounded ${
+                      className={`flex items-center justify-center gap-2 w-full text-xs px-2 py-1 rounded ${
                         loading || userCoins < skin.price
                           ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
                           : 'bg-green-500 text-white hover:bg-green-600'
                       }`}
                     >
-                      {loading ? 'Processing...' : `Unlock (${skin.price} 🪙)`}
+                      {loading ? 'Processing...' : `Unlock (${skin.price})`}
+                      <Image 
+                          src="/coin.png" 
+                          alt="Coin" 
+                          width={20} 
+                          height={20} 
+                      />
                     </button>
                   )}
                 </div>
