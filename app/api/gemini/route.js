@@ -92,7 +92,7 @@ function createContextPrompt(userPrompt) {
 
 // Create analysis prompt for efficiency analysis
 function createAnalysisPrompt(data) {
-  const { tasks } = data;
+  const { tasks, schedule } = data;
   
   // Get yesterday's date in local timezone
   const yesterday = new Date();
@@ -120,33 +120,50 @@ function createAnalysisPrompt(data) {
   const completedTasks = yesterdayTasks.filter(task => task.status === "Completed");
   const inProgressTasks = yesterdayTasks.filter(task => task.status === "In Progress");
 
-  return `
-    Analyze this user's productivity and efficiency for yesterday:
+  // Sort today's schedule by time
+  const todaySchedule = schedule ? schedule.sort((a, b) => {
+    const timeA = a.time.split(':').map(Number);
+    const timeB = b.time.split(':').map(Number);
+    return (timeA[0] * 60 + timeA[1]) - (timeB[0] * 60 + timeB[1]);
+  }) : [];
 
-    Completed tasks from yesterday:
+  return `
+    Analyze this user's productivity and efficiency for yesterday, and provide guidance for today's schedule:
+
+    Yesterday's Performance:
+    Completed tasks:
     ${completedTasks.map(task => 
       `- ${task.title} (Priority: ${task.priority}, Completed at: ${new Date(task.updatedAt).toLocaleTimeString()})`
     ).join('\n')}
     
-    Tasks in progress from yesterday:
+    Tasks in progress:
     ${inProgressTasks.map(task => 
       `- ${task.title} (Priority: ${task.priority}, Last updated: ${new Date(task.updatedAt).toLocaleTimeString()})`
     ).join('\n')}
     
+    Today's Schedule:
+    ${todaySchedule.map(event => 
+      `- ${event.time} - ${event.activity}`
+    ).join('\n')}
+    
     Summary:
-    - Total tasks completed: ${completedTasks.length}
+    - Tasks completed yesterday: ${completedTasks.length}
     - Tasks in progress: ${inProgressTasks.length}
+    - Activities scheduled for today: ${todaySchedule.length}
 
     Provide:
-    1. An efficiency score (0-100)
-    2. What they did well yesterday (consider both completed and in-progress tasks)
+    1. An efficiency score for yesterday (0-100)
+    2. What they did well yesterday
     3. Areas for improvement
-    4. 2-3 specific suggestions for today
+    4. 2-3 specific suggestions for today's schedule, considering:
+       - The timing and nature of scheduled activities
+       - Potential breaks between activities
+       - Best times to tackle incomplete tasks
     
     Format your response in RPG terms, like they're on a quest to improve productivity.
     Keep it encouraging and positive.
     
     Note: If no tasks were worked on yesterday, focus on motivation and getting started.
-    Consider task priorities when evaluating efficiency.
+    Consider task priorities and how to best integrate them with today's schedule.
   `;
 }

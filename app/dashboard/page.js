@@ -42,10 +42,12 @@ export default function Dashboard() {
     const yesterdayStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
     
     const tasksData = localStorage.getItem('tasks');
+    const scheduleData = localStorage.getItem('scheduleData');
 
     if (!analysisData || JSON.parse(analysisData).date !== yesterdayStr) {
       try {
         const tasks = tasksData ? JSON.parse(tasksData) : [];
+        const schedule = scheduleData ? JSON.parse(scheduleData) : [];
 
         const response = await fetch('/api/gemini', {
           method: 'POST',
@@ -54,7 +56,7 @@ export default function Dashboard() {
           },
           body: JSON.stringify({ 
             type: 'analysis',
-            data: { tasks }
+            data: { tasks, schedule }
           })
         });
 

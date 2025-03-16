@@ -225,8 +225,8 @@ export default function AIAssistant() {
       const schedule = scheduleData ? JSON.parse(scheduleData) : [];
       
       // Get completed tasks
-      const completedTasks = localStorage.getItem('completedTasks');
-      const tasks = completedTasks ? JSON.parse(completedTasks) : [];
+      const tasksData = localStorage.getItem('tasks');
+      const tasks = tasksData ? JSON.parse(tasksData) : [];
       
       // Call the API route
       const response = await fetch('/api/gemini', {
@@ -285,17 +285,19 @@ export default function AIAssistant() {
     setIsTyping(true);
     
     try {
-      // Get task data
-      let tasks = localStorage.getItem('tasks');
+      // Get task and schedule data
+      let tasksData = localStorage.getItem('tasks');
+      let scheduleData = localStorage.getItem('scheduleData');
       
-      if (!tasks) {
+      if (!tasksData) {
         addBotMessage("I don't have enough data to analyze your efficiency yet. Complete some quests and check back later!");
         setIsAnalyzing(false);
         setIsTyping(false);
         return;
       }
       
-      tasks = JSON.parse(tasks);
+      const tasks = tasksData? JSON.parse(tasksData) : [];
+      const schedule = scheduleData ? JSON.parse(scheduleData) : [];
       
       // Call the API route
       const response = await fetch('/api/gemini', {
@@ -304,8 +306,8 @@ export default function AIAssistant() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ 
-          prompt: { tasks },
-          type: 'analysis'
+          type: 'analysis',
+          data: { tasks, schedule }
         }),
       });
       
@@ -316,7 +318,7 @@ export default function AIAssistant() {
       const data = await response.json();
       
       setUserEfficiency(data.efficiencyScore);
-      addBotMessage(data.response);
+      addBotMessage(data.response.replaceAll("*", ""));
     } catch (error) {
       console.error('Error analyzing efficiency:', error);
       addBotMessage("I encountered a magical barrier while trying to analyze your efficiency. Please try again later!");
@@ -353,7 +355,7 @@ export default function AIAssistant() {
     // Process message after a short delay
     setTimeout(() => {
       // Check for specific commands
-      if (userMsg.includes('analyze my efficiency') || userMsg.includes('how productive am i')) {
+      if (userMsg.includes('efficiency') || userMsg.includes('productive') || userMsg.includes('productivity')) {
         analyzeUserEfficiency();
       }
       // For all other messages, use Gemini
