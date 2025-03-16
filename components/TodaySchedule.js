@@ -23,6 +23,10 @@ function TodaySchedule() {
   const [isTimeRange, setIsTimeRange] = useState(false);
   const timelineRef = useRef(null);
   const modalRef = useRef(null);
+  const [validationErrors, setValidationErrors] = useState({
+    time: false,
+    activity: false
+  });
 
   useEffect(() => {
     // Update current time every minute
@@ -37,7 +41,7 @@ function TodaySchedule() {
     // Close modal when clicking outside
     function handleClickOutside(event) {
       if (modalRef.current && !modalRef.current.contains(event.target)) {
-        setShowAddModal(false);
+        handleCloseModal();
       }
     }
 
@@ -370,13 +374,29 @@ function TodaySchedule() {
 
   // Add a new item
   const addNewItem = () => {
-    if (!newItemActivity.trim() || !newItemTime) return;
+    setValidationErrors({
+      time: false,
+      activity: false
+    });
     
-    // Validate end time if using time range
+    let hasError = false;
+    
+    if (!newItemTime) {
+      setValidationErrors(prev => ({ ...prev, time: true }));
+      hasError = true;
+    }
+    
+    if (!newItemActivity.trim()) {
+      setValidationErrors(prev => ({ ...prev, activity: true }));
+      hasError = true;
+    }
+    
     if (isTimeRange && (!newItemEndTime || newItemEndTime <= newItemTime)) {
       alert("End time must be after start time");
       return;
     }
+
+    if (hasError) return;
 
     const newItem = {
       id: `item-${Date.now()}`,
@@ -426,6 +446,19 @@ function TodaySchedule() {
     localStorage.removeItem('scheduleData');
     localStorage.removeItem('scheduleDate');
     window.location.reload();
+  };
+
+  // Add a function to handle modal closing
+  const handleCloseModal = () => {
+    setShowAddModal(false);
+    setValidationErrors({
+        time: false,
+        activity: false
+    });
+    setNewItemActivity('');
+    setNewItemTime('');
+    setNewItemEndTime('');
+    setIsTimeRange(false);
   };
 
   if (loading) {
@@ -658,8 +691,11 @@ function TodaySchedule() {
                     type="time" 
                     value={newItemTime}
                     onChange={(e) => setNewItemTime(e.target.value)}
-                    className="w-full p-2 text-sm border rounded"
+                    className={`w-full p-2 text-sm border rounded ${validationErrors.time ? 'border-red-500' : ''}`}
                   />
+                  {validationErrors.time && (
+                    <p className="text-red-500 text-xs mt-1">Time is required</p>
+                  )}
                 </div>
                 
                 {isTimeRange && (
@@ -696,14 +732,17 @@ function TodaySchedule() {
                   value={newItemActivity}
                   onChange={(e) => setNewItemActivity(e.target.value)}
                   placeholder="Enter activity name"
-                  className="w-full p-2 text-sm border rounded"
+                  className={`w-full p-2 text-sm border rounded ${validationErrors.activity ? 'border-red-500' : ''}`}
                   autoFocus
                 />
+                {validationErrors.activity && (
+                  <p className="text-red-500 text-xs mt-1">Activity name is required</p>
+                )}
               </div>
               
               <div className="flex justify-end space-x-3">
                 <button 
-                  onClick={() => setShowAddModal(false)}
+                  onClick={handleCloseModal}
                   className="px-4 py-2 text-sm bg-gray-200 hover:bg-gray-300 rounded"
                 >
                   Cancel

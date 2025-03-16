@@ -21,6 +21,7 @@ function ToDoList() {
         direction: 'asc'
     });
     const [showFilterPanel, setShowFilterPanel] = useState(false);
+    const [titleError, setTitleError] = useState(false);
 
     // Fetch tasks on component mount
     useEffect(() => {
@@ -72,6 +73,7 @@ function ToDoList() {
             priority: "Medium",
             status: "Pending"
         });
+        setTitleError(false);
     };
 
     const handleInputChange = (e) => {
@@ -151,7 +153,12 @@ function ToDoList() {
     };
 
     const handleSaveTask = async () => {
-        if (!newTask.title.trim()) return;
+        setTitleError(false);
+        
+        if (!newTask.title.trim()) {
+            setTitleError(true);
+            return;
+        }
 
         try {
             const response = await fetch('/api/task', {
@@ -462,9 +469,12 @@ function ToDoList() {
                                     name="title"
                                     value={newTask.title}
                                     onChange={handleInputChange}
-                                    className="w-full p-2 text-sm border rounded"
+                                    className={`w-full p-2 text-sm border rounded ${titleError ? 'border-red-500' : ''}`}
                                     placeholder="Enter title"
                                 />
+                                {titleError && (
+                                    <p className="text-red-500 text-xs mt-1">Title is required</p>
+                                )}
                             </div>
 
                             <div>

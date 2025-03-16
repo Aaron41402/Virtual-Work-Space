@@ -266,7 +266,7 @@ export default function AIAssistant() {
       }
       
       // Add the response to chat
-      addBotMessage(data.response);
+      addBotMessage(data.response.replaceAll("*", ""));
       
       // Optionally show remaining requests
       if (data.remainingRequests !== undefined && data.remainingRequests <= 2) {
@@ -586,7 +586,7 @@ export default function AIAssistant() {
                 <span>SKILLS</span>
               </button>
               <button 
-                onClick={() => addBotMessage("To boost productivity, try the Pomodoro technique: 25 minutes of focused work followed by a 5-minute break.")}
+                onClick={() => addBotMessage("To boost productivity, try the Capydoro: 25 minutes of focused work followed by a 5-minute break.")}
                 className="p-2 rounded-none hover:bg-[#705e78] flex flex-col items-center text-xs pixel-button"
                 title="Productivity Tips"
               >
