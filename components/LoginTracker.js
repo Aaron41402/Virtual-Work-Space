@@ -75,22 +75,23 @@ export default function LoginTracker() {
       console.log('Check-in response:', data); // Debug logging
       
       if (response.ok) {
-        // Ensure we're converting strings to Date objects
-        const updatedDates = data.loginDates.map(date => new Date(date));
+        // Immediately update the checked-in state
+        setCheckedInToday(true);
+        setCheckInMessage(data.message || 'Successfully checked in!');
+        
+        // Add today's date to the loginDates array directly
+        const today = new Date();
+        const updatedDates = [...loginData.loginDates, today];
         
         setLoginData({
           loginDates: updatedDates,
           coins: data.coins
         });
         
-        // Force the checked-in state to true
-        setCheckedInToday(true);
-        setCheckInMessage(data.message || 'Successfully checked in!');
-        
-        // Force re-render of calendar
+        // Force a complete refresh of data after a short delay
         setTimeout(() => {
           fetchLoginData();
-        }, 500);
+        }, 300);
       } else {
         setCheckInMessage(data.error || 'Failed to check in');
       }
@@ -102,11 +103,22 @@ export default function LoginTracker() {
     }
   };
 
+  // Add a function to check if a specific date is checked in
+  const isDateCheckedIn = (date) => {
+    // Convert to UTC date string for comparison
+    const dateString = new Date(date).toISOString().split('T')[0];
+    
+    return loginData.loginDates.some(loginDate => {
+      const loginDateString = new Date(loginDate).toISOString().split('T')[0];
+      return loginDateString === dateString;
+    });
+  };
+
   const togglePopup = () => {
     setShowPopup(!showPopup);
   };
 
-  // Generate calendar for current month
+  // Modify the renderCalendar function to use the isDateCheckedIn helper
   const renderCalendar = () => {
     const today = new Date();
     const currentMonth = today.getMonth();
@@ -125,24 +137,30 @@ export default function LoginTracker() {
     
     // Add days of the month
     for (let day = 1; day <= daysInMonth; day++) {
+      // Create date object for this calendar day
       const date = new Date(currentYear, currentMonth, day);
-      date.setHours(0, 0, 0, 0);
       
-      // Check if user logged in on this day
-      const loggedIn = loginData.loginDates.some(loginDate => {
-        const d = new Date(loginDate);
-        d.setHours(0, 0, 0, 0);
-        return d.getTime() === date.getTime();
-      });
+      // Check if user logged in on this day using our helper
+      const loggedIn = isDateCheckedIn(date);
       
       // Check if this is today
-      const isToday = day === today.getDate();
+      const isToday = day === today.getDate() && 
+                      currentMonth === today.getMonth() && 
+                      currentYear === today.getFullYear();
+      
+      // If this is today, force it to show as checked in if checkedInToday is true
+      const showAsCheckedIn = (isToday && checkedInToday) || loggedIn;
+      
+      // Debug today's check-in status
+      if (isToday) {
+        console.log('Calendar - Today is checked in:', showAsCheckedIn, 'checkedInToday:', checkedInToday);
+      }
       
       days.push(
         <div 
           key={`day-${day}`} 
           className={`h-8 w-8 flex items-center justify-center rounded-full 
-            ${loggedIn ? 'bg-green-500 text-white line-through' : 'bg-gray-100'} 
+            ${showAsCheckedIn ? 'bg-green-500 text-white line-through' : 'bg-gray-100'} 
             ${isToday ? 'ring-2 ring-blue-500' : ''}
           `}
         >
