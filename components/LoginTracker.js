@@ -13,16 +13,32 @@ export default function LoginTracker() {
   const [checkInMessage, setCheckInMessage] = useState('');
   const [showReminder, setShowReminder] = useState(false);
 
-  // Fetch login data when component mounts
+  // Fetch login data when component mounts and check localStorage
   useEffect(() => {
     fetchLoginData();
+    
+    // Check if reminder was dismissed today in localStorage
+    const checkLocalStorage = () => {
+      try {
+        const today = new Date().toISOString().split('T')[0];
+        const reminderDismissed = localStorage.getItem('reminderDismissed');
+        
+        if (reminderDismissed === today) {
+          console.log('Reminder was previously dismissed today');
+          setShowReminder(false);
+        }
+      } catch (error) {
+        console.error('Error checking localStorage:', error);
+      }
+    };
+    
+    checkLocalStorage();
   }, []);
 
   // Check if user already logged in today and manage reminder
   useEffect(() => {
     if (loginData.loginDates.length > 0) {
       const today = new Date();
-      // Use the same UTC midnight approach as the backend
       today.setUTCHours(0, 0, 0, 0);
       const todayString = today.toISOString().split('T')[0];
       
@@ -35,8 +51,26 @@ export default function LoginTracker() {
       
       setCheckedInToday(alreadyCheckedIn);
       
-      // Set reminder state based on check-in status
-      setShowReminder(!alreadyCheckedIn);
+      // If checked in, dismiss reminder and save to localStorage
+      if (alreadyCheckedIn) {
+        setShowReminder(false);
+        try {
+          localStorage.setItem('reminderDismissed', todayString);
+        } catch (error) {
+          console.error('Error setting localStorage:', error);
+        }
+      } else {
+        // Only show reminder if not already dismissed in localStorage
+        try {
+          const reminderDismissed = localStorage.getItem('reminderDismissed');
+          if (reminderDismissed !== todayString) {
+            setShowReminder(true);
+          }
+        } catch (error) {
+          console.error('Error checking localStorage:', error);
+          setShowReminder(true);
+        }
+      }
       
       // Add debug logging
       console.log('Today (UTC):', today.toISOString());
@@ -82,8 +116,16 @@ export default function LoginTracker() {
       if (response.ok) {
         // Immediately update the checked-in state
         setCheckedInToday(true);
-        // Hide the reminder
+        
+        // Hide the reminder and save to localStorage
         setShowReminder(false);
+        try {
+          const today = new Date().toISOString().split('T')[0];
+          localStorage.setItem('reminderDismissed', today);
+        } catch (error) {
+          console.error('Error setting localStorage:', error);
+        }
+        
         setCheckInMessage(data.message || 'Successfully checked in!');
         
         // Add today's date to the loginDates array directly
@@ -123,8 +165,15 @@ export default function LoginTracker() {
 
   const togglePopup = () => {
     setShowPopup(!showPopup);
-    // Hide reminder when calendar is opened
+    
+    // Hide reminder when calendar is opened and save to localStorage
     setShowReminder(false);
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      localStorage.setItem('reminderDismissed', today);
+    } catch (error) {
+      console.error('Error setting localStorage:', error);
+    }
   };
 
   // Modify the renderCalendar function to use the isDateCheckedIn helper
