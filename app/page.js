@@ -39,10 +39,10 @@ export default async function Home() {
         <div className="relative z-10 max-w-5xl mx-auto px-8 py-24 flex flex-col md:flex-row items-center">
           <div className="md:w-1/2 text-center md:text-left mb-12 md:mb-0">
             <h1 className="text-4xl md:text-5xl font-bold text-[#E6C86E] mb-6 pixel-shadow leading-tight">
-              Turn Your Tasks Into <span className="text-[#FF6B97]">Epic Quests</span>
+              Turn Tasks Into <span className="text-[#FF6B97]">Epic Quests</span>
             </h1>
             <p className="text-white text-lg mb-8 pixel-shadow">
-              Level up your productivity with TaskHero's gamified task management system. Complete quests, earn rewards, and conquer your day!
+              Level up productivity with TaskHero's gamified system. Complete quests, earn rewards, conquer your day!
             </p>
             <div className="pixel-button-container flex items-center">
               <Image 
@@ -86,16 +86,14 @@ export default async function Home() {
               <div className="bg-[#2A2136] p-6 border-4 border-[#FF6B97] rounded-lg shadow-pixel">
                 <h3 className="text-2xl font-bold text-[#FF6B97] mb-4">Train Your Capybara!</h3>
                 <p className="text-[#8BABBF] mb-6 text-lg">
-                  Your capybara is getting lazy! Introduce the Capydoro - a cute capybara friend that helps you stay focused with the Pomodoro technique.
+                  Work with your capybara friend using the Pomodoro technique. Stay focused, take breaks, and boost productivity!
                 </p>
                 <ul className="list-disc list-inside text-[#8BABBF] mb-6 space-y-2">
-                  <li>Work alongside your capybara companion</li>
-                  <li>Take breaks together when the timer rings</li>
-                  <li>Boost productivity with a furry friend by your side</li>
+                  <li>Customize with fun skins and outfits</li>
+                  <li>Take timed breaks together</li>
+                  <li>Boost productivity with a furry friend</li>
                 </ul>
-                <div className="flex justify-center">
-                  <ButtonLogin session={session} extraClass="px-6 py-2 bg-[#FF6B97] text-white font-bold rounded-none border-4 border-[#E6C86E] pixel-button hover:bg-[#FF8CAD] transition-transform"/>
-                </div>
+                
               </div>
             </div>
             
@@ -117,12 +115,12 @@ export default async function Home() {
                 {/* Capybara animations */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="border-2 border-[#8BABBF] p-2 bg-[#2A2136] shadow-pixel">
-                    <img src="/Capybara_sleep_left.gif" alt="Sleeping Capybara" className="w-full" />
-                    <p className="text-center text-sm mt-2 text-[#8BABBF]">Taking a break</p>
+                    <img src="/Capybara_walk_left_chicken.gif" alt="Chicken Hat Capybara" className="w-full" />
+                    <p className="text-center text-sm mt-2 text-[#8BABBF]">Chicken Hat</p>
                   </div>
                   <div className="border-2 border-[#8BABBF] p-2 bg-[#2A2136] shadow-pixel">
-                    <img src="/Capybara_walk_left.gif" alt="Walking Capybara" className="w-full" />
-                    <p className="text-center text-sm mt-2 text-[#8BABBF]">Getting to work</p>
+                    <img src="/Capybara_walk_left_pumpkin.gif" alt="Pumpkin Hat Capybara" className="w-full" />
+                    <p className="text-center text-sm mt-2 text-[#8BABBF]">Pumpkin Hat</p>
                   </div>
                 </div>
               </div>
@@ -156,19 +154,15 @@ export default async function Home() {
                 <div className="grid grid-cols-4 gap-2">
                   <div className="border-2 border-[#8BABBF] p-2 bg-[#3A2E56] shadow-pixel">
                     <img src="/woman_nice.png" alt="Emi being nice" className="w-full" />
-                    
                   </div>
                   <div className="border-2 border-[#8BABBF] p-2 bg-[#3A2E56] shadow-pixel">
                     <img src="/woman_happy.png" alt="Emi being happy" className="w-full" />
-                    
                   </div>
                   <div className="border-2 border-[#8BABBF] p-2 bg-[#3A2E56] shadow-pixel">
                     <img src="/woman_impressed.png" alt="Emi being impressed" className="w-full" />
-                   
                   </div>
                   <div className="border-2 border-[#8BABBF] p-2 bg-[#3A2E56] shadow-pixel">
                     <img src="/woman_angry.png" alt="Emi being stern" className="w-full" />
-                   
                   </div>
                 </div>
               </div>
@@ -178,111 +172,34 @@ export default async function Home() {
               <div className="bg-[#3A2E56] p-6 border-4 border-[#8BABBF] rounded-lg shadow-pixel">
                 <h3 className="text-2xl font-bold text-[#FF6B97] mb-4">Your Intelligent Assistant</h3>
                 <p className="text-white mb-6 text-lg">
-                  Emi is your AI-powered productivity assistant who helps you stay on track and maximize your potential every day.
+                  Emi helps you stay on track and maximize your potential every day.
                 </p>
                 <ul className="space-y-4 mb-6">
                   <li className="flex items-start">
                     <span className="text-[#E6C86E] mr-2">✓</span>
-                    <span className="text-[#8BABBF]">Keeps track of your schedule and upcoming tasks</span>
+                    <span className="text-[#8BABBF]">Tracks your schedule and tasks</span>
                   </li>
                   <li className="flex items-start">
                     <span className="text-[#E6C86E] mr-2">✓</span>
-                    <span className="text-[#8BABBF]">Analyzes your daily efficiency and productivity patterns</span>
+                    <span className="text-[#8BABBF]">Analyzes productivity patterns</span>
                   </li>
                   <li className="flex items-start">
                     <span className="text-[#E6C86E] mr-2">✓</span>
-                    <span className="text-[#8BABBF]">Provides timely reminders and personalized tips</span>
+                    <span className="text-[#8BABBF]">Provides timely reminders and tips</span>
                   </li>
                   <li className="flex items-start">
                     <span className="text-[#E6C86E] mr-2">✓</span>
-                    <span className="text-[#8BABBF]">Answers your questions with AI-powered intelligence</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-[#E6C86E] mr-2">✓</span>
-                    <span className="text-[#8BABBF]">Adapts to your work style and offers encouragement</span>
+                    <span className="text-[#8BABBF]">Answers questions with AI intelligence</span>
                   </li>
                 </ul>
-                <div className="flex justify-center">
-                  <ButtonLogin session={session} extraClass="px-6 py-2 bg-[#FF6B97] text-white font-bold rounded-none border-4 border-[#E6C86E] pixel-button hover:bg-[#FF8CAD] transition-transform"/>
-                </div>
+                
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Music Player Section */}
-      <section className="bg-[#3A2E56] text-white py-20 border-t-4 border-b-4 border-[#E6C86E]">
-        <div className="max-w-5xl mx-auto px-8">
-          <h2 className="text-3xl font-bold text-center text-[#E6C86E] mb-8 pixel-shadow">
-            Level Up Your Focus with Music
-          </h2>
-          
-          <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-            <div className="md:w-1/2">
-              <div className="bg-[#2A2136] p-6 border-4 border-[#FF6B97] rounded-lg shadow-pixel">
-                <h3 className="text-2xl font-bold text-[#FF6B97] mb-4">
-                  Built-in Music Player
-                </h3>
-                <p className="text-[#8BABBF] mb-6 text-lg">
-                  Enhance your productivity with our curated collection of pixel-perfect background music. Get in the zone with retro-inspired tunes!
-                </p>
-                <ul className="list-disc list-inside text-[#8BABBF] mb-6 space-y-2">
-                  <li>Handpicked background music</li>
-                  <li>Pixel-art music player interface</li>
-                  <li>Perfect for focus and productivity</li>
-                  <li>Toggle music on/off anytime</li>
-                </ul>
-                <div className="flex justify-center">
-                  <ButtonLogin 
-                    session={session} 
-                    extraClass="px-6 py-2 bg-[#FF6B97] text-white font-bold rounded-none border-4 border-[#E6C86E] pixel-button hover:bg-[#FF8CAD] transition-transform"
-                  />
-                </div>
-              </div>
-            </div>
-            
-            <div className="md:w-1/2 h-1/2">
-              <div className="relative">
-                {/* Video showcase */}
-                <div className=" shadow-pixel mb-6 overflow-hidden">
-                  <video 
-                    width="100%" 
-                    height="auto" 
-                    controls 
-                    className="bg-[#2A2136]"
-                  >
-                    <source src="/music.mp4" type="video/mp4" />
-                    Your browser does not support the video tag.
-                  </video>
-                </div>
-                
-                {/* Music tracks preview */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="border-2 border-[#8BABBF] p-4 bg-[#2A2136] shadow-pixel">
-                    <div className="flex items-center justify-center">
-                      <div className="text-4xl text-[#E6C86E] mr-2">♪</div>
-                      <div className="text-[#8BABBF]">
-                        <div className="font-bold">Retro Beats</div>
-                        <div className="text-sm">Perfect for coding</div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="border-2 border-[#8BABBF] p-4 bg-[#2A2136] shadow-pixel">
-                    <div className="flex items-center justify-center">
-                      <div className="text-4xl text-[#E6C86E] mr-2">♫</div>
-                      <div className="text-[#8BABBF]">
-                        <div className="font-bold">Pixel Tunes</div>
-                        <div className="text-sm">Focus enhancer</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      
 
       {/* Features */}
       <section className="bg-[#2A2136] text-white py-20">
@@ -294,17 +211,17 @@ export default async function Home() {
               {
                 icon: "🏆",
                 title: "Gamified Tasks",
-                description: "Transform boring to-dos into exciting quests with rewards and achievements"
+                description: "Transform to-dos into quests with rewards and achievements"
               },
               {
                 icon: "📊",
                 title: "Progress Tracking",
-                description: "Watch your productivity level up with visual stats and analytics"
+                description: "Watch your productivity level up with visual stats"
               },
               {
                 icon: "🎵",
                 title: "Immersive Experience",
-                description: "Pixel art themes and background music to enhance your productivity journey"
+                description: "Pixel art themes and music to enhance focus"
               }
             ].map((feature, index) => (
               <div key={index} className="bg-[#4A3F6B] p-6 border-4 border-[#8BABBF] pixel-container">
@@ -321,7 +238,7 @@ export default async function Home() {
       <section className="bg-[#4A3F6B] text-white py-16 border-t-4 border-[#E6C86E]">
         <div className="max-w-3xl mx-auto px-8 text-center">
           <h2 className="text-3xl font-bold text-[#E6C86E] mb-6 pixel-shadow">Begin Your Hero's Journey</h2>
-          <p className="text-lg mb-8">Join thousands of productivity heroes conquering their daily quests</p>
+          <p className="text-lg mb-8">Join thousands of heroes conquering their daily quests</p>
           <div className="flex justify-center">
             <ButtonLogin session={session} extraClass="px-8 py-3 bg-[#FF6B97] text-white font-bold rounded-none border-4 border-[#E6C86E] pixel-button hover:bg-[#FF8CAD] transition-transform"/>
           </div>

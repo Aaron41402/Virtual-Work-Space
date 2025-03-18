@@ -133,7 +133,7 @@ export default function Sidebar({ activeSection, setActiveSection }) {
     { id: 'home', label: '🏠 Journey', type: 'section' },
     { id: 'analysis', label: '📈 Analysis', type: 'section' },
     { id: 'todo', label: '📝 Quests', type: 'section' },
-    { id: 'theme', label: '🖼️ Themes', type: 'section' },
+    { id: 'theme', label: '🖼️ Stores', type: 'section' },
   ];
 
   return (
@@ -210,10 +210,10 @@ export default function Sidebar({ activeSection, setActiveSection }) {
               {isPlaying ? (
                 <div className="music-player-animation">
                   <Image 
-                    src="/musicPlayer.gif" 
+                    src="/musicPlayer1.gif" 
                     alt="Music playing" 
-                    width={160} 
-                    height={180} 
+                    width={200} 
+                    height={80} 
                     className="pixel-image"
                   />
                 </div>
@@ -234,7 +234,9 @@ export default function Sidebar({ activeSection, setActiveSection }) {
                 className="w-8 h-8 flex items-center justify-center bg-[#2A2136] text-[#8BABBF] border border-[#8BABBF] rounded-full hover:text-[#E6C86E] hover:border-[#E6C86E]"
                 aria-label="Previous track"
               >
-                ⏮
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-5 h-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 16.811c0 .864-.933 1.406-1.683.977l-7.108-4.061a1.125 1.125 0 0 1 0-1.954l7.108-4.061A1.125 1.125 0 0 1 21 8.689v8.122ZM11.25 16.811c0 .864-.933 1.406-1.683.977l-7.108-4.061a1.125 1.125 0 0 1 0-1.954l7.108-4.061a1.125 1.125 0 0 1 1.683.977v8.122Z" />
+                </svg>
               </button>
               
               <button 
@@ -242,7 +244,15 @@ export default function Sidebar({ activeSection, setActiveSection }) {
                 className="w-10 h-10 flex items-center justify-center bg-[#2A2136] text-[#E6C86E] border-2 border-[#E6C86E] rounded-full hover:bg-[#4A3F6B]"
                 aria-label={isPlaying ? "Pause" : "Play"}
               >
-                {isPlaying ? "⏸" : "▶"}
+                {isPlaying ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5" />
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6 ml-0.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
+                  </svg>
+                )}
               </button>
               
               <button 
@@ -250,7 +260,9 @@ export default function Sidebar({ activeSection, setActiveSection }) {
                 className="w-8 h-8 flex items-center justify-center bg-[#2A2136] text-[#8BABBF] border border-[#8BABBF] rounded-full hover:text-[#E6C86E] hover:border-[#E6C86E]"
                 aria-label="Next track"
               >
-                ⏭
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-5 h-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 8.689c0-.864.933-1.406 1.683-.977l7.108 4.061a1.125 1.125 0 0 1 0 1.954l-7.108 4.061A1.125 1.125 0 0 1 3 16.811V8.69ZM12.75 8.689c0-.864.933-1.406 1.683-.977l7.108 4.061a1.125 1.125 0 0 1 0 1.954l-7.108 4.061a1.125 1.125 0 0 1-1.683-.977V8.69Z" />
+                </svg>
               </button>
             </div>
           </div>
@@ -389,25 +401,25 @@ export default function Sidebar({ activeSection, setActiveSection }) {
             display: flex;
             justify-content: center;
             align-items: center;
-            width: 160px;
-            height: 180px;
-            margin-top: 4px;
-            margin-bottom: 6px;
+            width: 200px;
+            height: 80px;
+            margin-top: 2px;
+            margin-bottom: 4px;
           }
           
           .music-player-static {
             display: flex;
             justify-content: center;
             align-items: center;
-            width: 160px;
-            height: 180px;
+            width: 180px;
+            height: 80px;
             margin-top: 2px;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
           }
           
           .pixel-music-icon {
-            width: 160px;
-            height: 180px;
+            width: 180px;
+            height: 80px;
             background-color: #2A2136;
             border: 2px solid #8BABBF;
             display: flex;

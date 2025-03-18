@@ -27,6 +27,7 @@ function TodaySchedule() {
     time: false,
     activity: false
   });
+  const [notification, setNotification] = useState({ show: false, message: '' });
 
   useEffect(() => {
     // Update current time every minute
@@ -340,16 +341,23 @@ function TodaySchedule() {
   };
 
   // Save edited item
-  const saveEdit = (itemId) => {
+  const saveEdit = async (itemId) => {
     if (!newActivity.trim()) return;
 
+    // Find the original item before updating
+    const originalItem = schedule.find(item => item.id === itemId);
+    
+    // Create the updated item
+    const updatedItem = {
+      ...originalItem,
+      activity: newActivity.trim(),
+      time: newTime
+    };
+    
+    // Update the schedule
     const updatedSchedule = schedule.map(item => {
       if (item.id === itemId) {
-        return {
-          ...item,
-          activity: newActivity.trim(),
-          time: newTime
-        };
+        return updatedItem;
       }
       return item;
     });
@@ -361,15 +369,103 @@ function TodaySchedule() {
     
     // Update localStorage
     localStorage.setItem('scheduleData', JSON.stringify(updatedSchedule));
+    
+    // If the item is a priority or habit, update the corresponding To-Do list item
+    if (originalItem && (originalItem.type === 'priority' || originalItem.type === 'habit')) {
+      await updateToDoListItem(originalItem, updatedItem);
+    }
+  };
+
+  // Function to update an item in the To-Do list
+  const updateToDoListItem = async (originalItem, updatedItem) => {
+    try {
+      // Get existing tasks from localStorage
+      const cachedTasks = localStorage.getItem('tasks');
+      if (!cachedTasks) return;
+      
+      let tasks = JSON.parse(cachedTasks);
+      
+      // Find tasks that match the original schedule item
+      const matchingTasks = tasks.filter(task => 
+        task.title === originalItem.activity && 
+        task.description.includes(`Added from schedule (${originalItem.time}`)
+      );
+      
+      if (matchingTasks.length === 0) return;
+      
+      // Update matching tasks
+      const updatedTasks = tasks.map(task => {
+        if (task.title === originalItem.activity && 
+            task.description.includes(`Added from schedule (${originalItem.time}`)) {
+          return {
+            ...task,
+            title: updatedItem.activity,
+            description: `Added from schedule (${updatedItem.time}${updatedItem.endTime ? ` - ${updatedItem.endTime}` : ''})`,
+            // Keep the same priority level
+          };
+        }
+        return task;
+      });
+      
+      // Update localStorage
+      localStorage.setItem('tasks', JSON.stringify(updatedTasks));
+      
+      // Try to update in API if available
+      for (const originalTask of matchingTasks) {
+        try {
+          if (originalTask._id && !originalTask._id.startsWith('task-')) { // Only update if it has a real server ID
+            const updatedTask = updatedTasks.find(t => t._id === originalTask._id);
+            
+            await fetch('/api/task', {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                id: originalTask._id,
+                title: updatedTask.title,
+                description: updatedTask.description,
+                // Keep other properties the same
+                priority: originalTask.priority,
+                status: originalTask.status
+              }),
+            });
+          }
+        } catch (error) {
+          console.error('Error updating task in API:', error);
+          // Continue with local storage version even if API fails
+        }
+      }
+      
+      // Show notification
+      setNotification({
+        show: true,
+        message: `"${updatedItem.activity}" also updated in your To-Do list`
+      });
+      
+      // Hide notification after 5 seconds
+      setTimeout(() => {
+        setNotification({ show: false, message: '' });
+      }, 5000);
+      
+    } catch (error) {
+      console.error('Error updating To-Do list item:', error);
+    }
   };
 
   // Delete an item
-  const deleteItem = (itemId) => {
+  const deleteItem = async (itemId) => {
     const updatedSchedule = schedule.filter(item => item.id !== itemId);
     setSchedule(updatedSchedule);
     
     // Update localStorage
     localStorage.setItem('scheduleData', JSON.stringify(updatedSchedule));
+    
+    // If the deleted item was a priority or habit, also remove from To-Do list
+    const itemToDelete = schedule.find(item => item.id === itemId);
+    if (itemToDelete && (itemToDelete.type === 'priority' || itemToDelete.type === 'habit')) {
+      await removeFromToDoList(itemToDelete);
+    }
   };
 
   // Add a new item
@@ -426,6 +522,79 @@ function TodaySchedule() {
     
     // Update localStorage
     localStorage.setItem('scheduleData', JSON.stringify(updatedSchedule));
+    
+    // If the item is a priority or habit, add it to the to-do list
+    if (newItemType === 'priority' || newItemType === 'habit') {
+      addToToDoList(newItem);
+    }
+  };
+
+  // Function to add item to To-Do list
+  const addToToDoList = async (item) => {
+    try {
+      // Get existing tasks from localStorage
+      const cachedTasks = localStorage.getItem('tasks');
+      let tasks = cachedTasks ? JSON.parse(cachedTasks) : [];
+      
+      // Create new task object
+      const newTask = {
+        _id: `task-${Date.now()}`, // Generate a temporary ID
+        title: item.activity,
+        description: `Added from schedule (${item.time}${item.endTime ? ` - ${item.endTime}` : ''})`,
+        priority: item.type === 'priority' ? 'High' : 'Medium',
+        status: 'Pending',
+        createdAt: new Date().toISOString()
+      };
+      
+      // Add to tasks array
+      tasks.push(newTask);
+      
+      // Update localStorage
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+      
+      // Try to save to API if available
+      try {
+        const response = await fetch('/api/task', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            title: newTask.title,
+            description: newTask.description,
+            priority: newTask.priority,
+            status: newTask.status
+          }),
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          
+          // Update the task in localStorage with the real ID from the server
+          const updatedTasks = tasks.map(t => 
+            t._id === newTask._id ? { ...data.task } : t
+          );
+          localStorage.setItem('tasks', JSON.stringify(updatedTasks));
+        }
+      } catch (error) {
+        console.error('Error saving task to API:', error);
+        // Continue with local storage version even if API fails
+      }
+      
+      // Show notification
+      setNotification({
+        show: true,
+        message: `"${item.activity}" also added to your To-Do list`
+      });
+      
+      // Hide notification after 5 seconds
+      setTimeout(() => {
+        setNotification({ show: false, message: '' });
+      }, 5000);
+      
+    } catch (error) {
+      console.error('Error adding to To-Do list:', error);
+    }
   };
 
   // Open add modal with hour pre-filled
@@ -459,6 +628,83 @@ function TodaySchedule() {
     setNewItemTime('');
     setNewItemEndTime('');
     setIsTimeRange(false);
+  };
+
+  // Add this function to handle item deletion
+  const handleDeleteItem = async (itemId) => {
+    // Find the item to be deleted
+    const itemToDelete = schedule.find(item => item.id === itemId);
+    
+    if (!itemToDelete) return;
+    
+    // Remove from schedule
+    const updatedSchedule = schedule.filter(item => item.id !== itemId);
+    setSchedule(updatedSchedule);
+    
+    // Update localStorage
+    localStorage.setItem('scheduleData', JSON.stringify(updatedSchedule));
+    
+    // If the deleted item was a priority or habit, also remove from To-Do list
+    if (itemToDelete.type === 'priority' || itemToDelete.type === 'habit') {
+      await removeFromToDoList(itemToDelete);
+    }
+  };
+
+  // Function to remove item from To-Do list
+  const removeFromToDoList = async (scheduleItem) => {
+    try {
+      // Get existing tasks from localStorage
+      const cachedTasks = localStorage.getItem('tasks');
+      if (!cachedTasks) return;
+      
+      let tasks = JSON.parse(cachedTasks);
+      
+      // Find tasks that match this schedule item
+      // We'll match by title and description containing the time
+      const matchingTasks = tasks.filter(task => 
+        task.title === scheduleItem.activity && 
+        task.description.includes(`Added from schedule (${scheduleItem.time}`)
+      );
+      
+      if (matchingTasks.length === 0) return;
+      
+      // Remove matching tasks
+      const updatedTasks = tasks.filter(task => 
+        !(task.title === scheduleItem.activity && 
+          task.description.includes(`Added from schedule (${scheduleItem.time}`))
+      );
+      
+      // Update localStorage
+      localStorage.setItem('tasks', JSON.stringify(updatedTasks));
+      
+      // Try to delete from API if available
+      for (const task of matchingTasks) {
+        try {
+          if (task._id && !task._id.startsWith('task-')) { // Only delete if it has a real server ID
+            await fetch(`/api/task?id=${task._id}`, {
+              method: 'DELETE',
+            });
+          }
+        } catch (error) {
+          console.error('Error deleting task from API:', error);
+          // Continue with local storage version even if API fails
+        }
+      }
+      
+      // Show notification
+      setNotification({
+        show: true,
+        message: `"${scheduleItem.activity}" also removed from your To-Do list`
+      });
+      
+      // Hide notification after 5 seconds
+      setTimeout(() => {
+        setNotification({ show: false, message: '' });
+      }, 5000);
+      
+    } catch (error) {
+      console.error('Error removing from To-Do list:', error);
+    }
   };
 
   if (loading) {
@@ -544,10 +790,7 @@ function TodaySchedule() {
               <div className="w-3 h-3 bg-purple-100 border border-purple-500 rounded mr-1"></div>
               <span>Habit</span>
             </div>
-            <div className="flex items-center text-xs">
-              <div className="w-3 h-3 bg-gray-100 border border-slate-500 rounded mr-1"></div>
-              <span>Free Time</span>
-            </div>
+            
             <div className="flex items-center text-xs">
               <div className="w-3 h-3 bg-green-100 border border-green-500 rounded mr-1"></div>
               <span>Current</span>
@@ -614,7 +857,7 @@ function TodaySchedule() {
                                   <Edit2 size={14} />
                                 </button>
                                 <button 
-                                  onClick={() => deleteItem(activity.id)}
+                                  onClick={() => handleDeleteItem(activity.id)}
                                   className="text-gray-500 hover:text-red-500"
                                 >
                                   <Trash2 size={14} />
@@ -758,20 +1001,58 @@ function TodaySchedule() {
           </div>
         )}
       </div>
+
+      {/* Notification */}
+      {notification.show && (
+        <div className="absolute left-0 right-0 mx-auto w-3/4 max-w-2xl bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded shadow-md z-50 animate-fade-in-up">
+          <div className="flex items-start">
+            <div className="mr-2 flex-shrink-0 h-5 w-5">⚠️</div>
+            <div>
+              <p>{notification.message}</p>
+              <p className="text-sm mt-1">Check your To-Do list to manage it.</p>
+            </div>
+            <button 
+              onClick={() => setNotification({ show: false, message: '' })}
+              className="ml-4 text-green-700 hover:text-green-900"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
 export default TodaySchedule;
 
-<style jsx>{`
-  .font-pixel {
-    font-family: 'Press Start 2P', monospace;
-    letter-spacing: 0.5px;
-  }
-  
-  .pixel-shadow {
-    text-shadow: 2px 2px 0 #000;
-  }
-`}</style>
+<>
+  <style jsx>{`
+    .font-pixel {
+      font-family: 'Press Start 2P', monospace;
+      letter-spacing: 0.5px;
+    }
+    
+    .pixel-shadow {
+      text-shadow: 2px 2px 0 #000;
+    }
+  `}</style>
+
+  <style jsx global>{`
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .animate-fade-in-up {
+      animation: fadeInUp 0.3s ease-out forwards;
+    }
+  `}</style>
+</>
 

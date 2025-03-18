@@ -86,7 +86,7 @@ function createContextPrompt(userPrompt) {
     If the user is asking about their efficiency or productivity, provide general advice.
     If they're asking for suggestions to improve, provide specific, actionable advice.
     For general questions, provide helpful, informative responses.
-    Keep your response concise (under 100 words) and maintain the RPG theme.
+    Keep your response concise (under 50 words) and maintain the RPG theme.
   `;
 }
 
