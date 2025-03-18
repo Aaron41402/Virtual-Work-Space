@@ -11,13 +11,14 @@ export default function LoginTracker() {
   const [loading, setLoading] = useState(false);
   const [checkedInToday, setCheckedInToday] = useState(false);
   const [checkInMessage, setCheckInMessage] = useState('');
+  const [showReminder, setShowReminder] = useState(false);
 
   // Fetch login data when component mounts
   useEffect(() => {
     fetchLoginData();
   }, []);
 
-  // Check if user already logged in today
+  // Check if user already logged in today and manage reminder
   useEffect(() => {
     if (loginData.loginDates.length > 0) {
       const today = new Date();
@@ -34,10 +35,14 @@ export default function LoginTracker() {
       
       setCheckedInToday(alreadyCheckedIn);
       
+      // Set reminder state based on check-in status
+      setShowReminder(!alreadyCheckedIn);
+      
       // Add debug logging
       console.log('Today (UTC):', today.toISOString());
       console.log('Login dates:', loginData.loginDates.map(d => new Date(d).toISOString()));
       console.log('Already checked in:', alreadyCheckedIn);
+      console.log('Show reminder:', !alreadyCheckedIn);
     }
   }, [loginData.loginDates]);
 
@@ -77,6 +82,8 @@ export default function LoginTracker() {
       if (response.ok) {
         // Immediately update the checked-in state
         setCheckedInToday(true);
+        // Hide the reminder
+        setShowReminder(false);
         setCheckInMessage(data.message || 'Successfully checked in!');
         
         // Add today's date to the loginDates array directly
@@ -116,6 +123,8 @@ export default function LoginTracker() {
 
   const togglePopup = () => {
     setShowPopup(!showPopup);
+    // Hide reminder when calendar is opened
+    setShowReminder(false);
   };
 
   // Modify the renderCalendar function to use the isDateCheckedIn helper
@@ -186,6 +195,9 @@ export default function LoginTracker() {
           width={32} 
           height={32} 
         />
+        {showReminder && (
+          <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></div>
+        )}
       </button>
 
       {/* Popup Panel */}
