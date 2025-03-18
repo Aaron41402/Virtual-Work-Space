@@ -1,4 +1,5 @@
 import ButtonLogin from "@/components/ButtonLogin";
+import ParallaxHero from "@/components/ParallaxHero";
 import { auth } from "@/auth";
 import Image from "next/image";
 import "./pixel-styles.css";
@@ -33,43 +34,37 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Hero */}
-      <section className="bg-[url('/background.png')] bg-cover bg-center min-h-screen relative">
-        <div className="absolute inset-0 bg-[#2A2136]/70"></div>
-        <div className="relative z-10 max-w-5xl mx-auto px-8 py-24 flex flex-col md:flex-row items-center">
-          <div className="md:w-1/2 text-center md:text-left mb-12 md:mb-0">
-            <h1 className="text-4xl md:text-5xl font-bold text-[#E6C86E] mb-6 pixel-shadow leading-tight">
-              Turn Tasks Into <span className="text-[#FF6B97]">Epic Quests</span>
-            </h1>
-            <p className="text-white text-lg mb-8 pixel-shadow">
-              Level up productivity with TaskHero's gamified system. Complete quests, earn rewards, conquer your day!
-            </p>
-            <div className="pixel-button-container flex items-center">
-              <Image 
-                src="/favicon.ico" 
-                alt="TaskHero Logo" 
-                width={32} 
-                height={32} 
-                className="mr-2"
-              />
-              <ButtonLogin session={session} extraClass="px-8 py-3 bg-[#FF6B97] text-white font-bold rounded-none border-4 border-[#E6C86E] pixel-button hover:bg-[#FF8CAD] transition-transform"/>
-            </div>
-          </div>
-          <div className="md:w-1/2 flex justify-center">
-            <div className="relative">
-              <div className="pixel-frame border-4 border-[#E6C86E] shadow-pixel overflow-hidden">
-                <img
-                  src="/landing1.png"
-                  alt="TaskHero Dashboard"
-
-                />
+      {/* Hero - replaced with ParallaxHero component */}
+      <ParallaxHero session={session} />
+      
+      {/* About Section with Video Showcase */}
+      <section className="bg-[#2A2136] text-white py-16 border-t-4 border-b-4 border-[#E6C86E]">
+        <div className="max-w-5xl mx-auto px-8">
+          <h2 className="text-3xl font-bold text-center text-[#E6C86E] mb-8 pixel-shadow">How TaskHero Works</h2>
+          
+          <div className="flex flex-col md:flex-row items-center gap-12">
+            {/* Video showcase */}
+            <div className="md:w-3/5">
+              <div className="border-4 border-[#FF6B97] shadow-pixel overflow-hidden bg-[#3A2E56] rounded-lg">
+                <video 
+                  width="100%" 
+                  height="auto" 
+                  controls 
+                  className="w-full"
+                  poster="/video-poster.png"
+                >
+                  <source src="/taskhero-demo.mp4" type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
               </div>
-              <div className="absolute -bottom-12 -right-12 pixel-frame border-4 border-[#FF6B97] shadow-pixel overflow-hidden">
-                <img
-                  src="/landing2.png"
-                  alt="TaskHero Features"
-
-                />
+            </div>
+            
+            {/* Simple explanation */}
+            <div className="md:w-2/5">
+              <div className="bg-[#3A2E56] p-6 border-4 border-[#8BABBF] rounded-lg shadow-pixel">
+                <p className="text-white text-lg leading-relaxed">
+                  TaskHero turns productivity into a game. Complete tasks to earn XP, level up with AI assistance, and stay focused with your capybara companion. Make work fun in our pixel art world!
+                </p>
               </div>
             </div>
           </div>
