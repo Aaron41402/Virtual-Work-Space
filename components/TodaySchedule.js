@@ -510,24 +510,16 @@ function TodaySchedule() {
       {/* Main Content */}
       <div className="flex-1 p-8 mt-24 relative z-10">
         <div className="bg-white/70 backdrop-blur-sm w-3/4 max-w-2xl mx-auto mt-8 rounded-lg shadow-lg p-4">
-          <div className="flex justify-between items-center mb-3">
+          <div className="flex flex-row justify-between">
             <h2 className="text-2xl text-[#E6C86E] font-bold mb-4" style={{
               fontFamily: "'Press Start 2P', monospace",
               letterSpacing: "0.5px",
               textShadow: "2px 2px 0 #000"
-            }}>TODAY'S ADVENTURE</h2>
-            <button 
-              onClick={() => setShowAddModal(true)}
-              className="bg-blue-500 hover:bg-blue-600 text-white rounded-full p-1"
-            >
-              <Plus size={20} />
-            </button>
-          </div>
-
-          {/* Current time indicator */}
-          <div className="flex items-center mb-3 text-sm text-gray-700">
-            <Clock size={16} className="mr-1" />
-            <span>Current time: {currentTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+            }}>Today's Adventure</h2>
+            <div className="flex items-center mb-3 text-sm text-gray-700">
+              <Clock size={16} className="mr-1" />
+              <span>{currentTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+            </div>
           </div>
 
           {/* Legend */}
@@ -555,87 +547,97 @@ function TodaySchedule() {
           </div>
 
           {timelineHours.length > 0 ? (
-            <div 
-              ref={timelineRef}
-              className="space-y-2 max-h-[350px] overflow-y-auto pr-2 relative"
-            >
-              {timelineHours.map((hour, index) => {
-                const activity = getActivityForHour(hour);
-                const isPast = isHourPast(hour);
-                const isCurrentHour = currentTime.getHours() === parseInt(hour);
-                
-                return (
-                  <div 
-                    key={index} 
-                    className={`flex items-start ${isCurrentHour ? 'bg-green-300/80 -mx-2 px-2 py-1 rounded' : ''}`}
-                    data-hour={hour.split(':')[0]}
-                  >
-                    <div className="w-16 text-sm text-gray-600">{hour}</div>
-                    {activity ? (
-                      <div className={`flex-1 ${getBackgroundColor(activity.type)} p-2 rounded text-sm ${isPast ? 'line-through opacity-60' : ''}`}>
-                        {editingItem === activity.id ? (
-                          <div className="flex flex-col space-y-2">
-                            <input 
-                              type="time" 
-                              value={newTime}
-                              onChange={(e) => setNewTime(e.target.value)}
-                              className="w-full p-1 text-xs border rounded"
-                            />
-                            <input 
-                              type="text" 
-                              value={newActivity}
-                              onChange={(e) => setNewActivity(e.target.value)}
-                              className="w-full p-1 text-xs border rounded"
-                            />
-                            <div className="flex justify-end space-x-1">
-                              <button 
-                                onClick={() => saveEdit(activity.id)}
-                                className="p-1 bg-green-500 text-white rounded"
-                              >
-                                <Check size={14} />
-                              </button>
-                              <button 
-                                onClick={cancelEdit}
-                                className="p-1 bg-gray-500 text-white rounded"
-                              >
-                                <X size={14} />
-                              </button>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="flex justify-between items-center">
-                            <span>{activity.activity}</span>
-                            {!isPast && (
-                              <div className="flex space-x-1">
+            <>
+              <div 
+                ref={timelineRef}
+                className="space-y-2 max-h-[350px] overflow-y-auto pr-2 relative mb-4"
+              >
+                {timelineHours.map((hour, index) => {
+                  const activity = getActivityForHour(hour);
+                  const isPast = isHourPast(hour);
+                  const isCurrentHour = currentTime.getHours() === parseInt(hour);
+                  
+                  return (
+                    <div 
+                      key={index} 
+                      className={`flex items-start ${isCurrentHour ? 'bg-green-300/80 -mx-2 px-2 py-1 rounded' : ''}`}
+                      data-hour={hour.split(':')[0]}
+                    >
+                      <div className="w-16 text-sm text-gray-600">{hour}</div>
+                      {activity ? (
+                        <div className={`flex-1 ${getBackgroundColor(activity.type)} p-2 rounded text-sm ${isPast ? 'line-through opacity-60' : ''}`}>
+                          {editingItem === activity.id ? (
+                            <div className="flex flex-col space-y-2">
+                              <input 
+                                type="time" 
+                                value={newTime}
+                                onChange={(e) => setNewTime(e.target.value)}
+                                className="w-full p-1 text-xs border rounded"
+                              />
+                              <input 
+                                type="text" 
+                                value={newActivity}
+                                onChange={(e) => setNewActivity(e.target.value)}
+                                className="w-full p-1 text-xs border rounded"
+                              />
+                              <div className="flex justify-end space-x-1">
                                 <button 
-                                  onClick={() => startEditing(activity)}
-                                  className="text-gray-500 hover:text-blue-500"
+                                  onClick={() => saveEdit(activity.id)}
+                                  className="p-1 bg-green-500 text-white rounded"
                                 >
-                                  <Edit2 size={14} />
+                                  <Check size={14} />
                                 </button>
                                 <button 
-                                  onClick={() => deleteItem(activity.id)}
-                                  className="text-gray-500 hover:text-red-500"
+                                  onClick={cancelEdit}
+                                  className="p-1 bg-gray-500 text-white rounded"
                                 >
-                                  <Trash2 size={14} />
+                                  <X size={14} />
                                 </button>
                               </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <div 
-                        className={`flex-1 bg-gray-50/50 p-2 rounded text-gray-400 text-sm ${isPast ? 'line-through opacity-60' : ''} hover:bg-gray-100/50 cursor-pointer`}
-                        onClick={() => !isPast && openAddModalWithHour(hour)}
-                      >
-                        Free time
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
+                            </div>
+                          ) : (
+                            <div className="flex justify-between items-center">
+                              <span>{activity.activity}</span>
+                              {!isPast && (
+                                <div className="flex space-x-1">
+                                  <button 
+                                    onClick={() => startEditing(activity)}
+                                    className="text-gray-500 hover:text-blue-500"
+                                  >
+                                    <Edit2 size={14} />
+                                  </button>
+                                  <button 
+                                    onClick={() => deleteItem(activity.id)}
+                                    className="text-gray-500 hover:text-red-500"
+                                  >
+                                    <Trash2 size={14} />
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div 
+                          className={`flex-1 bg-gray-50/50 p-2 rounded text-gray-400 text-sm ${isPast ? 'line-through opacity-60' : ''} hover:bg-gray-100/50 cursor-pointer`}
+                          onClick={() => !isPast && openAddModalWithHour(hour)}
+                        >
+                          Free time
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="flex justify-end pr-2">
+                <button
+                  onClick={() => setShowAddModal(true)}
+                  className="px-4 py-2 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded"
+                >
+                  Add adventure
+                </button>
+              </div>
+            </>
           ) : (
             <div className="py-8 text-center">
               <p className="text-gray-500 mb-4">No schedule items yet</p>

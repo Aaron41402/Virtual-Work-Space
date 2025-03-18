@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Edit2, Check, X, Trash2, Filter } from 'lucide-react';
+import { Edit2, Check, X, Trash2, Filter, Circle, Clock, CheckCircle2 } from 'lucide-react';
 
 function ToDoList() {
     const [tasks, setTasks] = useState([]);
@@ -22,6 +22,7 @@ function ToDoList() {
     });
     const [showFilterPanel, setShowFilterPanel] = useState(false);
     const [titleError, setTitleError] = useState(false);
+    const [activeStatusDropdown, setActiveStatusDropdown] = useState(null);
 
     // Fetch tasks on component mount
     useEffect(() => {
@@ -37,6 +38,14 @@ function ToDoList() {
 
     // ------------------------- Handlers -------------------------
     const handleStatusChange = async (taskId, updates) => {
+        // First, update the local state and localStorage immediately
+        const updatedTasks = tasks.map(task => 
+            task._id === taskId ? { ...task, ...updates } : task
+        );
+        setTasks(updatedTasks);
+        localStorage.setItem('tasks', JSON.stringify(updatedTasks));
+
+        // Then, try to sync with the database
         try {
             const response = await fetch('/api/task', {
                 method: 'PUT',
@@ -49,14 +58,18 @@ function ToDoList() {
                 }),
             });
 
-            if (response.ok) {
-                const updatedTasks = tasks.map(task => 
-                    task._id === taskId ? { ...task, ...updates } : task
-                );
-                setTasks(updatedTasks);
-                localStorage.setItem('tasks', JSON.stringify(updatedTasks));
+            if (!response.ok) {
+                // If the API call fails, revert the changes
+                const originalTasks = tasks;
+                setTasks(originalTasks);
+                localStorage.setItem('tasks', JSON.stringify(originalTasks));
+                console.error('Failed to update task in database');
             }
         } catch (error) {
+            // If there's an error, revert the changes
+            const originalTasks = tasks;
+            setTasks(originalTasks);
+            localStorage.setItem('tasks', JSON.stringify(originalTasks));
             console.error('Error updating task:', error);
         }
     };
@@ -226,6 +239,80 @@ function ToDoList() {
         setShowFilterPanel(!showFilterPanel);
     };
 
+    const StatusButton = ({ taskId, currentStatus }) => {
+        const getStatusStyles = () => {
+            switch (currentStatus) {
+                case 'Pending':
+                    return 'border-blue-200 text-blue-800 bg-blue-50/90 hover:bg-blue-100';
+                case 'In Progress':
+                    return 'border-blue-400 text-white bg-blue-500 hover:bg-blue-600';
+                case 'Completed':
+                    return 'border-blue-900 text-white bg-blue-900 hover:bg-blue-950';
+                default:
+                    return 'border-blue-200 text-blue-800';
+            }
+        };
+
+        const getStatusIcon = () => {
+            switch (currentStatus) {
+                case 'Pending':
+                    return <Circle size={16} />;
+                case 'In Progress':
+                    return <Clock size={16} />;
+                case 'Completed':
+                    return <CheckCircle2 size={16} />;
+                default:
+                    return <Circle size={16} />;
+            }
+        };
+
+        return (
+            <div className="relative">
+                <button
+                    onClick={() => setActiveStatusDropdown(activeStatusDropdown === taskId ? null : taskId)}
+                    className={`flex items-center px-3 py-1 rounded-md border ${getStatusStyles()}`}
+                >
+                    <span className="flex items-center gap-2 text-sm">
+                        {getStatusIcon()}
+                        {currentStatus}
+                    </span>
+                </button>
+                
+                {/* Dropdown Modal */}
+                {activeStatusDropdown === taskId && (
+                    <>
+                        <div 
+                            className="fixed inset-0 z-10"
+                            onClick={() => setActiveStatusDropdown(null)}
+                        />
+                        
+                        <div className="absolute left-0 mt-1 bg-white rounded-md shadow-lg border border-gray-200 z-20">
+                            {['Pending', 'In Progress', 'Completed'].map((status) => (
+                                <button
+                                    key={status}
+                                    onClick={() => {
+                                        handleStatusChange(taskId, { status });
+                                        setActiveStatusDropdown(null);
+                                    }}
+                                    className={`flex items-center gap-2 w-full px-4 py-2 text-left text-sm ${
+                                        status === 'Pending' ? 'hover:bg-blue-50 text-blue-800' :
+                                        status === 'In Progress' ? 'hover:bg-blue-500 text-blue-500 hover:text-white' :
+                                        'hover:bg-blue-900 text-blue-900 hover:text-white'
+                                    }`}
+                                >
+                                    {status === 'Pending' && <Circle size={16} />}
+                                    {status === 'In Progress' && <Clock size={16} />}
+                                    {status === 'Completed' && <CheckCircle2 size={16} />}
+                                    {status}
+                                </button>
+                            ))}
+                        </div>
+                    </>
+                )}
+            </div>
+        );
+    };
+
     return (
         <div className="flex-1 p-8 mt-24 relative z-10">
             {/* Main Content */}
@@ -247,6 +334,22 @@ function ToDoList() {
                     >
                         <Filter size={16} />
                     </button>
+                </div>
+
+                {/* Add Legend */}
+                <div className="flex flex-wrap gap-2 mb-3">
+                    <div className="flex items-center text-xs">
+                        <div className="w-3 h-3 bg-green-100 border border-green-500 rounded mr-1"></div>
+                        <span>Low Priority</span>
+                    </div>
+                    <div className="flex items-center text-xs">
+                        <div className="w-3 h-3 bg-yellow-100 border border-yellow-500 rounded mr-1"></div>
+                        <span>Medium Priority</span>
+                    </div>
+                    <div className="flex items-center text-xs">
+                        <div className="w-3 h-3 bg-red-100 border border-red-500 rounded mr-1"></div>
+                        <span>High Priority</span>
+                    </div>
                 </div>
 
                 {/* Combined Filter & Sort Panel */}
@@ -342,7 +445,11 @@ function ToDoList() {
                             </div>
                         ) : (
                             getFilteredAndSortedTasks().map((task) => (
-                                <div key={task._id} className="flex-1 bg-gray-50/90 p-4 rounded relative">
+                                <div key={task._id} className={`flex-1 p-4 rounded relative ${
+                                    task.priority === 'High' ? 'bg-red-100/90' :
+                                    task.priority === 'Medium' ? 'bg-yellow-100/90' :
+                                    'bg-green-100/90'
+                                }`}>
                                     {editingTask && editingTask._id === task._id ? (
                                         <div className="space-y-4 mt-4">
                                             <div>
@@ -366,6 +473,19 @@ function ToDoList() {
                                                     placeholder="Enter quest description"
                                                     rows="2"
                                                 />
+                                            </div>
+                                            <div>
+                                                <label className="text-sm text-gray-600 block mb-1">Priority</label>
+                                                <select
+                                                    name="priority"
+                                                    value={editingTask.priority}
+                                                    onChange={handleEditChange}
+                                                    className="w-full p-2 text-sm border rounded"
+                                                >
+                                                    <option value="Low">Low Priority</option>
+                                                    <option value="Medium">Medium Priority</option>
+                                                    <option value="High">High Priority</option>
+                                                </select>
                                             </div>
                                             <div className="flex justify-end space-x-2">
                                                 <button 
@@ -391,50 +511,32 @@ function ToDoList() {
                                     ) : (
                                         <div>
                                             <div className="flex-1">
-                                                <div className="flex flex-row justify-between">
-                                                    <h3 className="font-semibold">{task.title}</h3>
-                                                    <div className="flex space-x-1 items-start pt-1">
-                                                        <button 
-                                                            onClick={() => startEditing(task)}
-                                                            className="text-gray-500 hover:text-blue-500"
-                                                        >
-                                                            <Edit2 size={14} />
-                                                        </button>
-                                                        <button 
-                                                            onClick={() => deleteTask(task._id)}
-                                                            className="text-gray-500 hover:text-red-500"
-                                                        >
-                                                            <Trash2 size={14} />
-                                                        </button>
+                                                <div className="flex flex-row items-center gap-2">
+                                                    <StatusButton
+                                                        taskId={task._id}
+                                                        currentStatus={task.status}
+                                                    />
+                                                    <div className="flex flex-row justify-between flex-1">
+                                                        <h3 className="font-semibold">{task.title}</h3>
+                                                        <div className="flex space-x-1 items-start pt-1">
+                                                            <button 
+                                                                onClick={() => startEditing(task)}
+                                                                className="text-gray-500 hover:text-blue-500"
+                                                            >
+                                                                <Edit2 size={14} />
+                                                            </button>
+                                                            <button 
+                                                                onClick={() => deleteTask(task._id)}
+                                                                className="text-gray-500 hover:text-red-500"
+                                                            >
+                                                                <Trash2 size={14} />
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 </div>
                                                 {task.description && (
                                                     <p className="text-sm text-gray-600 mt-1">{task.description}</p>
                                                 )}
-                                            </div>
-                                            <div className="flex items-center space-x-2 mt-2">
-                                                <select
-                                                    value={task.priority}
-                                                    onChange={(e) => handleStatusChange(task._id, { priority: e.target.value })}
-                                                    className={`text-sm border rounded p-1 ${
-                                                        task.priority === 'High' ? 'bg-red-100 text-red-800 border-red-200' :
-                                                        task.priority === 'Medium' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
-                                                        'bg-green-100 text-green-800 border-green-200'
-                                                    }`}
-                                                >
-                                                    <option value="Low">Low Priority</option>
-                                                    <option value="Medium">Medium Priority</option>
-                                                    <option value="High">High Priority</option>
-                                                </select>
-                                                <select
-                                                    value={task.status}
-                                                    onChange={(e) => handleStatusChange(task._id, { status: e.target.value })}
-                                                    className="text-sm border rounded p-1"
-                                                >
-                                                    <option value="Pending">Pending</option>
-                                                    <option value="In Progress">In Progress</option>
-                                                    <option value="Completed">Completed</option>
-                                                </select>
                                             </div>
                                         </div>
                                     )}

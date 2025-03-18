@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import ReactMarkdown from 'react-markdown';
+import { Calendar } from 'lucide-react';
 
 function UserAnalysis() {
   const [report, setReport] = useState('');
@@ -111,7 +112,10 @@ function UserAnalysis() {
             letterSpacing: "0.5px",
             textShadow: "2px 2px 0 #000"
           }}>Analysis</h2>
-          <span className="text-sm text-gray-600">{formatDate(analysisDate)}</span>
+          <div className="flex items-center mb-3 text-sm text-gray-700">
+            <Calendar size={16} className="mr-1" />
+            <span>{formatDate(analysisDate)}</span>
+          </div>
         </div>
 
         <div className="max-h-[450px] overflow-y-auto pr-2">
