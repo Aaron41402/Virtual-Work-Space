@@ -21,15 +21,23 @@ export default function LoginTracker() {
   useEffect(() => {
     if (loginData.loginDates.length > 0) {
       const today = new Date();
-      today.setHours(0, 0, 0, 0);
+      // Use the same UTC midnight approach as the backend
+      today.setUTCHours(0, 0, 0, 0);
+      const todayString = today.toISOString().split('T')[0];
       
       const alreadyCheckedIn = loginData.loginDates.some(date => {
         const loginDate = new Date(date);
-        loginDate.setHours(0, 0, 0, 0);
-        return loginDate.getTime() === today.getTime();
+        loginDate.setUTCHours(0, 0, 0, 0);
+        const loginDateString = loginDate.toISOString().split('T')[0];
+        return loginDateString === todayString;
       });
       
       setCheckedInToday(alreadyCheckedIn);
+      
+      // Add debug logging
+      console.log('Today (UTC):', today.toISOString());
+      console.log('Login dates:', loginData.loginDates.map(d => new Date(d).toISOString()));
+      console.log('Already checked in:', alreadyCheckedIn);
     }
   }, [loginData.loginDates]);
 
@@ -57,18 +65,32 @@ export default function LoginTracker() {
     setLoading(true);
     try {
       const response = await fetch('/api/login-tracker', {
-        method: 'POST'
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
       
       const data = await response.json();
+      console.log('Check-in response:', data); // Debug logging
       
       if (response.ok) {
+        // Ensure we're converting strings to Date objects
+        const updatedDates = data.loginDates.map(date => new Date(date));
+        
         setLoginData({
-          loginDates: data.loginDates.map(date => new Date(date)),
+          loginDates: updatedDates,
           coins: data.coins
         });
+        
+        // Force the checked-in state to true
         setCheckedInToday(true);
-        setCheckInMessage(data.message);
+        setCheckInMessage(data.message || 'Successfully checked in!');
+        
+        // Force re-render of calendar
+        setTimeout(() => {
+          fetchLoginData();
+        }, 500);
       } else {
         setCheckInMessage(data.error || 'Failed to check in');
       }

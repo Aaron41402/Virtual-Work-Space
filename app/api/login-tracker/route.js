@@ -52,7 +52,10 @@ export async function POST() {
     
     // Get today's date (reset hours to start of day for comparison)
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    // Store the date as UTC midnight to avoid timezone issues
+    today.setUTCHours(0, 0, 0, 0);
+    
+    console.log('API - Today (UTC midnight):', today);
     
     // Find or create user login record
     let userLogin = await UserLogin.findOne({ userId: session.user.id });
@@ -65,18 +68,25 @@ export async function POST() {
       });
     }
     
-    // Check if user already logged in today
+    console.log('API - User login dates:', userLogin.loginDates);
+    
+    // Check if user already logged in today - using UTC comparison
     const alreadyLoggedInToday = userLogin.loginDates.some(date => {
       const loginDate = new Date(date);
-      loginDate.setHours(0, 0, 0, 0);
-      return loginDate.getTime() === today.getTime();
+      loginDate.setUTCHours(0, 0, 0, 0);
+      const isSameDay = loginDate.toISOString().split('T')[0] === today.toISOString().split('T')[0];
+      console.log('API - Comparing dates:', loginDate.toISOString(), today.toISOString(), isSameDay);
+      return isSameDay;
     });
+    
+    console.log('API - Already logged in today:', alreadyLoggedInToday);
     
     if (alreadyLoggedInToday) {
       return NextResponse.json({ 
         message: "Already checked in today",
         alreadyCheckedIn: true,
-        loginDates: userLogin.loginDates
+        loginDates: userLogin.loginDates,
+        today: today.toISOString() // Send today's date for debugging
       }, { status: 200 });
     }
     
@@ -97,7 +107,8 @@ export async function POST() {
       message: "Check-in successful! You earned 1 coin.",
       loginDates: userLogin.loginDates,
       coins: updatedUser.coins,
-      checkedInToday: true
+      checkedInToday: true,
+      today: today.toISOString() // Send today's date for debugging
     }, { status: 200 });
   } catch (error) {
     console.error("Error processing check-in:", error);
