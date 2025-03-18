@@ -95,7 +95,7 @@ function UserAnalysis() {
   };
 
   if (loading) {
-    return <div className="flex-1 p-8 relative z-10">
+    return <div className="flex-1 p-8 mt-24 relative z-10">
       <div className="bg-white/70 backdrop-blur-sm w-3/4 max-w-2xl mx-auto mt-8 rounded-lg shadow-lg p-4">
         Loading...
       </div>

@@ -17,6 +17,7 @@ export default function CapybaraPomodoro() {
   const walkIntervalRef = useRef(null)
   const [showTooltip, setShowTooltip] = useState(false)
   const [selectedSkin, setSelectedSkin] = useState('default')
+  const [isLoading, setIsLoading] = useState(true)
 
   // Timer logic
   useEffect(() => {
@@ -163,6 +164,16 @@ export default function CapybaraPomodoro() {
     }
   }, []);
 
+  // Add this useEffect to handle the loading state
+  useEffect(() => {
+    // Set loading to false after a short delay to ensure the container is rendered
+    const loadingTimer = setTimeout(() => {
+      setIsLoading(false);
+    }, 500);
+    
+    return () => clearTimeout(loadingTimer);
+  }, []);
+
   return (
     <div className="capybara-container">
       {/* Pomodoro Timer */}
@@ -243,11 +254,15 @@ export default function CapybaraPomodoro() {
       
       {/* Capybara with Tooltip */}
       <div 
-        className={`capybara ${capybaraState}`}
+        className={`capybara ${capybaraState} ${isLoading ? 'loading' : ''}`}
         onClick={togglePomodoro}
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
-        style={{ transform: `translateX(${capybaraPosition}px)` }}
+        style={{ 
+          transform: isLoading 
+            ? 'translateX(0)' 
+            : `translateX(${capybaraPosition}px)` 
+        }}
       >
         <Image 
           src={getCapybaraGif()} 
@@ -516,6 +531,14 @@ export default function CapybaraPomodoro() {
         /* Adjust sleeping capybara position for tooltip visibility */
         .capybara.sleep {
           margin-top: 100px;
+        }
+
+        /* Loading state styles */
+        .capybara.loading {
+          position: relative;
+          left: 0;
+          transform: translateX(0) !important;
+          transition: none;
         }
       `}</style>
     </div>
