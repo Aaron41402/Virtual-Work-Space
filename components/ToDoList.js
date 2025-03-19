@@ -1,6 +1,6 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import { Edit2, Check, X, Trash2, Filter } from 'lucide-react';
+import React, { useState, useEffect, useRef } from "react";
+import { Edit2, Check, X, Trash2, Filter, Circle, Clock, CheckCircle2 } from 'lucide-react';
 
 function ToDoList() {
     const [tasks, setTasks] = useState([]);
@@ -17,11 +17,21 @@ function ToDoList() {
         statuses: []
     });
     const [sortConfig, setSortConfig] = useState({
-        field: 'none',
-        direction: 'asc'
+        field: 'priority',
+        direction: 'desc'
     });
     const [showFilterPanel, setShowFilterPanel] = useState(false);
     const [titleError, setTitleError] = useState(false);
+    const [activeStatusDropdown, setActiveStatusDropdown] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    // Add priority and status order maps
+    const priorityOrder = { High: 1, Medium: 2, Low: 3 };
+    const statusOrder = { Pending: 1, 'In Progress': 2, Completed: 3 };
+
+    // Add refs
+    const taskListRef = useRef(null);
+    const taskRefs = useRef({});
 
     // Fetch tasks on component mount
     useEffect(() => {
@@ -31,12 +41,28 @@ function ToDoList() {
     const fetchTasks = async () => {
         const cachedTasks = localStorage.getItem('tasks');
         if (cachedTasks) {
-        setTasks(JSON.parse(cachedTasks));
+            setTasks(JSON.parse(cachedTasks));
         }
+        setLoading(false);
     };
 
     // ------------------------- Handlers -------------------------
     const handleStatusChange = async (taskId, updates) => {
+        // Find the current task and return if status is unchanged
+        const currentTask = tasks.find(task => task._id === taskId);
+        if (currentTask.status === updates.status) {
+            setActiveStatusDropdown(null);
+            return;
+        }
+
+        // First, update the local state and localStorage immediately
+        const updatedTasks = tasks.map(task => 
+            task._id === taskId ? { ...task, ...updates } : task
+        );
+        setTasks(updatedTasks);
+        localStorage.setItem('tasks', JSON.stringify(updatedTasks));
+
+        // Then, try to sync with the database
         try {
             const response = await fetch('/api/task', {
                 method: 'PUT',
@@ -49,16 +75,23 @@ function ToDoList() {
                 }),
             });
 
-            if (response.ok) {
-                const updatedTasks = tasks.map(task => 
-                    task._id === taskId ? { ...task, ...updates } : task
-                );
-                setTasks(updatedTasks);
-                localStorage.setItem('tasks', JSON.stringify(updatedTasks));
+            if (!response.ok) {
+                // If the API call fails, revert the changes
+                const originalTasks = tasks;
+                setTasks(originalTasks);
+                localStorage.setItem('tasks', JSON.stringify(originalTasks));
+                console.error('Failed to update task in database');
             }
         } catch (error) {
+            // If there's an error, revert the changes
+            const originalTasks = tasks;
+            setTasks(originalTasks);
+            localStorage.setItem('tasks', JSON.stringify(originalTasks));
             console.error('Error updating task:', error);
         }
+
+        // After successful update
+        setTimeout(() => scrollToTask(taskId), 100); // Small delay to allow for re-render
     };
 
     const handleOpenAddTaskModal = () => {
@@ -104,7 +137,7 @@ function ToDoList() {
         }));
     };
 
-    const saveEdit = async () => {
+    const saveEdit = async (itemId) => {
         if (!editingTask.title.trim()) return;
 
         try {
@@ -130,6 +163,9 @@ function ToDoList() {
                 setTasks(updatedTasks);
                 localStorage.setItem('tasks', JSON.stringify(updatedTasks));
                 setEditingTask(null);
+                
+                // Add scroll after update
+                setTimeout(() => scrollToTask(itemId), 100);
             }
         } catch (error) {
             console.error('Error updating task:', error);
@@ -192,14 +228,20 @@ function ToDoList() {
             filteredTasks = filteredTasks.filter(task => filters.statuses.includes(task.status));
         }
 
-        // Apply sorting
-        if (sortConfig.field === 'priority') {
-            const priorityOrder = { High: 1, Medium: 2, Low: 3 };
-            filteredTasks.sort((a, b) => {
-                const comparison = priorityOrder[a.priority] - priorityOrder[b.priority];
-                return sortConfig.direction === 'asc' ? comparison : -comparison;
-            });
-        }
+        // Always apply sorting
+        filteredTasks.sort((a, b) => {
+            let comparison = 0;
+            
+            if (sortConfig.field === 'priority') {
+                comparison = priorityOrder[a.priority] - priorityOrder[b.priority];
+            } else if (sortConfig.field === 'status') {
+                comparison = statusOrder[a.status] - statusOrder[b.status];
+            }
+
+            // For desc (default), we want High to Low (priority) or Completed to Pending (status)
+            // For asc, we want Low to High (priority) or Pending to Completed (status)
+            return sortConfig.direction === 'desc' ? comparison : -comparison;
+        });
 
         return filteredTasks;
     };
@@ -226,6 +268,117 @@ function ToDoList() {
         setShowFilterPanel(!showFilterPanel);
     };
 
+    const StatusButton = ({ taskId, currentStatus }) => {
+        const getStatusStyles = () => {
+            switch (currentStatus) {
+                case 'Pending':
+                    return 'border-blue-200 text-blue-800 bg-blue-50/90 hover:bg-blue-100';
+                case 'In Progress':
+                    return 'border-blue-400 text-white bg-blue-500 hover:bg-blue-600';
+                case 'Completed':
+                    return 'border-blue-900 text-white bg-blue-900 hover:bg-blue-950';
+                default:
+                    return 'border-blue-200 text-blue-800';
+            }
+        };
+
+        const getStatusIcon = () => {
+            switch (currentStatus) {
+                case 'Pending':
+                    return <Circle size={16} />;
+                case 'In Progress':
+                    return <Clock size={16} />;
+                case 'Completed':
+                    return <CheckCircle2 size={16} />;
+                default:
+                    return <Circle size={16} />;
+            }
+        };
+
+        return (
+            <div className="relative">
+                <button
+                    onClick={() => setActiveStatusDropdown(activeStatusDropdown === taskId ? null : taskId)}
+                    className={`flex items-center px-3 py-1 rounded-md border ${getStatusStyles()}`}
+                >
+                    <span className="flex items-center gap-2 text-sm">
+                        {getStatusIcon()}
+                        {currentStatus}
+                    </span>
+                </button>
+                
+                {/* Dropdown Modal */}
+                {activeStatusDropdown === taskId && (
+                    <>
+                        <div 
+                            className="fixed inset-0 z-10"
+                            onClick={() => setActiveStatusDropdown(null)}
+                        />
+                        
+                        <div className="absolute left-0 mt-1 bg-white rounded-md shadow-lg border border-gray-200 z-20 whitespace-nowrap">
+                            {['Pending', 'In Progress', 'Completed'].map((status) => (
+                                <button
+                                    key={status}
+                                    onClick={() => {
+                                        handleStatusChange(taskId, { status });
+                                        setActiveStatusDropdown(null);
+                                    }}
+                                    className={`flex items-center gap-2 w-full px-4 py-2 text-left text-sm
+                                        bg-white text-gray-700
+                                        ${status === 'Pending' 
+                                            ? 'hover:bg-blue-50/90 hover:text-blue-800 rounded-t-md border-b-2' :
+                                        status === 'In Progress' 
+                                            ? 'hover:bg-blue-500 hover:text-white border-b-2' :
+                                        'hover:bg-blue-900 hover:text-white rounded-b-md'
+                                    }`}
+                                >
+                                    {status === 'Pending' && <Circle size={16} />}
+                                    {status === 'In Progress' && <Clock size={16} />}
+                                    {status === 'Completed' && <CheckCircle2 size={16} />}
+                                    {status}
+                                </button>
+                            ))}
+                        </div>
+                    </>
+                )}
+            </div>
+        );
+    };
+
+    // Add function to scroll to task
+    const scrollToTask = (taskId) => {
+        if (taskListRef.current && taskRefs.current[taskId]) {
+            const taskElement = taskRefs.current[taskId];
+            const listElement = taskListRef.current;
+            
+            // Calculate scroll position
+            const taskTop = taskElement.offsetTop;
+            const listScrollTop = listElement.scrollTop;
+            const listHeight = listElement.clientHeight;
+            
+            // Scroll the task into view with some padding
+            listElement.scrollTo({
+                top: taskTop - listHeight / 3,
+                behavior: 'smooth'
+            });
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="flex-1 p-8 mt-24 relative z-10">
+                <div className="bg-white/70 backdrop-blur-sm w-3/4 max-w-2xl mx-auto mt-8 rounded-lg shadow p-4">
+                    <h2 className="text-2xl text-[#E6C86E] font-bold mb-4" style={{
+                        fontFamily: "'Press Start 2P', monospace",
+                        letterSpacing: "0.5px",
+                        textShadow: "2px 2px 0 #000"
+                    }}>Quests</h2>
+                    <p>Loading your quests <span className="loading loading-dots loading-xs"></span></p>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="flex-1 p-8 mt-24 relative z-10">
             {/* Main Content */}
@@ -239,14 +392,30 @@ function ToDoList() {
                     
                     <button
                         onClick={handleFilterClick}
-                        className={`p-2 rounded-full border ${
+                        className={`p-2 rounded-full ${
                             showFilterPanel 
                                 ? 'bg-blue-500 text-white border-blue-500' 
-                                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'
+                                : 'text-gray-700 hover:bg-blue-500 hover:text-white'
                         }`}
                     >
-                        <Filter size={16} />
+                        <Filter size={18} />
                     </button>
+                </div>
+
+                {/* Add Legend */}
+                <div className="flex flex-wrap gap-2 mb-3">
+                    <div className="flex items-center text-xs">
+                        <div className="w-3 h-3 bg-green-100 border border-green-500 rounded mr-1"></div>
+                        <span>Low Priority</span>
+                    </div>
+                    <div className="flex items-center text-xs">
+                        <div className="w-3 h-3 bg-yellow-100 border border-yellow-500 rounded mr-1"></div>
+                        <span>Medium Priority</span>
+                    </div>
+                    <div className="flex items-center text-xs">
+                        <div className="w-3 h-3 bg-red-100 border border-red-500 rounded mr-1"></div>
+                        <span>High Priority</span>
+                    </div>
                 </div>
 
                 {/* Combined Filter & Sort Panel */}
@@ -302,20 +471,18 @@ function ToDoList() {
                                         onChange={(e) => setSortConfig(prev => ({ ...prev, field: e.target.value }))}
                                         className="text-sm border rounded p-1"
                                     >
-                                        <option value="none">None</option>
                                         <option value="priority">Priority</option>
+                                        <option value="status">Status</option>
                                     </select>
-                                    {sortConfig.field !== 'none' && (
-                                        <button
-                                            onClick={() => setSortConfig(prev => ({
-                                                ...prev,
-                                                direction: prev.direction === 'asc' ? 'desc' : 'asc'
-                                            }))}
-                                            className="px-2 py-1 text-sm border rounded hover:bg-gray-100"
-                                        >
-                                            {sortConfig.direction === 'asc' ? '↑' : '↓'}
-                                        </button>
-                                    )}
+                                    <button
+                                        onClick={() => setSortConfig(prev => ({
+                                            ...prev,
+                                            direction: prev.direction === 'asc' ? 'desc' : 'asc'
+                                        }))}
+                                        className="px-2 py-1 text-sm border rounded hover:bg-gray-100"
+                                    >
+                                        {sortConfig.direction === 'asc' ? '↑' : '↓'}
+                                    </button>
                                 </div>
                             </div>
 
@@ -334,15 +501,26 @@ function ToDoList() {
 
                 {/* Task List */}
                 {!showFilterPanel && (
-                    <div className="mb-4 flex flex-col max-h-[350px] overflow-y-auto pr-2 space-y-2">
+                    <div 
+                        ref={taskListRef}
+                        className="mb-4 flex flex-col max-h-[350px] overflow-y-auto pr-2 space-y-2"
+                    >
                         {getFilteredAndSortedTasks().length === 0 ? (
                             <div className="text-center py-8 text-gray-500">
                                 <p className="text-sm">No quests available</p>
-                                <p className="text-xs mt-1">Click 'Add Quest' to create your first quest</p>
+                                <p className="text-xs mt-1">Click 'Add Quest' to create a quest</p>
                             </div>
                         ) : (
                             getFilteredAndSortedTasks().map((task) => (
-                                <div key={task._id} className="flex-1 bg-gray-50/90 p-4 rounded relative">
+                                <div 
+                                    key={task._id} 
+                                    ref={el => taskRefs.current[task._id] = el}
+                                    className={`flex-1 p-4 rounded relative ${
+                                        task.priority === 'High' ? 'bg-red-100/90' :
+                                        task.priority === 'Medium' ? 'bg-yellow-100/90' :
+                                        'bg-green-100/90'
+                                    }`}
+                                >
                                     {editingTask && editingTask._id === task._id ? (
                                         <div className="space-y-4 mt-4">
                                             <div>
@@ -367,9 +545,22 @@ function ToDoList() {
                                                     rows="2"
                                                 />
                                             </div>
+                                            <div>
+                                                <label className="text-sm text-gray-600 block mb-1">Priority</label>
+                                                <select
+                                                    name="priority"
+                                                    value={editingTask.priority}
+                                                    onChange={handleEditChange}
+                                                    className="w-full p-2 text-sm border rounded"
+                                                >
+                                                    <option value="Low">Low Priority</option>
+                                                    <option value="Medium">Medium Priority</option>
+                                                    <option value="High">High Priority</option>
+                                                </select>
+                                            </div>
                                             <div className="flex justify-end space-x-2">
                                                 <button 
-                                                    onClick={saveEdit}
+                                                    onClick={() => saveEdit(task._id)}
                                                     className="px-3 py-1 bg-green-500 text-white rounded text-sm"
                                                 >
                                                     <span className="flex items-center">
@@ -391,50 +582,36 @@ function ToDoList() {
                                     ) : (
                                         <div>
                                             <div className="flex-1">
-                                                <div className="flex flex-row justify-between">
-                                                    <h3 className="font-semibold">{task.title}</h3>
-                                                    <div className="flex space-x-1 items-start pt-1">
-                                                        <button 
-                                                            onClick={() => startEditing(task)}
-                                                            className="text-gray-500 hover:text-blue-500"
-                                                        >
-                                                            <Edit2 size={14} />
-                                                        </button>
-                                                        <button 
-                                                            onClick={() => deleteTask(task._id)}
-                                                            className="text-gray-500 hover:text-red-500"
-                                                        >
-                                                            <Trash2 size={14} />
-                                                        </button>
+                                                <div className="flex flex-row items-center gap-2">
+                                                    <StatusButton
+                                                        taskId={task._id}
+                                                        currentStatus={task.status}
+                                                    />
+                                                    <div className="flex flex-row justify-between flex-1">
+                                                        <h3 className={`font-semibold ${task.status === 'Completed' ? 'line-through text-gray-500' : ''}`}>
+                                                            {task.title}
+                                                        </h3>
+                                                        <div className="flex space-x-1 items-start pt-1">
+                                                            <button 
+                                                                onClick={() => startEditing(task)}
+                                                                className="text-gray-500 hover:text-blue-500"
+                                                            >
+                                                                <Edit2 size={14} />
+                                                            </button>
+                                                            <button 
+                                                                onClick={() => deleteTask(task._id)}
+                                                                className="text-gray-500 hover:text-red-500"
+                                                            >
+                                                                <Trash2 size={14} />
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 </div>
                                                 {task.description && (
-                                                    <p className="text-sm text-gray-600 mt-1">{task.description}</p>
+                                                    <p className={`text-sm text-gray-600 mt-1 ${task.status === 'Completed' ? 'line-through' : ''}`}>
+                                                        {task.description}
+                                                    </p>
                                                 )}
-                                            </div>
-                                            <div className="flex items-center space-x-2 mt-2">
-                                                <select
-                                                    value={task.priority}
-                                                    onChange={(e) => handleStatusChange(task._id, { priority: e.target.value })}
-                                                    className={`text-sm border rounded p-1 ${
-                                                        task.priority === 'High' ? 'bg-red-100 text-red-800 border-red-200' :
-                                                        task.priority === 'Medium' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
-                                                        'bg-green-100 text-green-800 border-green-200'
-                                                    }`}
-                                                >
-                                                    <option value="Low">Low Priority</option>
-                                                    <option value="Medium">Medium Priority</option>
-                                                    <option value="High">High Priority</option>
-                                                </select>
-                                                <select
-                                                    value={task.status}
-                                                    onChange={(e) => handleStatusChange(task._id, { status: e.target.value })}
-                                                    className="text-sm border rounded p-1"
-                                                >
-                                                    <option value="Pending">Pending</option>
-                                                    <option value="In Progress">In Progress</option>
-                                                    <option value="Completed">Completed</option>
-                                                </select>
                                             </div>
                                         </div>
                                     )}

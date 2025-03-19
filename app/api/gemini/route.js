@@ -182,16 +182,18 @@ function createAnalysisPrompt(data) {
     - Activities scheduled for today: ${todaySchedule.length}
 
     Provide:
-    1. An efficiency score for yesterday (0-100)
-    2. What they did well yesterday
-    3. Areas for improvement
-    4. 2-3 specific suggestions for today's schedule, considering:
-       - The timing and nature of scheduled activities
-       - Potential breaks between activities
-       - Best times to tackle incomplete tasks
-    
-    Format your response in RPG terms, like they're on a quest to improve productivity.
-    Keep it encouraging and positive.
+    1. Start with a brief, enthusiastic greeting in RPG-style to address the user as an adventurer beginning their journey for the day.
+
+    2. **Efficiency Score: XX/100**
+      - Provide an efficiency score (0-100) based on yesterday's productivity.
+      - 2-3 sentences about what they did well yesterday and areas for improvement.
+
+    3. **Guidance for Today's Quest:**
+      - Provide 1-2 specific, actionable suggestions for today's schedule.  
+      - Consider how to align tasks with the user's energy levels and scheduled events.  
+      - Factor in potential breaks and optimal times to tackle unfinished tasks.
+
+    Your response should be in RPG terms and be concise, positive, and encouraging. You should also treat the user like they're on a quest to improve productivity.
     
     Note: If no tasks were worked on yesterday, focus on motivation and getting started.
     Consider task priorities and how to best integrate them with today's schedule.
