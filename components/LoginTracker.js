@@ -77,11 +77,20 @@ useEffect(() => {
     const handleCheckInEvent = (event) => {
     console.log('Check-in event received:', event.detail);
     
-    // Force a data refresh instead of just updating state
-    fetchLoginData();
-    
-    // Also update the message
+    // Update the state immediately with the event data first
+    setCheckedInToday(true);
     setCheckInMessage("Check-in successful! You earned 1 coin.");
+    
+    // Update loginData with the event detail data
+    if (event.detail && Array.isArray(event.detail.loginDates)) {
+        setLoginData({
+        loginDates: event.detail.loginDates.map(date => new Date(date)),
+        coins: event.detail.coins || 0
+        });
+    }
+    
+    // Then refresh data from server to be sure
+    setTimeout(() => fetchLoginData(), 300);
     };
     
     window.addEventListener('user-checked-in', handleCheckInEvent);
@@ -100,7 +109,11 @@ const handleCheckIn = async () => {
     setLoading(true);
     try {
     const response = await fetch('/api/login-tracker', {
-        method: 'POST'
+        method: 'POST',
+        headers: {
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache'
+        }
     });
 
     const data = await response.json();

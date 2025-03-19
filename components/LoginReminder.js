@@ -11,7 +11,12 @@ export default function LoginReminder() {
     // Check if user has logged in today
     const checkLoginStatus = async () => {
       try {
-        const response = await fetch('/api/login-tracker');
+        const response = await fetch('/api/login-tracker', {
+          headers: {
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+          }
+        });
         if (response.ok) {
           const data = await response.json();
           
@@ -55,7 +60,8 @@ export default function LoginReminder() {
       const response = await fetch('/api/login-tracker', {
         method: 'POST',
         headers: {
-          'Cache-Control': 'no-cache'
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
         }
       });
       
@@ -66,7 +72,7 @@ export default function LoginReminder() {
         // More robust event dispatching with console logging
         console.log('Dispatching check-in event with data:', data);
         
-        // Force data to be properly structured
+        // Create properly structured event data, ensuring dates are properly formatted
         const eventData = {
           loginDates: Array.isArray(data.loginDates) ? data.loginDates : [],
           coins: typeof data.coins === 'number' ? data.coins : 0
@@ -78,7 +84,7 @@ export default function LoginReminder() {
             detail: eventData
           });
           window.dispatchEvent(checkInEvent);
-          console.log('Event dispatched');
+          console.log('Event dispatched with data:', eventData);
         }, 100);
         
         // Also force a refresh of the login tracker data
@@ -169,4 +175,4 @@ export default function LoginReminder() {
       </div>
     </div>
   );
-} 
+}

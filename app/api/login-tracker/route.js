@@ -35,7 +35,13 @@ export async function GET() {
         loginDates: userLogin.loginDates,
         coins: user?.coins || 0
       },
-      { status: 200 }
+      { 
+        status: 200,
+        headers: {
+          'Cache-Control': 'no-store, max-age=0',
+          'Pragma': 'no-cache'
+        }
+      }
     );
   } catch (error) {
     console.error("Error fetching login history:", error);
@@ -86,7 +92,8 @@ export async function POST() {
           message: "Already checked in today",
           alreadyCheckedIn: true,
           loginDates: userLogin.loginDates,
-          coins: user?.coins || 0
+          coins: user?.coins || 0,
+          checkedInToday: true
         },
         { 
           status: 200,
