@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import { Edit2, Check, X, Trash2, Filter, Circle, Clock, CheckCircle2 } from 'lucide-react';
+import { createPortal } from 'react-dom';
 
 function ToDoList() {
     const [tasks, setTasks] = useState([]);
@@ -32,6 +33,7 @@ function ToDoList() {
     // Add refs
     const taskListRef = useRef(null);
     const taskRefs = useRef({});
+    const buttonRefs = useRef({});
 
     // Fetch tasks on component mount
     useEffect(() => {
@@ -298,6 +300,7 @@ function ToDoList() {
         return (
             <div className="relative">
                 <button
+                    ref={el => buttonRefs.current[taskId] = el}
                     onClick={() => setActiveStatusDropdown(activeStatusDropdown === taskId ? null : taskId)}
                     className={`flex items-center px-3 py-1 rounded-md border ${getStatusStyles()}`}
                 >
@@ -307,15 +310,22 @@ function ToDoList() {
                     </span>
                 </button>
                 
-                {/* Dropdown Modal */}
-                {activeStatusDropdown === taskId && (
-                    <div>
+                {activeStatusDropdown === taskId && createPortal(
+                    <>
                         <div 
-                            className="fixed inset-0 z-10"
+                            className="fixed inset-0 bg-black/10"
+                            style={{ zIndex: 999 }}
                             onClick={() => setActiveStatusDropdown(null)}
                         />
                         
-                        <div className="absolute left-0 mt-1 bg-white rounded-md shadow-lg border border-gray-200 whitespace-nowrap">
+                        <div 
+                            className="fixed bg-white rounded-md shadow-lg border border-gray-200 whitespace-nowrap"
+                            style={{
+                                zIndex: 1000,
+                                top: buttonRefs.current[taskId]?.getBoundingClientRect().bottom + 4,
+                                left: buttonRefs.current[taskId]?.getBoundingClientRect().left,
+                            }}
+                        >
                             {['Pending', 'In Progress', 'Completed'].map((status) => (
                                 <button
                                     key={status}
@@ -339,7 +349,8 @@ function ToDoList() {
                                 </button>
                             ))}
                         </div>
-                    </div>
+                    </>,
+                    document.body
                 )}
             </div>
         );
