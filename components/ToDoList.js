@@ -309,13 +309,13 @@ function ToDoList() {
                 
                 {/* Dropdown Modal */}
                 {activeStatusDropdown === taskId && (
-                    <>
+                    <div>
                         <div 
                             className="fixed inset-0 z-10"
                             onClick={() => setActiveStatusDropdown(null)}
                         />
                         
-                        <div className="absolute left-0 mt-1 bg-white rounded-md shadow-lg border border-gray-200 z-20 whitespace-nowrap">
+                        <div className="absolute left-0 mt-1 bg-white rounded-md shadow-lg border border-gray-200 whitespace-nowrap">
                             {['Pending', 'In Progress', 'Completed'].map((status) => (
                                 <button
                                     key={status}
@@ -339,7 +339,7 @@ function ToDoList() {
                                 </button>
                             ))}
                         </div>
-                    </>
+                    </div>
                 )}
             </div>
         );

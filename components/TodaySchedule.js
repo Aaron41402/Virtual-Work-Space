@@ -803,7 +803,7 @@ function TodaySchedule() {
                   return (
                     <div 
                       key={index} 
-                      className={`flex items-start ${isCurrentHour ? 'bg-green-300/80 -mx-2 px-2 py-1 rounded' : ''}`}
+                      className={`flex items-start px-2 py-1 rounded ${isCurrentHour ? 'bg-green-300/80' : ''}`}
                       data-hour={hour.split(':')[0]}
                     >
                       <div className="w-16 text-sm text-gray-600">{hour}</div>
