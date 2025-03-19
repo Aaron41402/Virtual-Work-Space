@@ -53,19 +53,45 @@ export default function LoginReminder() {
     setIsLoading(true);
     try {
       const response = await fetch('/api/login-tracker', {
-        method: 'POST'
+        method: 'POST',
+        headers: {
+          'Cache-Control': 'no-cache'
+        }
       });
       
       if (response.ok) {
         const data = await response.json();
         setHasCheckedIn(true);
-        setShowReminder(false);
         
-        // Dispatch a custom event to notify other components
-        const checkInEvent = new CustomEvent('user-checked-in', { 
-          detail: { loginDates: data.loginDates, coins: data.coins } 
-        });
-        window.dispatchEvent(checkInEvent);
+        // More robust event dispatching with console logging
+        console.log('Dispatching check-in event with data:', data);
+        
+        // Force data to be properly structured
+        const eventData = {
+          loginDates: Array.isArray(data.loginDates) ? data.loginDates : [],
+          coins: typeof data.coins === 'number' ? data.coins : 0
+        };
+        
+        // Dispatch event with timeout to ensure DOM is ready
+        setTimeout(() => {
+          const checkInEvent = new CustomEvent('user-checked-in', { 
+            detail: eventData
+          });
+          window.dispatchEvent(checkInEvent);
+          console.log('Event dispatched');
+        }, 100);
+        
+        // Also force a refresh of the login tracker data
+        try {
+          const refreshEvent = new CustomEvent('refresh-login-data');
+          window.dispatchEvent(refreshEvent);
+        } catch (e) {
+          console.error('Error dispatching refresh event:', e);
+        }
+        
+        setShowReminder(false);
+      } else {
+        console.error('Check-in failed:', await response.text());
       }
     } catch (error) {
       console.error('Error checking in:', error);

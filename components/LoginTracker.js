@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 
 export default function LoginTracker() {
@@ -12,57 +12,84 @@ const [loading, setLoading] = useState(false);
 const [checkedInToday, setCheckedInToday] = useState(false);
 const [checkInMessage, setCheckInMessage] = useState('');
 
-// Fetch login data when component mounts
+// Make fetchLoginData a useCallback function so it can be referenced in multiple places
+const fetchLoginData = useCallback(async () => {
+    console.log('Fetching login data...');
+    try {
+    const response = await fetch('/api/login-tracker', {
+        headers: {
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache'
+        }
+    });
+    
+    if (response.ok) {
+        const data = await response.json();
+        console.log('Received login data:', data);
+        
+        // Ensure dates are properly converted
+        const loginDates = Array.isArray(data.loginDates) 
+            ? data.loginDates.map(date => new Date(date))
+            : [];
+        
+        setLoginData({
+        loginDates,
+        coins: data.coins || 0
+        });
+        
+        // Check if today is in the login dates
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const alreadyCheckedIn = loginDates.some(date => {
+        const loginDate = new Date(date);
+        loginDate.setHours(0, 0, 0, 0);
+        return loginDate.getTime() === today.getTime();
+        });
+        
+        console.log('Already checked in today?', alreadyCheckedIn);
+        setCheckedInToday(alreadyCheckedIn);
+    }
+    } catch (error) {
+    console.error('Error fetching login data:', error);
+    }
+}, []);
+
+// Add a listener for the refresh event
+useEffect(() => {
+    const handleRefreshEvent = () => {
+    console.log('Refresh event received');
+    fetchLoginData();
+    };
+    
+    window.addEventListener('refresh-login-data', handleRefreshEvent);
+    
+    return () => {
+    window.removeEventListener('refresh-login-data', handleRefreshEvent);
+    };
+}, [fetchLoginData]);
+
+// Modify the existing event listener
 useEffect(() => {
     fetchLoginData();
     
     // Listen for check-in events from LoginReminder
     const handleCheckInEvent = (event) => {
-      setLoginData({
-        loginDates: event.detail.loginDates.map(date => new Date(date)),
-        coins: event.detail.coins
-      });
-      setCheckedInToday(true);
-      setCheckInMessage("Check-in successful! You earned 1 coin.");
+    console.log('Check-in event received:', event.detail);
+    
+    // Force a data refresh instead of just updating state
+    fetchLoginData();
+    
+    // Also update the message
+    setCheckInMessage("Check-in successful! You earned 1 coin.");
     };
     
     window.addEventListener('user-checked-in', handleCheckInEvent);
     
     return () => {
-      window.removeEventListener('user-checked-in', handleCheckInEvent);
+    window.removeEventListener('user-checked-in', handleCheckInEvent);
     };
-}, []);
-
-// Check if user already logged in today
-useEffect(() => {
-    if (loginData.loginDates.length > 0) {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const alreadyCheckedIn = loginData.loginDates.some(date => {
-        const loginDate = new Date(date);
-        loginDate.setHours(0, 0, 0, 0);
-        return loginDate.getTime() === today.getTime();
-    });
-
-    setCheckedInToday(alreadyCheckedIn);
-    }
-}, [loginData.loginDates]);
-
-const fetchLoginData = async () => {
-    try {
-    const response = await fetch('/api/login-tracker');
-    if (response.ok) {
-        const data = await response.json();
-        setLoginData({
-        loginDates: data.loginDates.map(date => new Date(date)),
-        coins: data.coins
-        });
-    }
-    } catch (error) {
-    console.error('Error fetching login data:', error);
-    }
-};
+}, [fetchLoginData]);
 
 const handleCheckIn = async () => {
     if (checkedInToday) {

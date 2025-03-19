@@ -67,6 +67,7 @@ export async function POST() {
         loginDates: [],
         coins: 0
       });
+      await userLogin.save();
     }
 
     // Check if user already logged in today
@@ -77,14 +78,23 @@ export async function POST() {
     });
 
     if (alreadyLoggedInToday) {
+      // Get the user to include coins
+      const user = await User.findById(session.user.id);
+      
       return NextResponse.json(
         {
           message: "Already checked in today",
           alreadyCheckedIn: true,
           loginDates: userLogin.loginDates,
-          coins: (await User.findById(session.user.id))?.coins || 0
+          coins: user?.coins || 0
         },
-        { status: 200 }
+        { 
+          status: 200,
+          headers: {
+            'Cache-Control': 'no-store, max-age=0',
+            'Pragma': 'no-cache'
+          }
+        }
       );
     }
 
@@ -106,7 +116,13 @@ export async function POST() {
         coins: updatedUser.coins,
         checkedInToday: true
       },
-      { status: 200 }
+      { 
+        status: 200,
+        headers: {
+          'Cache-Control': 'no-store, max-age=0',
+          'Pragma': 'no-cache'
+        }
+      }
     );
   } catch (error) {
     console.error("Error processing check-in:", error);
