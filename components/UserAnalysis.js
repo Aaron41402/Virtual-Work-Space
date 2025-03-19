@@ -77,6 +77,7 @@ function UserAnalysis() {
       setError(true);
     } finally {
       setIsGenerating(false);
+      loadReport()
     }
   };
 
