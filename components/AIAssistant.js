@@ -328,41 +328,50 @@ export default function AIAssistant() {
     }
   };
 
-  const handleSendMessage = (e) => {
+  const handleSendMessage = async (e) => {
     e.preventDefault();
-    
     if (!inputMessage.trim()) return;
     
     // Add user message to chat
-    setMessages(prev => [...prev, { sender: 'user', text: inputMessage.trim() }]);
+    const userMessage = { sender: 'user', text: inputMessage };
+    setMessages(prev => [...prev, userMessage]);
     
-    // Store the message for processing
-    const userMsg = inputMessage.trim().toLowerCase();
-    
-    // Clear input
+    const messageToSend = inputMessage;
     setInputMessage('');
-    
-    // Scroll to bottom
-    setTimeout(() => {
-      if (messagesEndRef.current) {
-        messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-      }
-    }, 100);
-    
-    // Show typing indicator
     setIsTyping(true);
     
-    // Process message after a short delay
-    setTimeout(() => {
-      // Check for specific commands
-      if (userMsg.includes('efficiency') || userMsg.includes('productive') || userMsg.includes('productivity')) {
-        analyzeUserEfficiency();
+    try {
+      // Make sure we're sending the correct request format
+      const response = await fetch('/api/gemini', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'context', // Ensure this is 'context' for general questions
+          data: messageToSend // Send the user's message as data
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`API responded with status: ${response.status}`);
       }
-      // For all other messages, use Gemini
-      else {
-        askGemini(userMsg);
+      
+      const data = await response.json();
+      
+      if (data.error) {
+        console.error('API returned error:', data.error);
+        addBotMessage("I'm having trouble processing your request. Please try again later!");
+      } else {
+        // Make sure we're using the correct property from the response
+        addBotMessage(data.response);
       }
-    }, 1000);
+    } catch (error) {
+      console.error('Error getting AI response:', error);
+      addBotMessage("I'm having trouble connecting right now. Please try again later!");
+    } finally {
+      setIsTyping(false);
+    }
   };
 
   // Show notification bubble
@@ -494,7 +503,7 @@ export default function AIAssistant() {
         "\nTIP: Take a short rest between quests to restore your FOCUS points.",
         "\nTIP: Staying hydrated throughout your journey increases your STAMINA by +20%.",
         "\nTIP: If you're feeling overwhelmed, use the DEEP BREATHING spell for 1 minute before your next quest.",
-        "\nTIP: Review your quest log at the end of the day to prepare for tomorrow's adventures."
+        "\nTIP: Review your quest log at the end of the day to prepare for tomorrow's adventure."
       ];
       
       response += tips[Math.floor(Math.random() * tips.length)];
@@ -525,6 +534,162 @@ export default function AIAssistant() {
     };
   }, []);
 
+  // Remove the quick action buttons and add a reminder system
+  useEffect(() => {
+    // Set up periodic reminders when the chat is open
+    let reminderInterval;
+    
+    if (isOpen) {
+      // Clear any existing interval
+      if (reminderInterval) clearInterval(reminderInterval);
+      
+      // Set up a new interval for reminders (every 3-5 minutes)
+      reminderInterval = setInterval(() => {
+        // Only show reminders if the user hasn't interacted recently
+        const lastMessageTime = messages.length > 0 
+          ? new Date(messages[messages.length - 1].timestamp || Date.now()) 
+          : new Date(0);
+        
+        const timeSinceLastMessage = Date.now() - lastMessageTime;
+        const threeMinutes = 3 * 60 * 1000;
+        
+        if (timeSinceLastMessage > threeMinutes) {
+          generateReminder();
+        }
+      }, 4 * 60 * 1000); // Check every 4 minutes
+    }
+    
+    return () => {
+      if (reminderInterval) clearInterval(reminderInterval);
+    };
+  }, [isOpen, messages]);
+
+  // Function to generate contextual reminders and encouragements
+  const generateReminder = async () => {
+    try {
+      // Get current time
+      const now = new Date();
+      const currentHour = now.getHours();
+      
+      // Decide whether to show an encouragement message (30% chance)
+      const showEncouragement = Math.random() < 0.3;
+      
+      if (showEncouragement) {
+        // Generate an encouragement message
+        const encouragementMessages = [
+          "⚔️ Your persistence is legendary! Each task you complete adds to your hero's tale.",
+          "🌟 You're making excellent progress on your journey! Your determination would impress even the greatest wizards.",
+          "🛡️ Remember: even the mightiest heroes take small steps. Your consistent effort is building something amazing!",
+          "🧙‍♂️ I sense great power in your work today! Your focus and dedication are truly magical.",
+          "🏆 Every quest completed brings you closer to legendary status! I'm impressed by your progress.",
+          "🔮 The oracle foretold of a hero with your dedication. The prophecy is coming true!",
+          "🏰 You're building your kingdom one task at a time. Your strategic approach is admirable!",
+          "🧝‍♀️ Even the elven elders would be impressed by how you've managed your quests today.",
+          "🐉 You're slaying your tasks like a true dragon hunter! Your courage in facing challenges is inspiring.",
+          "�� Your work ethic is as rare and valuable as enchanted gems. Keep mining for greatness!"
+        ];
+        
+        // Select a random encouragement message
+        const encouragementMessage = encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)];
+        
+        // Add the encouragement as a bot message
+        addBotMessage(encouragementMessage);
+        
+        // Set happy expression for encouragement
+        setAvatarExpression('happy');
+        
+        // Reset expression after a few seconds
+        setTimeout(() => {
+          setAvatarExpression('nice');
+        }, 5000);
+        
+        return; // Exit the function after showing encouragement
+      }
+      
+      // Continue with regular reminders if not showing encouragement
+      // Get task and schedule data
+      let tasksData = localStorage.getItem('tasks');
+      let scheduleData = localStorage.getItem('scheduleData');
+      
+      const tasks = tasksData ? JSON.parse(tasksData) : [];
+      const schedule = scheduleData ? JSON.parse(scheduleData) : [];
+      
+      // Find upcoming schedule items
+      const upcomingItems = schedule.filter(item => {
+        const itemHour = parseInt(item.time.split(':')[0]);
+        const itemMinute = parseInt(item.time.split(':')[1]);
+        
+        // Check if the item is within the next 30 minutes
+        if (itemHour === currentHour) {
+          return (itemMinute - now.getMinutes()) <= 30 && (itemMinute - now.getMinutes()) > 0;
+        } else if (itemHour === currentHour + 1) {
+          return (itemMinute + 60 - now.getMinutes()) <= 30;
+        }
+        return false;
+      });
+      
+      // Find pending high priority tasks
+      const highPriorityTasks = tasks.filter(task => 
+        task.priority === 'High' && task.status === 'Pending'
+      );
+      
+      // Determine what kind of reminder to show
+      let reminderType = 'general';
+      let reminderData = null;
+      
+      if (upcomingItems.length > 0) {
+        reminderType = 'schedule';
+        reminderData = upcomingItems[0]; // Remind about the nearest upcoming item
+      } else if (highPriorityTasks.length > 0) {
+        reminderType = 'task';
+        reminderData = highPriorityTasks[0]; // Remind about a high priority task
+      }
+      
+      // Generate the reminder message
+      let reminderMessage = '';
+      
+      switch (reminderType) {
+        case 'schedule':
+          reminderMessage = `⏰ Brave adventurer! Don't forget your upcoming quest: "${reminderData.activity}" at ${reminderData.time}. Prepare yourself!`;
+          break;
+        case 'task':
+          reminderMessage = `📜 Attention, hero! You have an important quest waiting: "${reminderData.title}" with HIGH priority. The kingdom depends on you!`;
+          break;
+        default:
+          // Time-based general reminders
+          if (currentHour < 12) {
+            reminderMessage = "🌞 How's your morning adventure going? Remember to tackle your most challenging quests while your energy is high!";
+          } else if (currentHour < 15) {
+            reminderMessage = "🍽️ Have you taken a break to restore your energy? Even the mightiest heroes need to rest!";
+          } else if (currentHour < 18) {
+            reminderMessage = "🌆 The day's journey continues! What quests remain on your adventure log for today?";
+          } else {
+            reminderMessage = "🌙 The day's light fades. Consider reviewing your completed quests and planning tomorrow's adventure!";
+          }
+      }
+      
+      // Add the reminder as a bot message
+      addBotMessage(reminderMessage);
+      
+      // Change avatar expression based on reminder type
+      if (reminderType === 'schedule') {
+        setAvatarExpression('impressed');
+      } else if (reminderType === 'task') {
+        setAvatarExpression('happy');
+      } else {
+        setAvatarExpression('nice');
+      }
+      
+      // Reset expression after a few seconds
+      setTimeout(() => {
+        setAvatarExpression('nice');
+      }, 5000);
+      
+    } catch (error) {
+      console.error('Error generating reminder:', error);
+    }
+  };
+
   return (
     <div className="fixed bottom-4 right-4 z-50 font-pixel">
       {/* Notification Bubble */}
@@ -540,67 +705,32 @@ export default function AIAssistant() {
         </div>
       )}
       
-      {/* Chat Window with Avatar on Top */}
+      {/* Chat Window */}
       {isOpen && (
-        <div className="relative mb-4">
-          {/* Avatar on top of chat */}
-          <div className="absolute -top-24 right-4 z-10">
-            <div className="w-24 h-24 rounded-none overflow-hidden pixel-border animate-float">
-              <img 
-                src={`/woman_${avatarExpression}.png`} 
-                alt="Assistant" 
-                className="w-full h-full object-cover"
-                style={{imageRendering: 'pixelated'}}
-              />
-            </div>
-          </div>
-          
-          {/* Chat Window */}
-          <div className="bg-[#705e78] rounded-none shadow-xl w-80 md:w-96 overflow-hidden pixel-border mt-12">
+        <div className="fixed bottom-4 right-4 w-80 bg-[#422e37] rounded-none border-4 border-[#e9d8a6] shadow-lg overflow-hidden z-50 pixel-border">
+          <div className="flex flex-col h-96">
             {/* Chat Header */}
-            <div className="bg-[#422e37] text-[#f2e9e4] p-3 flex justify-between items-center">
+            <div className="bg-[#705e78] p-3 flex justify-between items-center">
               <div className="flex items-center">
-                <span className="font-medium text-xs">Emi</span>
+                <div className="w-8 h-8 rounded-none overflow-hidden mr-2">
+                  <img 
+                    src={`/woman_${avatarExpression}.png`} 
+                    alt="Assistant" 
+                    className="w-full h-full object-cover"
+                    style={{imageRendering: 'pixelated'}}
+                  />
+                </div>
+                <h3 className="text-[#f2e9e4] text-sm font-bold">EMI</h3>
               </div>
-              <button onClick={toggleChat} className="text-[#f2e9e4] hover:text-white">
-                <Minimize2 size={18} />
-              </button>
-            </div>
-            
-            {/* Quick Action Buttons */}
-            <div className="bg-[#9c89b8] p-2 flex justify-around">
-              <button 
-                onClick={() => showSchedule()}
-                className="p-2 rounded-none hover:bg-[#705e78] flex flex-col items-center text-xs pixel-button"
-                title="Show Schedule"
-              >
-                <Calendar size={16} className="mb-1" />
-                <span>QUESTS</span>
-              </button>
-              <button 
-                onClick={() => addBotMessage("For your current task, try breaking it down into smaller steps to make it more manageable!")}
-                className="p-2 rounded-none hover:bg-[#705e78] flex flex-col items-center text-xs pixel-button"
-                title="Task Tips"
-              >
-                <BookOpen size={16} className="mb-1" />
-                <span>SKILLS</span>
-              </button>
-              <button 
-                onClick={() => addBotMessage("To boost productivity, try the Capydoro: 25 minutes of focused work followed by a 5-minute break.")}
-                className="p-2 rounded-none hover:bg-[#705e78] flex flex-col items-center text-xs pixel-button"
-                title="Productivity Tips"
-              >
-                <Clock size={16} className="mb-1" />
-                <span>WISDOM</span>
-              </button>
-              <button 
-                onClick={showRandomEncouragement}
-                className="p-2 rounded-none hover:bg-[#705e78] flex flex-col items-center text-xs pixel-button"
-                title="Get Encouragement"
-              >
-                <Coffee size={16} className="mb-1" />
-                <span>BOOST</span>
-              </button>
+              <div className="flex space-x-2">
+                
+                <button 
+                  onClick={() => setIsOpen(false)}
+                  className="text-[#f2e9e4] hover:text-[#e9d8a6]"
+                >
+                  <X size={16} />
+                </button>
+              </div>
             </div>
             
             {/* Chat Messages */}
@@ -636,21 +766,21 @@ export default function AIAssistant() {
             </div>
             
             {/* Chat Input */}
-            <form onSubmit={handleSendMessage} className="p-3 flex bg-[#422e37]">
+            <form onSubmit={handleSendMessage} className="p-3 flex items-center bg-[#422e37] border-t-2 border-[#705e78]">
               <input
                 ref={chatInputRef}
                 type="text"
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 placeholder="TYPE MESSAGE..."
-                className="flex-1 rounded-none px-3 py-2 text-xs pixel-input"
+                className="flex-1 rounded-none px-3 py-2 text-xs pixel-input min-w-0 h-10"
               />
               <button 
                 type="submit"
-                className="px-4 py-2 rounded-none text-[#f2e9e4] pixel-button"
+                className="px-3 py-2 ml-2 rounded-none text-[#f2e9e4] bg-[#705e78] hover:bg-[#9c89b8] pixel-button flex-shrink-0 h-10 flex items-center justify-center"
                 disabled={!inputMessage.trim()}
               >
-                <Send size={18} />
+                <Send size={16} />
               </button>
             </form>
           </div>

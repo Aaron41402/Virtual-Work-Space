@@ -4,6 +4,9 @@ export async function POST(request) {
   try {
     const { type, data } = await request.json();
     
+    // Log the request for debugging
+    console.log(`Processing ${type} request with data:`, typeof data === 'string' ? data : 'complex data');
+    
     // Get API key from environment variable
     const apiKey = process.env.GEMINI_API_KEY;
     
@@ -21,15 +24,36 @@ export async function POST(request) {
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
     
     let finalPrompt;
+    let result;
     
     if (type === 'analysis') {
       finalPrompt = createAnalysisPrompt(data);
-    } else {
+    } else if (type === 'context') {
+      // Make sure we're handling context requests correctly
       finalPrompt = createContextPrompt(data);
+    } else {
+      return new Response(JSON.stringify({ 
+        error: 'Invalid request type' 
+      }), { 
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
     
     // Get response from Gemini
-    const result = await model.generateContent(finalPrompt);
+    try {
+      result = await model.generateContent(finalPrompt);
+    } catch (error) {
+      console.error('Gemini API error:', error);
+      return new Response(JSON.stringify({ 
+        error: 'Failed to generate content',
+        details: error.message 
+      }), { 
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+    
     const response = result.response.text();
     
     // Extract efficiency score if it's an analysis
@@ -76,7 +100,7 @@ export async function POST(request) {
   }
 }
 
-// Create context-aware prompt for general questions
+// Improve the context prompt function
 function createContextPrompt(userPrompt) {
   return `
     You are a helpful RPG-themed AI assistant named Emi. You speak in a friendly, encouraging tone with occasional RPG references.
@@ -86,7 +110,13 @@ function createContextPrompt(userPrompt) {
     If the user is asking about their efficiency or productivity, provide general advice.
     If they're asking for suggestions to improve, provide specific, actionable advice.
     For general questions, provide helpful, informative responses.
-    Keep your response concise (under 100 words) and maintain the RPG theme.
+    Keep your response concise (under 40 words) and maintain the RPG theme.
+    
+    Always respond as if you're a character in an RPG game, using terms like quests (tasks), 
+    adventure (day), skills (abilities), and other fantasy RPG terminology.
+    
+    If the user asks something you don't know, admit that you don't have that information
+    rather than making up an answer.
   `;
 }
 
