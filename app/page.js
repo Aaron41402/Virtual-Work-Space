@@ -42,30 +42,28 @@ export default async function Home() {
         <div className="max-w-5xl mx-auto px-8">
           <h2 className="text-3xl font-bold text-center text-[#E6C86E] mb-8 pixel-shadow">How TaskHero Works</h2>
           
-          <div className="flex flex-col md:flex-row items-center gap-12">
-            {/* Video showcase */}
-            <div className="md:w-3/5">
-              <div className="border-4 border-[#FF6B97] shadow-pixel overflow-hidden bg-[#3A2E56] rounded-lg">
-                <video 
-                  width="100%" 
-                  height="auto" 
-                  controls 
-                  className="w-full"
-                  poster="/video-poster.png"
-                >
-                  <source src="/taskhero-demo.mp4" type="video/mp4" />
-                  Your browser does not support the video tag.
-                </video>
-              </div>
+          {/* Simple explanation - moved to top */}
+          <div className="mb-8">
+            <div className="bg-[#3A2E56] p-6 border-4 border-[#8BABBF] rounded-lg shadow-pixel">
+              <p className="text-white text-lg leading-relaxed">
+                TaskHero turns productivity into a game. Complete tasks to earn XP, level up with AI assistance, and stay focused with your capybara companion. Make work fun in our pixel art world!
+              </p>
             </div>
-            
-            {/* Simple explanation */}
-            <div className="md:w-2/5">
-              <div className="bg-[#3A2E56] p-6 border-4 border-[#8BABBF] rounded-lg shadow-pixel">
-                <p className="text-white text-lg leading-relaxed">
-                  TaskHero turns productivity into a game. Complete tasks to earn XP, level up with AI assistance, and stay focused with your capybara companion. Make work fun in our pixel art world!
-                </p>
-              </div>
+          </div>
+          
+          {/* Video showcase - now full width */}
+          <div className="w-full">
+            <div className="border-4 border-[#FF6B97] shadow-pixel overflow-hidden bg-[#3A2E56] rounded-lg">
+              <video 
+                width="100%" 
+                height="auto" 
+                controls 
+                className="w-full"
+                poster="/video-poster.png"
+              >
+                <source src="/taskhero-demo.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
             </div>
           </div>
         </div>

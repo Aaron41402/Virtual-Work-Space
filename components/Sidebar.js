@@ -156,7 +156,7 @@ export default function Sidebar({ activeSection, setActiveSection }) {
         {/* User Profile Section */}
         <div className="flex flex-col items-center mb-8">
           <div className="avatar mb-4 z-10">
-            <div className="w-20 h-20 rounded-none border-4 border-[#E6C86E] overflow-hidden pixel-shadow">
+            <div className="w-20 h-20 rounded-full border-4 border-[#E6C86E] overflow-hidden pixel-shadow">
               <img src={userAvatar} alt={userName} className="pixel-image" />
             </div>
           </div>
