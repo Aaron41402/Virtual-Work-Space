@@ -10,15 +10,6 @@ export default function LoginReminder() {
     // Check if user has logged in today
     const checkLoginStatus = async () => {
       try {
-        // Check if reminder was dismissed today in localStorage
-        const today = new Date().toISOString().split('T')[0];
-        const reminderDismissed = localStorage.getItem('reminderDismissed');
-        
-        if (reminderDismissed === today) {
-          console.log('Reminder was previously dismissed today');
-          return; // Don't show reminder if already dismissed
-        }
-        
         const response = await fetch('/api/login-tracker');
         if (response.ok) {
           const data = await response.json();
@@ -30,12 +21,14 @@ export default function LoginReminder() {
             return;
           }
           
-          // Check if user has logged in today using date string comparison
-          const todayString = new Date().toISOString().split('T')[0];
+          // Check if user has logged in today
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
           
           const hasLoggedInToday = data.loginDates.some(date => {
-            const loginDateString = new Date(date).toISOString().split('T')[0];
-            return loginDateString === todayString;
+            const loginDate = new Date(date);
+            loginDate.setHours(0, 0, 0, 0);
+            return loginDate.getTime() === today.getTime();
           });
           
           setHasCheckedIn(hasLoggedInToday);
@@ -56,24 +49,12 @@ export default function LoginReminder() {
   const handleCheckIn = async () => {
     try {
       const response = await fetch('/api/login-tracker', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        }
+        method: 'POST'
       });
       
       if (response.ok) {
         setHasCheckedIn(true);
         setShowReminder(false);
-        
-        // Save dismissal to localStorage
-        try {
-          const today = new Date().toISOString().split('T')[0];
-          localStorage.setItem('reminderDismissed', today);
-        } catch (error) {
-          console.error('Error setting localStorage:', error);
-        }
-        
         // Reload page to update coin count
         window.location.reload();
       }
@@ -84,14 +65,6 @@ export default function LoginReminder() {
   
   const dismissReminder = () => {
     setShowReminder(false);
-    
-    // Save dismissal to localStorage
-    try {
-      const today = new Date().toISOString().split('T')[0];
-      localStorage.setItem('reminderDismissed', today);
-    } catch (error) {
-      console.error('Error setting localStorage:', error);
-    }
   };
   
   if (!showReminder) return null;
