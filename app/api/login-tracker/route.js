@@ -4,6 +4,17 @@ import User from "@/models/User";
 import UserLogin from "@/models/UserLogin";
 import { NextResponse } from "next/server";
 
+// Helper function for date comparison
+function isSameDay(date1, date2) {
+  const d1 = new Date(date1);
+  const d2 = new Date(date2);
+  return (
+    d1.getFullYear() === d2.getFullYear() &&
+    d1.getMonth() === d2.getMonth() &&
+    d1.getDate() === d2.getDate()
+  );
+}
+
 // Get login history for the current user
 export async function GET() {
   const session = await auth();
@@ -30,16 +41,25 @@ export async function GET() {
     // Get user to include total coins
     const user = await User.findById(session.user.id);
 
+    // Check if user already logged in today
+    const today = new Date();
+    const checkedInToday = userLogin.loginDates.some((date) => 
+      isSameDay(date, today)
+    );
+
     return NextResponse.json(
       {
         loginDates: userLogin.loginDates,
-        coins: user?.coins || 0
+        coins: user?.coins || 0,
+        checkedInToday // Explicitly tell the client if they're checked in today
       },
       { 
         status: 200,
         headers: {
-          'Cache-Control': 'no-store, max-age=0',
-          'Pragma': 'no-cache'
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+          'Surrogate-Control': 'no-store'
         }
       }
     );
@@ -62,7 +82,6 @@ export async function POST() {
 
     // Get today's date in local timezone
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
 
     // Find or create user login record
     let userLogin = await UserLogin.findOne({ userId: session.user.id });
@@ -77,11 +96,9 @@ export async function POST() {
     }
 
     // Check if user already logged in today
-    const alreadyLoggedInToday = userLogin.loginDates.some((date) => {
-      const loginDate = new Date(date);
-      loginDate.setHours(0, 0, 0, 0);
-      return loginDate.getTime() === today.getTime();
-    });
+    const alreadyLoggedInToday = userLogin.loginDates.some((date) => 
+      isSameDay(date, today)
+    );
 
     if (alreadyLoggedInToday) {
       // Get the user to include coins
@@ -93,13 +110,15 @@ export async function POST() {
           alreadyCheckedIn: true,
           loginDates: userLogin.loginDates,
           coins: user?.coins || 0,
-          checkedInToday: true
+          checkedInToday: true // Explicitly tell the client they're checked in today
         },
         { 
           status: 200,
           headers: {
-            'Cache-Control': 'no-store, max-age=0',
-            'Pragma': 'no-cache'
+            'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0',
+            'Surrogate-Control': 'no-store'
           }
         }
       );
@@ -121,13 +140,15 @@ export async function POST() {
         message: "Check-in successful! You earned 1 coin.",
         loginDates: userLogin.loginDates,
         coins: updatedUser.coins,
-        checkedInToday: true
+        checkedInToday: true // Explicitly tell the client they're checked in today
       },
       { 
         status: 200,
         headers: {
-          'Cache-Control': 'no-store, max-age=0',
-          'Pragma': 'no-cache'
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+          'Surrogate-Control': 'no-store'
         }
       }
     );

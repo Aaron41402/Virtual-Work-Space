@@ -12,14 +12,26 @@ const [loading, setLoading] = useState(false);
 const [checkedInToday, setCheckedInToday] = useState(false);
 const [checkInMessage, setCheckInMessage] = useState('');
 
+// Helper function to compare dates without time
+const isSameDay = (date1, date2) => {
+  const d1 = new Date(date1);
+  const d2 = new Date(date2);
+  return (
+    d1.getFullYear() === d2.getFullYear() &&
+    d1.getMonth() === d2.getMonth() &&
+    d1.getDate() === d2.getDate()
+  );
+};
+
 // Make fetchLoginData a useCallback function so it can be referenced in multiple places
 const fetchLoginData = useCallback(async () => {
     console.log('Fetching login data...');
     try {
     const response = await fetch('/api/login-tracker', {
+        cache: 'no-store',
         headers: {
-        'Cache-Control': 'no-cache',
-        'Pragma': 'no-cache'
+          'Cache-Control': 'no-cache, no-store',
+          'Pragma': 'no-cache'
         }
     });
     
@@ -27,28 +39,31 @@ const fetchLoginData = useCallback(async () => {
         const data = await response.json();
         console.log('Received login data:', data);
         
-        // Ensure dates are properly converted
-        const loginDates = Array.isArray(data.loginDates) 
-            ? data.loginDates.map(date => new Date(date))
-            : [];
-        
-        setLoginData({
-        loginDates,
-        coins: data.coins || 0
-        });
-        
-        // Check if today is in the login dates
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        
-        const alreadyCheckedIn = loginDates.some(date => {
-        const loginDate = new Date(date);
-        loginDate.setHours(0, 0, 0, 0);
-        return loginDate.getTime() === today.getTime();
-        });
-        
-        console.log('Already checked in today?', alreadyCheckedIn);
-        setCheckedInToday(alreadyCheckedIn);
+        // If the API tells us the user is already checked in, trust that
+        if (data.checkedInToday === true) {
+          console.log('API confirms user is checked in today');
+          setCheckedInToday(true);
+        } else {
+          // Ensure dates are properly converted
+          const loginDates = Array.isArray(data.loginDates) 
+              ? data.loginDates.map(date => new Date(date))
+              : [];
+          
+          setLoginData({
+            loginDates,
+            coins: data.coins || 0
+          });
+          
+          // Check if today is in the login dates
+          const today = new Date();
+          
+          const alreadyCheckedIn = loginDates.some(date => 
+            isSameDay(date, today)
+          );
+          
+          console.log('Already checked in today?', alreadyCheckedIn);
+          setCheckedInToday(alreadyCheckedIn);
+        }
     }
     } catch (error) {
     console.error('Error fetching login data:', error);
@@ -77,20 +92,24 @@ useEffect(() => {
     const handleCheckInEvent = (event) => {
     console.log('Check-in event received:', event.detail);
     
-    // Update the state immediately with the event data first
+    // Force check-in status to true when we receive a check-in event
     setCheckedInToday(true);
     setCheckInMessage("Check-in successful! You earned 1 coin.");
     
     // Update loginData with the event detail data
-    if (event.detail && Array.isArray(event.detail.loginDates)) {
+    if (event.detail) {
+        const loginDates = Array.isArray(event.detail.loginDates) 
+          ? event.detail.loginDates.map(date => new Date(date))
+          : [];
+          
         setLoginData({
-        loginDates: event.detail.loginDates.map(date => new Date(date)),
-        coins: event.detail.coins || 0
+          loginDates,
+          coins: event.detail.coins || 0
         });
     }
     
     // Then refresh data from server to be sure
-    setTimeout(() => fetchLoginData(), 300);
+    setTimeout(() => fetchLoginData(), 500);
     };
     
     window.addEventListener('user-checked-in', handleCheckInEvent);
@@ -110,9 +129,10 @@ const handleCheckIn = async () => {
     try {
     const response = await fetch('/api/login-tracker', {
         method: 'POST',
+        cache: 'no-store',
         headers: {
-        'Cache-Control': 'no-cache',
-        'Pragma': 'no-cache'
+          'Cache-Control': 'no-cache, no-store',
+          'Pragma': 'no-cache'
         }
     });
 
@@ -120,8 +140,8 @@ const handleCheckIn = async () => {
     
     if (response.ok) {
         setLoginData({
-        loginDates: data.loginDates.map(date => new Date(date)),
-        coins: data.coins
+          loginDates: data.loginDates.map(date => new Date(date)),
+          coins: data.coins
         });
         
         setCheckedInToday(true);
@@ -165,23 +185,23 @@ const renderCalendar = () => {
     // Add days of the month
     for (let day = 1; day <= daysInMonth; day++) {
     const date = new Date(currentYear, currentMonth, day);
-    date.setHours(0, 0, 0, 0);
-
-    // Check if user logged in on this day
-    const loggedIn = loginData.loginDates.some(loginDate => {
-        const d = new Date(loginDate);
-        d.setHours(0, 0, 0, 0);
-        return d.getTime() === date.getTime();
-    });
+    
+    // Check if user logged in on this day - use the same day comparison function
+    const loggedIn = loginData.loginDates.some(loginDate => 
+      isSameDay(loginDate, date)
+    );
 
     // Check if this is today
     const isToday = day === today.getDate();
+
+    // Force today to be marked as logged in if checkedInToday is true
+    const isMarkedLoggedIn = (isToday && checkedInToday) || loggedIn;
 
     days.push(
         <div 
         key={`day-${day}`} 
         className={`h-8 w-8 flex items-center justify-center rounded-full 
-            ${loggedIn ? 'bg-green-500 text-white line-through' : 'bg-gray-100'} 
+            ${isMarkedLoggedIn ? 'bg-green-500 text-white line-through' : 'bg-gray-100'} 
             ${isToday ? 'ring-2 ring-blue-500' : ''}
         `}
         >

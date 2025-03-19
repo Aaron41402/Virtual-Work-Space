@@ -7,18 +7,36 @@ export default function LoginReminder() {
   const [hasCheckedIn, setHasCheckedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   
+  // Helper function to compare dates without time
+  const isSameDay = (date1, date2) => {
+    const d1 = new Date(date1);
+    const d2 = new Date(date2);
+    return (
+      d1.getFullYear() === d2.getFullYear() &&
+      d1.getMonth() === d2.getMonth() &&
+      d1.getDate() === d2.getDate()
+    );
+  };
+  
   useEffect(() => {
     // Check if user has logged in today
     const checkLoginStatus = async () => {
       try {
         const response = await fetch('/api/login-tracker', {
+          cache: 'no-store',
           headers: {
-            'Cache-Control': 'no-cache',
+            'Cache-Control': 'no-cache, no-store',
             'Pragma': 'no-cache'
           }
         });
         if (response.ok) {
           const data = await response.json();
+          
+          // If API explicitly tells us they've checked in today
+          if (data.checkedInToday) {
+            setHasCheckedIn(true);
+            return;
+          }
           
           // Check if user has any login dates
           if (!data.loginDates || data.loginDates.length === 0) {
@@ -29,13 +47,10 @@ export default function LoginReminder() {
           
           // Check if user has logged in today
           const today = new Date();
-          today.setHours(0, 0, 0, 0);
           
-          const hasLoggedInToday = data.loginDates.some(date => {
-            const loginDate = new Date(date);
-            loginDate.setHours(0, 0, 0, 0);
-            return loginDate.getTime() === today.getTime();
-          });
+          const hasLoggedInToday = data.loginDates.some(date => 
+            isSameDay(new Date(date), today)
+          );
           
           setHasCheckedIn(hasLoggedInToday);
           
@@ -59,8 +74,9 @@ export default function LoginReminder() {
     try {
       const response = await fetch('/api/login-tracker', {
         method: 'POST',
+        cache: 'no-store',
         headers: {
-          'Cache-Control': 'no-cache',
+          'Cache-Control': 'no-cache, no-store',
           'Pragma': 'no-cache'
         }
       });
@@ -75,7 +91,8 @@ export default function LoginReminder() {
         // Create properly structured event data, ensuring dates are properly formatted
         const eventData = {
           loginDates: Array.isArray(data.loginDates) ? data.loginDates : [],
-          coins: typeof data.coins === 'number' ? data.coins : 0
+          coins: typeof data.coins === 'number' ? data.coins : 0,
+          checkedInToday: true
         };
         
         // Dispatch event with timeout to ensure DOM is ready
@@ -89,8 +106,11 @@ export default function LoginReminder() {
         
         // Also force a refresh of the login tracker data
         try {
-          const refreshEvent = new CustomEvent('refresh-login-data');
-          window.dispatchEvent(refreshEvent);
+          setTimeout(() => {
+            const refreshEvent = new CustomEvent('refresh-login-data');
+            window.dispatchEvent(refreshEvent);
+            console.log('Refresh event dispatched');
+          }, 200);
         } catch (e) {
           console.error('Error dispatching refresh event:', e);
         }
