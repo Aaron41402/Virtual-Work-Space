@@ -38,6 +38,13 @@ function ToDoList() {
 
     // ------------------------- Handlers -------------------------
     const handleStatusChange = async (taskId, updates) => {
+        // Find the current task and return if status is unchanged
+        const currentTask = tasks.find(task => task._id === taskId);
+        if (currentTask.status === updates.status) {
+            setActiveStatusDropdown(null);
+            return;
+        }
+
         // First, update the local state and localStorage immediately
         const updatedTasks = tasks.map(task => 
             task._id === taskId ? { ...task, ...updates } : task
@@ -286,7 +293,7 @@ function ToDoList() {
                             onClick={() => setActiveStatusDropdown(null)}
                         />
                         
-                        <div className="absolute left-0 mt-1 bg-white rounded-md shadow-lg border border-gray-200 z-20">
+                        <div className="absolute left-0 mt-1 bg-white rounded-md shadow-lg border border-gray-200 z-20 whitespace-nowrap">
                             {['Pending', 'In Progress', 'Completed'].map((status) => (
                                 <button
                                     key={status}
@@ -294,10 +301,13 @@ function ToDoList() {
                                         handleStatusChange(taskId, { status });
                                         setActiveStatusDropdown(null);
                                     }}
-                                    className={`flex items-center gap-2 w-full px-4 py-2 text-left text-sm ${
-                                        status === 'Pending' ? 'hover:bg-blue-50 text-blue-800' :
-                                        status === 'In Progress' ? 'hover:bg-blue-500 text-blue-500 hover:text-white' :
-                                        'hover:bg-blue-900 text-blue-900 hover:text-white'
+                                    className={`flex items-center gap-2 w-full px-4 py-2 text-left text-sm
+                                        bg-white text-gray-700
+                                        ${status === 'Pending' 
+                                            ? 'hover:bg-blue-50/90 hover:text-blue-800 rounded-t-md border-b-2' :
+                                        status === 'In Progress' 
+                                            ? 'hover:bg-blue-500 hover:text-white border-b-2' :
+                                        'hover:bg-blue-900 hover:text-white rounded-b-md'
                                     }`}
                                 >
                                     {status === 'Pending' && <Circle size={16} />}
@@ -326,13 +336,13 @@ function ToDoList() {
                     
                     <button
                         onClick={handleFilterClick}
-                        className={`p-2 rounded-full border ${
+                        className={`p-2 rounded-full ${
                             showFilterPanel 
                                 ? 'bg-blue-500 text-white border-blue-500' 
-                                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'
+                                : 'text-gray-700 hover:bg-blue-500 hover:text-white'
                         }`}
                     >
-                        <Filter size={16} />
+                        <Filter size={18} />
                     </button>
                 </div>
 

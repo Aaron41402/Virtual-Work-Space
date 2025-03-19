@@ -634,7 +634,7 @@ function TodaySchedule() {
                   onClick={() => setShowAddModal(true)}
                   className="px-4 py-2 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded"
                 >
-                  Add adventure
+                  Add Adventure
                 </button>
               </div>
             </>
