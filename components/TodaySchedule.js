@@ -751,7 +751,7 @@ function TodaySchedule() {
           <div className="mt-4 flex justify-end">
             <button
               onClick={createSchedule}
-              className={`px-3 py-1 rounded transition-colors ${
+              className={`py-2 px-4 rounded-md transition-colors font-pixel ${
                   isCreatingSchedule 
                     ? 'bg-gray-400 cursor-not-allowed' 
                     : 'bg-blue-500 hover:bg-blue-600 text-white'
@@ -889,7 +889,7 @@ function TodaySchedule() {
               <div className="flex justify-end pr-2">
                 <button
                   onClick={() => setShowAddModal(true)}
-                  className="px-4 py-2 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded"
+                  className="px-4 py-2 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded-md font-pixel"
                 >
                   Add Adventure
                 </button>

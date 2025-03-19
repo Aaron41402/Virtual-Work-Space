@@ -111,7 +111,7 @@ function UserAnalysis() {
     );
   }
 
-  if (error) {
+  if (!error) {
     return (
       <div className="flex-1 p-8 mt-24 relative z-10">
         <div className="bg-white/70 backdrop-blur-sm w-3/4 max-w-2xl mx-auto mt-8 rounded-lg shadow p-4">
@@ -132,7 +132,7 @@ function UserAnalysis() {
           <div className="mt-4 flex justify-end">
             <button
               onClick={regenerateAnalysis}
-              className={`px-3 py-1 rounded transition-colors ${
+              className={`py-2 px-4 rounded-md transition-colors font-pixel ${
                   isGenerating 
                     ? 'bg-gray-400 cursor-not-allowed' 
                     : 'bg-blue-500 hover:bg-blue-600 text-white'

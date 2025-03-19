@@ -657,7 +657,7 @@ function ToDoList() {
                 <div className="flex justify-end pr-2">
                     <button
                         onClick={handleOpenAddTaskModal}
-                        className="px-4 py-2 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded"
+                        className="px-4 py-2 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded-md font-pixel"
                     >
                         Add Quest
                     </button>
