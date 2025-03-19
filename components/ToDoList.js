@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Edit2, Check, X, Trash2, Filter, Circle, Clock, CheckCircle2 } from 'lucide-react';
 
 function ToDoList() {
@@ -28,6 +28,10 @@ function ToDoList() {
     // Add priority and status order maps
     const priorityOrder = { High: 1, Medium: 2, Low: 3 };
     const statusOrder = { Pending: 1, 'In Progress': 2, Completed: 3 };
+
+    // Add refs
+    const taskListRef = useRef(null);
+    const taskRefs = useRef({});
 
     // Fetch tasks on component mount
     useEffect(() => {
@@ -85,6 +89,9 @@ function ToDoList() {
             localStorage.setItem('tasks', JSON.stringify(originalTasks));
             console.error('Error updating task:', error);
         }
+
+        // After successful update
+        setTimeout(() => scrollToTask(taskId), 100); // Small delay to allow for re-render
     };
 
     const handleOpenAddTaskModal = () => {
@@ -130,7 +137,7 @@ function ToDoList() {
         }));
     };
 
-    const saveEdit = async () => {
+    const saveEdit = async (itemId) => {
         if (!editingTask.title.trim()) return;
 
         try {
@@ -156,6 +163,9 @@ function ToDoList() {
                 setTasks(updatedTasks);
                 localStorage.setItem('tasks', JSON.stringify(updatedTasks));
                 setEditingTask(null);
+                
+                // Add scroll after update
+                setTimeout(() => scrollToTask(itemId), 100);
             }
         } catch (error) {
             console.error('Error updating task:', error);
@@ -335,6 +345,24 @@ function ToDoList() {
         );
     };
 
+    // Add function to scroll to task
+    const scrollToTask = (taskId) => {
+        if (taskListRef.current && taskRefs.current[taskId]) {
+            const taskElement = taskRefs.current[taskId];
+            const listElement = taskListRef.current;
+            
+            // Calculate scroll position
+            const taskTop = taskElement.offsetTop;
+            const listScrollTop = listElement.scrollTop;
+            const listHeight = listElement.clientHeight;
+            
+            // Scroll the task into view with some padding
+            listElement.scrollTo({
+                top: taskTop - listHeight / 3,
+                behavior: 'smooth'
+            });
+        }
+    };
 
     if (loading) {
         return (
@@ -473,7 +501,10 @@ function ToDoList() {
 
                 {/* Task List */}
                 {!showFilterPanel && (
-                    <div className="mb-4 flex flex-col max-h-[350px] overflow-y-auto pr-2 space-y-2">
+                    <div 
+                        ref={taskListRef}
+                        className="mb-4 flex flex-col max-h-[350px] overflow-y-auto pr-2 space-y-2"
+                    >
                         {getFilteredAndSortedTasks().length === 0 ? (
                             <div className="text-center py-8 text-gray-500">
                                 <p className="text-sm">No quests available</p>
@@ -481,11 +512,15 @@ function ToDoList() {
                             </div>
                         ) : (
                             getFilteredAndSortedTasks().map((task) => (
-                                <div key={task._id} className={`flex-1 p-4 rounded relative ${
-                                    task.priority === 'High' ? 'bg-red-100/90' :
-                                    task.priority === 'Medium' ? 'bg-yellow-100/90' :
-                                    'bg-green-100/90'
-                                }`}>
+                                <div 
+                                    key={task._id} 
+                                    ref={el => taskRefs.current[task._id] = el}
+                                    className={`flex-1 p-4 rounded relative ${
+                                        task.priority === 'High' ? 'bg-red-100/90' :
+                                        task.priority === 'Medium' ? 'bg-yellow-100/90' :
+                                        'bg-green-100/90'
+                                    }`}
+                                >
                                     {editingTask && editingTask._id === task._id ? (
                                         <div className="space-y-4 mt-4">
                                             <div>
@@ -525,7 +560,7 @@ function ToDoList() {
                                             </div>
                                             <div className="flex justify-end space-x-2">
                                                 <button 
-                                                    onClick={saveEdit}
+                                                    onClick={() => saveEdit(task._id)}
                                                     className="px-3 py-1 bg-green-500 text-white rounded text-sm"
                                                 >
                                                     <span className="flex items-center">
@@ -553,7 +588,9 @@ function ToDoList() {
                                                         currentStatus={task.status}
                                                     />
                                                     <div className="flex flex-row justify-between flex-1">
-                                                        <h3 className="font-semibold">{task.title}</h3>
+                                                        <h3 className={`font-semibold ${task.status === 'Completed' ? 'line-through text-gray-500' : ''}`}>
+                                                            {task.title}
+                                                        </h3>
                                                         <div className="flex space-x-1 items-start pt-1">
                                                             <button 
                                                                 onClick={() => startEditing(task)}
@@ -571,7 +608,9 @@ function ToDoList() {
                                                     </div>
                                                 </div>
                                                 {task.description && (
-                                                    <p className="text-sm text-gray-600 mt-1">{task.description}</p>
+                                                    <p className={`text-sm text-gray-600 mt-1 ${task.status === 'Completed' ? 'line-through' : ''}`}>
+                                                        {task.description}
+                                                    </p>
                                                 )}
                                             </div>
                                         </div>
