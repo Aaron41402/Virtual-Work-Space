@@ -120,13 +120,15 @@ function UserAnalysis() {
             letterSpacing: "0.5px",
             textShadow: "2px 2px 0 #000"
           }}>Analysis</h2>
-          <div className="flex items-center text-red-500 mb-2">
-            <AlertCircle size={18} className="mr-2" />
-            <p>No analysis found</p>
+          <div className="text-center py-8 text-gray-500">
+            <div className="flex items-center justify-center text-red-500 mb-2">
+              <AlertCircle size={18} className="mr-2" />
+              <p className='text-sm'>No analysis found</p>
+            </div>
+            <p className="text-xs text-center">
+              You can generate an analysis by clicking the 'Generate Analysis' button.
+            </p>
           </div>
-          <p className="text-sm text-gray-600">
-            You can generate an analysis by clicking the "Generate Analysis" button.
-          </p>
           <div className="mt-4 flex justify-end">
             <button
               onClick={regenerateAnalysis}

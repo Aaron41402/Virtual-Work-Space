@@ -28,6 +28,7 @@ function TodaySchedule() {
     activity: false
   });
   const [notification, setNotification] = useState({ show: false, message: '' });
+  const [isCreatingSchedule, setIsCreatingSchedule] = useState(false);
 
   useEffect(() => {
     // Update current time every minute
@@ -105,6 +106,7 @@ function TodaySchedule() {
         console.log('Using cached schedule data');
         setSchedule(JSON.parse(cachedData));
         setLoading(false);
+        setError(false);
         return;
       }
       
@@ -707,6 +709,12 @@ function TodaySchedule() {
     }
   };
 
+  const createSchedule = async () => {
+    setIsCreatingSchedule(true);
+    await loadScheduleData();
+    setIsCreatingSchedule(false);
+  }
+
   if (loading) {
     return (
       <div className="flex-1 p-8 mt-24 relative z-10">
@@ -730,20 +738,26 @@ function TodaySchedule() {
             fontFamily: "'Press Start 2P', monospace",
             letterSpacing: "0.5px",
             textShadow: "2px 2px 0 #000"
-          }}>TODAY'S ADVENTURE</h2>
-          <div className="flex items-center text-red-500 mb-2">
-            <AlertCircle size={18} className="mr-2" />
-            <p>{error}</p>
+          }}>Today's Adventure</h2>
+          <div className="text-center py-8 text-gray-500">
+            <div className="flex items-center justify-center text-red-500 mb-2">
+              <AlertCircle size={18} className="mr-2" />
+              <p className='text-sm'>{error}</p>
+            </div>
+            <p className="text-xs text-center">
+              You can create a custom schedule by clicking the 'Create Schedule' button.
+            </p>
           </div>
-          <p className="text-sm text-gray-600">
-            You can create a custom schedule by clicking the "Create Schedule" button.
-          </p>
           <div className="mt-4 flex justify-end">
             <button
-              onClick={() => setShowAddModal(true)}
-              className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+              onClick={createSchedule}
+              className={`px-3 py-1 rounded transition-colors ${
+                  isCreatingSchedule 
+                    ? 'bg-gray-400 cursor-not-allowed' 
+                    : 'bg-blue-500 hover:bg-blue-600 text-white'
+                }`}
             >
-              Create Schedule
+              {isCreatingSchedule ? 'Creating Schedule...' : 'Create Schedule'}
             </button>
           </div>
         </div>

@@ -13,13 +13,19 @@ function ToDoList() {
         status: "Pending"
     });
     const [editingTask, setEditingTask] = useState(null);
-    const [filters, setFilters] = useState({
-        priorities: [],
-        statuses: []
+    const [filters, setFilters] = useState(() => {
+        const savedFilters = localStorage.getItem('taskFilters');
+        return savedFilters ? JSON.parse(savedFilters) : {
+            priorities: [],
+            statuses: []
+        };
     });
-    const [sortConfig, setSortConfig] = useState({
-        field: 'priority',
-        direction: 'desc'
+    const [sortConfig, setSortConfig] = useState(() => {
+        const savedSortConfig = localStorage.getItem('taskSortConfig');
+        return savedSortConfig ? JSON.parse(savedSortConfig) : {
+            field: 'priority',
+            direction: 'desc'
+        };
     });
     const [showFilterPanel, setShowFilterPanel] = useState(false);
     const [titleError, setTitleError] = useState(false);
@@ -47,6 +53,15 @@ function ToDoList() {
         }
         setLoading(false);
     };
+
+    // Add effects to save changes to localStorage
+    useEffect(() => {
+        localStorage.setItem('taskFilters', JSON.stringify(filters));
+    }, [filters]);
+
+    useEffect(() => {
+        localStorage.setItem('taskSortConfig', JSON.stringify(sortConfig));
+    }, [sortConfig]);
 
     // ------------------------- Handlers -------------------------
     const handleStatusChange = async (taskId, updates) => {
@@ -270,6 +285,13 @@ function ToDoList() {
         setShowFilterPanel(!showFilterPanel);
     };
 
+    const handleApplyChanges = () => {
+        // Save current filters and sort config to localStorage
+        localStorage.setItem('taskFilters', JSON.stringify(filters));
+        localStorage.setItem('taskSortConfig', JSON.stringify(sortConfig));
+        setShowFilterPanel(false);
+    };
+
     const StatusButton = ({ taskId, currentStatus }) => {
         const getStatusStyles = () => {
             switch (currentStatus) {
@@ -364,7 +386,6 @@ function ToDoList() {
             
             // Calculate scroll position
             const taskTop = taskElement.offsetTop;
-            const listScrollTop = listElement.scrollTop;
             const listHeight = listElement.clientHeight;
             
             // Scroll the task into view with some padding
@@ -500,7 +521,7 @@ function ToDoList() {
                             {/* Apply Button */}
                             <div className="flex justify-end">
                                 <button
-                                    onClick={() => setShowFilterPanel(false)}
+                                    onClick={handleApplyChanges}
                                     className="px-4 py-2 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded"
                                 >
                                     Apply Changes
@@ -519,7 +540,7 @@ function ToDoList() {
                         {getFilteredAndSortedTasks().length === 0 ? (
                             <div className="text-center py-8 text-gray-500">
                                 <p className="text-sm">No quests available</p>
-                                <p className="text-xs mt-1">Click 'Add Quest' to create a quest</p>
+                                <p className="text-xs mt-1">You can create a new quest by clicking the 'Add Quest' button.</p>
                             </div>
                         ) : (
                             getFilteredAndSortedTasks().map((task) => (
