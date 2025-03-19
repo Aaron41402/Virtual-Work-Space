@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import ReactMarkdown from 'react-markdown';
-import { Calendar } from 'lucide-react';
+import { Calendar, AlertCircle } from 'lucide-react';
 
 function UserAnalysis() {
   const [report, setReport] = useState('');
@@ -96,11 +96,51 @@ function UserAnalysis() {
   };
 
   if (loading) {
-    return <div className="flex-1 p-8 relative z-10">
-      <div className="bg-white/70 backdrop-blur-sm w-3/4 max-w-2xl mx-auto mt-8 rounded-lg shadow-lg p-4">
-        Loading...
+    return (
+      <div className="flex-1 p-8 mt-24 relative z-10">
+        <div className="bg-white/70 backdrop-blur-sm w-3/4 max-w-2xl mx-auto mt-8 rounded-lg shadow p-4">
+          <h2 className="text-2xl text-[#E6C86E] font-bold mb-4" style={{
+            fontFamily: "'Press Start 2P', monospace",
+            letterSpacing: "0.5px",
+            textShadow: "2px 2px 0 #000"
+          }}>Analysis</h2>
+          <p>Loading your efficiency analysis <span className="loading loading-dots loading-xs"></span></p>
+        </div>
       </div>
-    </div>;
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex-1 p-8 mt-24 relative z-10">
+        <div className="bg-white/70 backdrop-blur-sm w-3/4 max-w-2xl mx-auto mt-8 rounded-lg shadow p-4">
+          <h2 className="text-2xl text-[#E6C86E] font-bold mb-4" style={{
+            fontFamily: "'Press Start 2P', monospace",
+            letterSpacing: "0.5px",
+            textShadow: "2px 2px 0 #000"
+          }}>Analysis</h2>
+          <div className="flex items-center text-red-500 mb-2">
+            <AlertCircle size={18} className="mr-2" />
+            <p>No analysis found</p>
+          </div>
+          <p className="text-sm text-gray-600">
+            You can generate an analysis by clicking the "Generate Analysis" button.
+          </p>
+          <div className="mt-4 flex justify-end">
+            <button
+              onClick={regenerateAnalysis}
+              className={`px-3 py-1 rounded transition-colors ${
+                  isGenerating 
+                    ? 'bg-gray-400 cursor-not-allowed' 
+                    : 'bg-blue-500 hover:bg-blue-600 text-white'
+                }`}
+            >
+              {isGenerating ? 'Generating Analysis...' : 'Generate Analysis'}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -119,48 +159,29 @@ function UserAnalysis() {
         </div>
 
         <div className="max-h-[450px] overflow-y-auto pr-2">
-          { error ? (
-            <div className="flex flex-col justify-center items-center">
-              {!isGenerating && <p className="mb-4">No Analysis Found</p>}
-              <button 
-                onClick={regenerateAnalysis}
-                disabled={loading}
-                className={`px-4 py-2 rounded transition-colors ${
-                  isGenerating 
-                    ? 'bg-gray-400 cursor-not-allowed' 
-                    : 'bg-blue-500 hover:bg-blue-600 text-white'
-                }`}
-              >
-                {isGenerating ? 'Generating Analysis...' : 'Generate Analysis'}
-              </button>
-            </div>
-          ) : (
-            <div>
-              {/* Circles row with default values */}
-              <div className="flex justify-evenly mb-4">
-                <div className="flex flex-col items-center">
-                  <p className="text-sm mb-1 font-semibold">Efficiency Score</p>
-                  <div className="w-20 h-20 flex items-center justify-center rounded-full border-2 bg-blue-50/90">
-                    <span className="text-xl font-semibold">{efficiencyScore}</span>
-                  </div>
-                </div>
-
-                <div className="flex flex-col items-center">
-                  <p className="text-sm mb-1 font-semibold">Tasks Completed</p>
-                  <div className="w-20 h-20 flex items-center justify-center rounded-full border-2 bg-green-50/90">
-                    <span className="text-xl font-semibold">{tasksCompleted}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="w-full border rounded-lg p-4 bg-white">
-                <h3 className="text-lg font-bold text-center mb-2">Report Summary</h3>
-                <div className="prose prose-sm max-w-none text-sm">
-                  <ReactMarkdown>{report}</ReactMarkdown>
-                </div>
+          {/* Circles row with default values */}
+          <div className="flex justify-evenly mb-4">
+            <div className="flex flex-col items-center">
+              <p className="text-sm mb-1 font-semibold">Efficiency Score</p>
+              <div className="w-20 h-20 flex items-center justify-center rounded-full border-2 bg-blue-50/90">
+                <span className="text-xl font-semibold">{efficiencyScore}</span>
               </div>
             </div>
-          )}
+
+            <div className="flex flex-col items-center">
+              <p className="text-sm mb-1 font-semibold">Tasks Completed</p>
+              <div className="w-20 h-20 flex items-center justify-center rounded-full border-2 bg-green-50/90">
+                <span className="text-xl font-semibold">{tasksCompleted}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="w-full border rounded-lg p-4 bg-white">
+            <h3 className="text-lg font-bold text-center mb-2">Report Summary</h3>
+            <div className="prose prose-sm max-w-none text-sm">
+              <ReactMarkdown>{report}</ReactMarkdown>
+            </div>
+          </div>
         </div>
       </div>
     </div>

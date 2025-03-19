@@ -17,12 +17,17 @@ function ToDoList() {
         statuses: []
     });
     const [sortConfig, setSortConfig] = useState({
-        field: 'none',
-        direction: 'asc'
+        field: 'priority',
+        direction: 'desc'
     });
     const [showFilterPanel, setShowFilterPanel] = useState(false);
     const [titleError, setTitleError] = useState(false);
     const [activeStatusDropdown, setActiveStatusDropdown] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    // Add priority and status order maps
+    const priorityOrder = { High: 1, Medium: 2, Low: 3 };
+    const statusOrder = { Pending: 1, 'In Progress': 2, Completed: 3 };
 
     // Fetch tasks on component mount
     useEffect(() => {
@@ -32,8 +37,9 @@ function ToDoList() {
     const fetchTasks = async () => {
         const cachedTasks = localStorage.getItem('tasks');
         if (cachedTasks) {
-        setTasks(JSON.parse(cachedTasks));
+            setTasks(JSON.parse(cachedTasks));
         }
+        setLoading(false);
     };
 
     // ------------------------- Handlers -------------------------
@@ -212,14 +218,20 @@ function ToDoList() {
             filteredTasks = filteredTasks.filter(task => filters.statuses.includes(task.status));
         }
 
-        // Apply sorting
-        if (sortConfig.field === 'priority') {
-            const priorityOrder = { High: 1, Medium: 2, Low: 3 };
-            filteredTasks.sort((a, b) => {
-                const comparison = priorityOrder[a.priority] - priorityOrder[b.priority];
-                return sortConfig.direction === 'asc' ? comparison : -comparison;
-            });
-        }
+        // Always apply sorting
+        filteredTasks.sort((a, b) => {
+            let comparison = 0;
+            
+            if (sortConfig.field === 'priority') {
+                comparison = priorityOrder[a.priority] - priorityOrder[b.priority];
+            } else if (sortConfig.field === 'status') {
+                comparison = statusOrder[a.status] - statusOrder[b.status];
+            }
+
+            // For desc (default), we want High to Low (priority) or Completed to Pending (status)
+            // For asc, we want Low to High (priority) or Pending to Completed (status)
+            return sortConfig.direction === 'desc' ? comparison : -comparison;
+        });
 
         return filteredTasks;
     };
@@ -323,6 +335,22 @@ function ToDoList() {
         );
     };
 
+
+    if (loading) {
+        return (
+            <div className="flex-1 p-8 mt-24 relative z-10">
+                <div className="bg-white/70 backdrop-blur-sm w-3/4 max-w-2xl mx-auto mt-8 rounded-lg shadow p-4">
+                    <h2 className="text-2xl text-[#E6C86E] font-bold mb-4" style={{
+                        fontFamily: "'Press Start 2P', monospace",
+                        letterSpacing: "0.5px",
+                        textShadow: "2px 2px 0 #000"
+                    }}>Quests</h2>
+                    <p>Loading your quests <span className="loading loading-dots loading-xs"></span></p>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="flex-1 p-8 mt-24 relative z-10">
             {/* Main Content */}
@@ -415,20 +443,18 @@ function ToDoList() {
                                         onChange={(e) => setSortConfig(prev => ({ ...prev, field: e.target.value }))}
                                         className="text-sm border rounded p-1"
                                     >
-                                        <option value="none">None</option>
                                         <option value="priority">Priority</option>
+                                        <option value="status">Status</option>
                                     </select>
-                                    {sortConfig.field !== 'none' && (
-                                        <button
-                                            onClick={() => setSortConfig(prev => ({
-                                                ...prev,
-                                                direction: prev.direction === 'asc' ? 'desc' : 'asc'
-                                            }))}
-                                            className="px-2 py-1 text-sm border rounded hover:bg-gray-100"
-                                        >
-                                            {sortConfig.direction === 'asc' ? '↑' : '↓'}
-                                        </button>
-                                    )}
+                                    <button
+                                        onClick={() => setSortConfig(prev => ({
+                                            ...prev,
+                                            direction: prev.direction === 'asc' ? 'desc' : 'asc'
+                                        }))}
+                                        className="px-2 py-1 text-sm border rounded hover:bg-gray-100"
+                                    >
+                                        {sortConfig.direction === 'asc' ? '↑' : '↓'}
+                                    </button>
                                 </div>
                             </div>
 
@@ -451,7 +477,7 @@ function ToDoList() {
                         {getFilteredAndSortedTasks().length === 0 ? (
                             <div className="text-center py-8 text-gray-500">
                                 <p className="text-sm">No quests available</p>
-                                <p className="text-xs mt-1">Click 'Add Quest' to create your first quest</p>
+                                <p className="text-xs mt-1">Click 'Add Quest' to create a quest</p>
                             </div>
                         ) : (
                             getFilteredAndSortedTasks().map((task) => (

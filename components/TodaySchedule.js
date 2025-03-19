@@ -490,7 +490,7 @@ function TodaySchedule() {
             <p>{error}</p>
           </div>
           <p className="text-sm text-gray-600">
-            You can create a custom schedule by clicking the "+" button.
+            You can create a custom schedule by clicking the "Create Schedule" button.
           </p>
           <div className="mt-4 flex justify-end">
             <button
