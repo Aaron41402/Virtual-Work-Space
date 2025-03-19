@@ -133,7 +133,7 @@ export default function Sidebar({ activeSection, setActiveSection }) {
     { id: 'home', label: '🏠 Adventure', type: 'section' },
     { id: 'todo', label: '📝 Quests', type: 'section' },
     { id: 'analysis', label: '📈 Analysis', type: 'section' },
-    { id: 'theme', label: '🖼️ Stores', type: 'section' },
+    { id: 'theme', label: '🖼️ Store', type: 'section' },
   ];
 
   return (
