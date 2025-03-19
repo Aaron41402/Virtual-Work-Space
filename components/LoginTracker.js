@@ -128,19 +128,14 @@ export default function LoginTracker() {
         
         setCheckInMessage(data.message || 'Successfully checked in!');
         
-        // Add today's date to the loginDates array directly
-        const today = new Date();
-        const updatedDates = [...loginData.loginDates, today];
-        
+        // IMPORTANT: Use the server's date instead of creating a new local date
+        // This ensures we're using the same date the server recorded
         setLoginData({
-          loginDates: updatedDates,
+          loginDates: data.loginDates.map(date => new Date(date)),
           coins: data.coins
         });
         
-        // Force a complete refresh of data after a short delay
-        setTimeout(() => {
-          fetchLoginData();
-        }, 300);
+        // No need for the setTimeout refresh since we're using the server's data directly
       } else {
         setCheckInMessage(data.error || 'Failed to check in');
       }

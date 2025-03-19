@@ -50,12 +50,13 @@ export async function POST() {
   try {
     await connectMongo();
     
-    // Get today's date (reset hours to start of day for comparison)
+    // Get today's date in UTC
     const today = new Date();
-    // Store the date as UTC midnight to avoid timezone issues
-    today.setUTCHours(0, 0, 0, 0);
     
-    console.log('API - Today (UTC midnight):', today);
+    // Convert to user's local date string (YYYY-MM-DD) to handle timezone differences
+    const todayDateString = today.toISOString().split('T')[0];
+    
+    console.log('API - Today date string:', todayDateString);
     
     // Find or create user login record
     let userLogin = await UserLogin.findOne({ userId: session.user.id });
@@ -70,12 +71,11 @@ export async function POST() {
     
     console.log('API - User login dates:', userLogin.loginDates);
     
-    // Check if user already logged in today - using UTC comparison
+    // Check if user already logged in today by comparing date strings
     const alreadyLoggedInToday = userLogin.loginDates.some(date => {
-      const loginDate = new Date(date);
-      loginDate.setUTCHours(0, 0, 0, 0);
-      const isSameDay = loginDate.toISOString().split('T')[0] === today.toISOString().split('T')[0];
-      console.log('API - Comparing dates:', loginDate.toISOString(), today.toISOString(), isSameDay);
+      const loginDateString = new Date(date).toISOString().split('T')[0];
+      const isSameDay = loginDateString === todayDateString;
+      console.log('API - Comparing date strings:', loginDateString, todayDateString, isSameDay);
       return isSameDay;
     });
     
