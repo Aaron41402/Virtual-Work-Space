@@ -5,6 +5,7 @@ import Image from 'next/image';
 export default function LoginReminder() {
   const [showReminder, setShowReminder] = useState(false);
   const [hasCheckedIn, setHasCheckedIn] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   
   useEffect(() => {
     // Check if user has logged in today
@@ -47,19 +48,29 @@ export default function LoginReminder() {
   }, []);
   
   const handleCheckIn = async () => {
+    if (isLoading) return;
+    
+    setIsLoading(true);
     try {
       const response = await fetch('/api/login-tracker', {
         method: 'POST'
       });
       
       if (response.ok) {
+        const data = await response.json();
         setHasCheckedIn(true);
         setShowReminder(false);
-        // Reload page to update coin count
-        window.location.reload();
+        
+        // Dispatch a custom event to notify other components
+        const checkInEvent = new CustomEvent('user-checked-in', { 
+          detail: { loginDates: data.loginDates, coins: data.coins } 
+        });
+        window.dispatchEvent(checkInEvent);
       }
     } catch (error) {
       console.error('Error checking in:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
   
@@ -122,9 +133,10 @@ export default function LoginReminder() {
           ) : (
             <button
               onClick={handleCheckIn}
+              disabled={isLoading}
               className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md font-pixel"
             >
-              Check In Now
+              {isLoading ? 'Checking in...' : 'Check In Now'}
             </button>
           )}
         </div>

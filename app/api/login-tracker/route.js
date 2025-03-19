@@ -54,9 +54,9 @@ export async function POST() {
   try {
     await connectMongo();
 
-    // Get today's date in UTC
+    // Get today's date in local timezone
     const today = new Date();
-    today.setUTCHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
 
     // Find or create user login record
     let userLogin = await UserLogin.findOne({ userId: session.user.id });
@@ -67,13 +67,12 @@ export async function POST() {
         loginDates: [],
         coins: 0
       });
-      await userLogin.save();
     }
 
     // Check if user already logged in today
     const alreadyLoggedInToday = userLogin.loginDates.some((date) => {
       const loginDate = new Date(date);
-      loginDate.setUTCHours(0, 0, 0, 0);
+      loginDate.setHours(0, 0, 0, 0);
       return loginDate.getTime() === today.getTime();
     });
 
@@ -82,7 +81,8 @@ export async function POST() {
         {
           message: "Already checked in today",
           alreadyCheckedIn: true,
-          loginDates: userLogin.loginDates
+          loginDates: userLogin.loginDates,
+          coins: (await User.findById(session.user.id))?.coins || 0
         },
         { status: 200 }
       );

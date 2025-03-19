@@ -15,6 +15,22 @@ const [checkInMessage, setCheckInMessage] = useState('');
 // Fetch login data when component mounts
 useEffect(() => {
     fetchLoginData();
+    
+    // Listen for check-in events from LoginReminder
+    const handleCheckInEvent = (event) => {
+      setLoginData({
+        loginDates: event.detail.loginDates.map(date => new Date(date)),
+        coins: event.detail.coins
+      });
+      setCheckedInToday(true);
+      setCheckInMessage("Check-in successful! You earned 1 coin.");
+    };
+    
+    window.addEventListener('user-checked-in', handleCheckInEvent);
+    
+    return () => {
+      window.removeEventListener('user-checked-in', handleCheckInEvent);
+    };
 }, []);
 
 // Check if user already logged in today
@@ -62,9 +78,7 @@ const handleCheckIn = async () => {
 
     const data = await response.json();
     
-
     if (response.ok) {
-        
         setLoginData({
         loginDates: data.loginDates.map(date => new Date(date)),
         coins: data.coins
@@ -85,6 +99,10 @@ const handleCheckIn = async () => {
 
 const togglePopup = () => {
     setShowPopup(!showPopup);
+    // Refresh data when opening popup
+    if (!showPopup) {
+      fetchLoginData();
+    }
 };
 
 // Generate calendar for current month
@@ -160,7 +178,8 @@ return (
                 src="/Hero.png" 
                 alt="Hero" 
                 width={32} 
-                height={32} 
+                height={32}
+                className="rounded-full" 
                 />
             </span>
             <h3 className="font-bold text-lg font-pixel">Adventurer's Log
