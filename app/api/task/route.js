@@ -85,7 +85,7 @@ export async function PUT(req) {
   }
 }
 
-// Delete a task
+// Delete tasks
 export async function DELETE(req) {
   const session = await auth();
 
@@ -96,20 +96,23 @@ export async function DELETE(req) {
   try {
     await connectMongo();
     const { searchParams } = new URL(req.url);
-    const id = searchParams.get("id");
+    const ids = searchParams.get("ids")?.split(',');
 
-    // Verify task ownership
-    const task = await Task.findOne({ _id: id, userId: session.user.id });
-    if (!task) {
-      return NextResponse.json({ error: "Task not found" }, { status: 404 });
+    if (!ids || ids.length === 0) {
+      return NextResponse.json({ error: "No task IDs provided" }, { status: 400 });
     }
 
-    await Task.findByIdAndDelete(id);
+    // Verify task ownership and delete tasks
+    await Task.deleteMany({
+      _id: { $in: ids },
+      userId: session.user.id
+    });
+
     return NextResponse.json({ 
-      message: "Task deleted successfully" 
+      message: "Tasks deleted successfully" 
     }, { status: 200 });
   } catch (error) {
-    console.error("Error deleting task:", error);
+    console.error("Error deleting tasks:", error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }
