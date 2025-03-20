@@ -83,16 +83,21 @@ export async function POST() {
     // Get today's date in local timezone
     const today = new Date();
 
-    // Find or create user login record
-    let userLogin = await UserLogin.findOne({ userId: session.user.id });
+    // Find or create user login record AND user document
+    const [userLogin, user] = await Promise.all([
+      UserLogin.findOne({ userId: session.user.id }),
+      User.findById(session.user.id)
+    ]);
 
     if (!userLogin) {
       userLogin = new UserLogin({
         userId: session.user.id,
         loginDates: [],
-        coins: 0
       });
-      await userLogin.save();
+    }
+
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Check if user already logged in today
@@ -101,16 +106,13 @@ export async function POST() {
     );
 
     if (alreadyLoggedInToday) {
-      // Get the user to include coins
-      const user = await User.findById(session.user.id);
-      
       return NextResponse.json(
         {
           message: "Already checked in today",
           alreadyCheckedIn: true,
           loginDates: userLogin.loginDates,
-          coins: user?.coins || 0,
-          checkedInToday: true // Explicitly tell the client they're checked in today
+          coins: user.coins,
+          checkedInToday: true
         },
         { 
           status: 200,
@@ -124,23 +126,26 @@ export async function POST() {
       );
     }
 
-    // Add today to login dates and increment coins
+    // Add today to login dates
     userLogin.loginDates.push(today);
-    await userLogin.save();
 
-    // Update user's coin count
-    const updatedUser = await User.findByIdAndUpdate(
-      session.user.id,
-      { $inc: { coins: 1 } },
-      { new: true } // Return the updated document
-    );
+    // Update user's coin count and save both documents
+    user.coins = (user.coins || 0) + 1;
+
+    // Save both documents
+    await Promise.all([
+      userLogin.save(),
+      user.save()
+    ]);
+
+    console.log('Updated user coins:', user.coins); // Add logging
 
     return NextResponse.json(
       {
         message: "Check-in successful! You earned 1 coin.",
         loginDates: userLogin.loginDates,
-        coins: updatedUser.coins,
-        checkedInToday: true // Explicitly tell the client they're checked in today
+        coins: user.coins,
+        checkedInToday: true
       },
       { 
         status: 200,

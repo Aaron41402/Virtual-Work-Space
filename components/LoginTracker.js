@@ -39,31 +39,15 @@ const fetchLoginData = useCallback(async () => {
         const data = await response.json();
         console.log('Received login data:', data);
         
-        // If the API tells us the user is already checked in, trust that
-        if (data.checkedInToday === true) {
-          console.log('API confirms user is checked in today');
-          setCheckedInToday(true);
-        } else {
-          // Ensure dates are properly converted
-          const loginDates = Array.isArray(data.loginDates) 
-              ? data.loginDates.map(date => new Date(date))
-              : [];
-          
-          setLoginData({
-            loginDates,
-            coins: data.coins || 0
-          });
-          
-          // Check if today is in the login dates
-          const today = new Date();
-          
-          const alreadyCheckedIn = loginDates.some(date => 
-            isSameDay(date, today)
-          );
-          
-          console.log('Already checked in today?', alreadyCheckedIn);
-          setCheckedInToday(alreadyCheckedIn);
-        }
+        // Ensure we're setting the coins correctly
+        setLoginData({
+          loginDates: Array.isArray(data.loginDates) 
+            ? data.loginDates.map(date => new Date(date))
+            : [],
+          coins: typeof data.coins === 'number' ? data.coins : 0
+        });
+        
+        setCheckedInToday(data.checkedInToday === true);
     }
     } catch (error) {
     console.error('Error fetching login data:', error);
@@ -137,6 +121,7 @@ const handleCheckIn = async () => {
     });
 
     const data = await response.json();
+    console.log('Check-in response:', data);
     
     if (response.ok) {
         setLoginData({

@@ -83,15 +83,13 @@ export default function LoginReminder() {
       
       if (response.ok) {
         const data = await response.json();
+        console.log('Check-in response in reminder:', data);
         setHasCheckedIn(true);
         
-        // More robust event dispatching with console logging
-        console.log('Dispatching check-in event with data:', data);
-        
-        // Create properly structured event data, ensuring dates are properly formatted
+        // Create properly structured event data with coins
         const eventData = {
           loginDates: Array.isArray(data.loginDates) ? data.loginDates : [],
-          coins: typeof data.coins === 'number' ? data.coins : 0,
+          coins: data.coins,
           checkedInToday: true
         };
         
@@ -103,17 +101,6 @@ export default function LoginReminder() {
           window.dispatchEvent(checkInEvent);
           console.log('Event dispatched with data:', eventData);
         }, 100);
-        
-        // Also force a refresh of the login tracker data
-        try {
-          setTimeout(() => {
-            const refreshEvent = new CustomEvent('refresh-login-data');
-            window.dispatchEvent(refreshEvent);
-            console.log('Refresh event dispatched');
-          }, 200);
-        } catch (e) {
-          console.error('Error dispatching refresh event:', e);
-        }
         
         setShowReminder(false);
       } else {
