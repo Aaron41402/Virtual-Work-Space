@@ -766,24 +766,24 @@ function TodaySchedule() {
   }
 
   return (
-    <div className="relative">
+    <div>
       {/* Main Content */}
       <div className="flex-1 p-8 mt-24 relative z-10">
         <div className="bg-white/70 backdrop-blur-sm w-3/4 max-w-2xl mx-auto mt-8 rounded-lg shadow-lg p-4">
-          <div className="flex flex-row justify-between">
-            <h2 className="text-2xl text-[#E6C86E] font-bold mb-4" style={{
+          <div className="flex flex-row justify-between mb-4">
+            <h2 className="text-2xl text-[#E6C86E] font-bold" style={{
               fontFamily: "'Press Start 2P', monospace",
               letterSpacing: "0.5px",
               textShadow: "2px 2px 0 #000"
             }}>Today's Adventure</h2>
-            <div className="flex items-center mb-3 text-sm text-gray-700">
+            <div className="flex items-center text-sm text-gray-700">
               <Clock size={16} className="mr-1" />
               <span>{currentTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
             </div>
           </div>
 
           {/* Legend */}
-          <div className="flex flex-wrap gap-2 mb-3">
+          <div className="flex flex-wrap gap-2 mb-3 ml-2">
             <div className="flex items-center text-xs">
               <div className="w-3 h-3 bg-blue-100 border border-blue-500 rounded mr-1"></div>
               <span>Routine</span>
@@ -1025,7 +1025,7 @@ function TodaySchedule() {
             <div className="mr-2 flex-shrink-0 h-5 w-5">⚠️</div>
             <div>
               <p>{notification.message}</p>
-              <p className="text-sm mt-1">Check your To-Do list to manage it.</p>
+              <p className="text-sm mt-1">Check your Quests to manage it.</p>
             </div>
             <button 
               onClick={() => setNotification({ show: false, message: '' })}

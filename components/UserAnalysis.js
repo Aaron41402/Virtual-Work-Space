@@ -19,7 +19,7 @@ function UserAnalysis() {
   const loadReport = async () => {
     const storageData = localStorage.getItem('analysis');
     const parsedData = storageData ? JSON.parse(storageData) : null;
-
+    
     if (parsedData && parsedData.report) {
       setReport(parsedData.report);
       setEfficiencyScore(parsedData.efficiencyScore);
@@ -111,7 +111,7 @@ function UserAnalysis() {
     );
   }
 
-  if (!error) {
+  if (error) {
     return (
       <div className="flex-1 p-8 mt-24 relative z-10">
         <div className="bg-white/70 backdrop-blur-sm w-3/4 max-w-2xl mx-auto mt-8 rounded-lg shadow p-4">
@@ -149,8 +149,8 @@ function UserAnalysis() {
   return (
     <div className="flex-1 p-8 mt-24 relative z-10">
       <div className="bg-white/70 backdrop-blur-sm w-3/4 max-w-2xl mx-auto mt-8 rounded-lg shadow-lg p-4">
-        <div className="flex flex-row justify-between">
-          <h2 className="text-xl text-[#E6C86E] font-bold mb-4" style={{
+        <div className="flex flex-row justify-between mb-4">
+          <h2 className="text-2xl text-[#E6C86E] font-bold" style={{
             fontFamily: "'Press Start 2P', monospace",
             letterSpacing: "0.5px",
             textShadow: "2px 2px 0 #000"

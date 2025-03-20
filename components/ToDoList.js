@@ -416,7 +416,7 @@ function ToDoList() {
             {/* Main Content */}
             <div className="bg-white/70 backdrop-blur-sm w-3/4 max-w-2xl mx-auto mt-8 rounded-lg shadow-lg p-4">
                 <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-xl text-[#E6C86E] font-bold" style={{
+                    <h2 className="text-2xl text-[#E6C86E] font-bold" style={{
                         fontFamily: "'Press Start 2P', monospace",
                         letterSpacing: "0.5px",
                         textShadow: "2px 2px 0 #000"
@@ -435,7 +435,7 @@ function ToDoList() {
                 </div>
 
                 {/* Add Legend */}
-                <div className="flex flex-wrap gap-2 mb-3">
+                <div className="flex flex-wrap gap-2 mb-3 ml-2">
                     <div className="flex items-center text-xs">
                         <div className="w-3 h-3 bg-green-100 border border-green-500 rounded mr-1"></div>
                         <span>Low Priority</span>
@@ -450,9 +450,8 @@ function ToDoList() {
                     </div>
                 </div>
 
-                {/* Combined Filter & Sort Panel */}
-                {showFilterPanel && (
-                    <div className="mb-4 bg-white/50 p-4 rounded-lg">
+                {showFilterPanel ? (
+                    <div className="mb-4 bg-white/50 p-4 rounded-lg ml-2">
                         <div className="space-y-4">
                             {/* Priority Filter */}
                             <div className="space-y-2">
@@ -529,13 +528,10 @@ function ToDoList() {
                             </div>
                         </div>
                     </div>
-                )}
-
-                {/* Task List */}
-                {!showFilterPanel && (
+                ) : (
                     <div 
                         ref={taskListRef}
-                        className="mb-4 flex flex-col max-h-[350px] overflow-y-auto pr-2 space-y-2"
+                        className="mb-3 ml-2 flex flex-col max-h-[350px] overflow-y-auto pr-2 space-y-2"
                     >
                         {getFilteredAndSortedTasks().length === 0 ? (
                             <div className="text-center py-8 text-gray-500">
