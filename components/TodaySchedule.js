@@ -139,7 +139,7 @@ function TodaySchedule() {
         
         if (detailsResponse.ok) {
           setSetupData(setupDetails.data);
-          const scheduleItems = generateScheduleFromSetup(setupDetails.data);
+          const scheduleItems = await generateScheduleFromSetup(setupDetails.data);
           setSchedule(scheduleItems);
           
           // Cache the generated schedule
@@ -163,108 +163,68 @@ function TodaySchedule() {
   };
 
   // Generate a schedule based on the user's setup data
-  const generateScheduleFromSetup = (data) => {
+  const generateScheduleFromSetup = async (data) => {
     if (!data) return [];
 
-    const scheduleItems = [];
-    
-    // Add wake up time
-    if (data.wakeTime) {
-      scheduleItems.push({
-        id: 'wake',
-        time: data.wakeTime,
-        activity: 'Wake up',
-        type: 'routine'
-      });
-    }
+    try {
+      // Get active tasks from localStorage
+      const cachedTasks = localStorage.getItem('tasks');
+      const tasks = cachedTasks ? JSON.parse(cachedTasks) : [];
+      const activeTasks = tasks.filter(task => 
+        task.status === "Pending" || task.status === "In Progress"
+      );
 
-    // Add morning routine (30 min after wake time)
-    if (data.wakeTime) {
-      const wakeHour = parseInt(data.wakeTime.split(':')[0]);
-      const wakeMinute = parseInt(data.wakeTime.split(':')[1]);
-      
-      let morningRoutineHour = wakeHour;
-      let morningRoutineMinute = wakeMinute + 30;
-      
-      if (morningRoutineMinute >= 60) {
-        morningRoutineHour = (morningRoutineHour + 1) % 24;
-        morningRoutineMinute = morningRoutineMinute - 60;
+      // Call Gemini API to generate schedule
+      const response = await fetch('/api/gemini', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'schedule',
+          data: {
+            setupData: data,
+            tasks: activeTasks
+          }
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate schedule');
       }
-      
-      scheduleItems.push({
-        id: 'morning',
-        time: `${morningRoutineHour.toString().padStart(2, '0')}:${morningRoutineMinute.toString().padStart(2, '0')}`,
-        activity: 'Morning routine',
-        type: 'routine'
-      });
+
+      const result = await response.json();
+      return JSON.parse(result.response);
+    } catch (error) {
+      console.error('Error generating schedule:', error);
+      // Fallback to a basic schedule if API fails
+      return [
+        {
+          id: 'wake',
+          time: data.wakeTime || '08:00',
+          activity: 'Wake up',
+          type: 'routine'
+        },
+        {
+          id: 'lunch',
+          time: '12:00',
+          activity: 'Lunch break',
+          type: 'routine'
+        },
+        {
+          id: 'dinner',
+          time: '18:00',
+          activity: 'Dinner',
+          type: 'routine'
+        },
+        {
+          id: 'bed',
+          time: data.bedTime || '22:00',
+          activity: 'Bedtime',
+          type: 'routine'
+        }
+      ];
     }
-
-    // Add priorities from setup
-    if (data.priorities) {
-      const priorities = data.priorities.split(',').map(p => p.trim());
-      
-      priorities.forEach((priority, index) => {
-        const priorityHour = (9 + index) % 24;
-        scheduleItems.push({
-          id: `priority-${index}`,
-          time: `${priorityHour.toString().padStart(2, '0')}:00`,
-          activity: priority,
-          type: 'priority'
-        });
-      });
-    }
-
-    // Add lunch time
-    scheduleItems.push({
-      id: 'lunch',
-      time: '12:00',
-      activity: 'Lunch break',
-      type: 'routine'
-    });
-
-    // Add habits from setup
-    if (data.habits) {
-      const habits = data.habits.split(',').map(h => h.trim());
-      
-      habits.forEach((habit, index) => {
-        const habitHour = (14 + index) % 24;
-        scheduleItems.push({
-          id: `habit-${index}`,
-          time: `${habitHour.toString().padStart(2, '0')}:00`,
-          activity: habit,
-          type: 'habit'
-        });
-      });
-    }
-
-    // Add dinner time
-    scheduleItems.push({
-      id: 'dinner',
-      time: '18:00',
-      activity: 'Dinner',
-      type: 'routine'
-    });
-
-    // Add bedtime
-    if (data.bedTime) {
-      scheduleItems.push({
-        id: 'bed',
-        time: data.bedTime,
-        activity: 'Bedtime',
-        type: 'routine'
-      });
-    }
-
-    // Sort schedule by time
-    return scheduleItems.sort((a, b) => {
-      const timeA = a.time.split(':').map(Number);
-      const timeB = b.time.split(':').map(Number);
-      
-      if (timeA[0] !== timeB[0]) {
-        return timeA[0] - timeB[0];
-      }
-      return timeA[1] - timeB[1];
-    });
   };
 
   // Get activity for a specific hour
@@ -845,7 +805,7 @@ function TodaySchedule() {
                                   <Check size={14} />
                                 </button>
                                 <button 
-                                  onClick={() => handleDeleteItem(activity.id)}
+                                  onClick={() => cancelEdit()}
                                   className="text-gray-500 hover:text-red-500"
                                 >
                                   <X size={14} />

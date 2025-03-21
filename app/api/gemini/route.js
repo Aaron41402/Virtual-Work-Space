@@ -3,6 +3,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 export async function POST(request) {
   try {
     const { type, data } = await request.json();
+    console.log(data)
     
     // Log the request for debugging
     console.log(`Processing ${type} request with data:`, typeof data === 'string' ? data : 'complex data');
@@ -31,6 +32,8 @@ export async function POST(request) {
     } else if (type === 'context') {
       // Make sure we're handling context requests correctly
       finalPrompt = createContextPrompt(data);
+    } else if (type === 'schedule') {
+      finalPrompt = createSchedulePrompt(data);
     } else {
       return new Response(JSON.stringify({ 
         error: 'Invalid request type' 
@@ -56,6 +59,8 @@ export async function POST(request) {
     
     const response = result.response.text();
     
+    console.log(response)
+
     // Extract efficiency score if it's an analysis
     let efficiencyScore = null;
     let tasksCompleted = 0;
@@ -77,6 +82,15 @@ export async function POST(request) {
                task.status === "Completed";
       });
       tasksCompleted = yesterdayTasks.length;
+    } else if (type === 'schedule') {
+      // Clean up the schedule response by removing markdown code block formatting
+      const cleanResponse = response.replace(/^```json\n|\n```$/g, '').trim();
+      return new Response(JSON.stringify({ 
+        response: cleanResponse
+      }), { 
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
 
     return new Response(JSON.stringify({ 
@@ -197,5 +211,53 @@ function createAnalysisPrompt(data) {
     
     Note: If no tasks were worked on yesterday, focus on motivation and getting started.
     Consider task priorities and how to best integrate them with today's schedule.
+  `;
+}
+
+function createSchedulePrompt(data) {
+  const { setupData, tasks } = data;
+  
+  // Filter only pending and in-progress tasks
+  const activeTasks = tasks.filter(task => 
+    task.status === "Pending" || task.status === "In Progress"
+  );
+
+  return `
+    As an AI schedule generator, create a daily schedule based on the user's preferences and tasks.
+    Use the following setup data and active tasks to generate an optimized hourly schedule.
+
+    User Setup Data:
+    ${JSON.stringify(setupData, null, 2)}
+
+    Active Tasks:
+    ${activeTasks.map(task => 
+      `- ${task.title} (Priority: ${task.priority}, Status: ${task.status}, Description: ${task.description})`
+    ).join('\n')}
+
+    Requirements:
+    1. Generate a schedule that follows this exact JSON format:
+    [{"id":"hour","time":"HH:MM","activity":"Activity Name","type":"routine/priority/habit"}]
+
+    2. Setup Data Usage:
+    - All hours after bed time and before wake up time should be set to sleep
+    - If there are habits and/or priorities, please analyze how many hours they take and what time of the day they should take place
+    - Assign habits and/or priorities appropriately
+
+    3. Active Tasks Usage:
+    - Carefully read the task title and description, then analyze how many hours they take and what time of the day they should take place
+    - Assign high priority and in progress tasks first
+    - No need to assign all tasks
+
+    3. Other Rules:
+    - Use 24-hour format for time (HH:MM)
+    - Start from 00:00 to 23:00
+    - Leave gaps for free time, ideally every 2-4 hours
+    - Assign appropriate meal times depending on the wake up time and bed time, normally 2 or 3 meals a day, each meal time should only take an hour
+    - Each activity should have a unique ID
+    - Valid types are: "routine", "priority", "habit"
+    - Use hour for id 
+
+    Return ONLY the JSON array with no additional text or explanation.
+    The response must be parseable by JSON.parse().
   `;
 }
