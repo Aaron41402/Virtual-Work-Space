@@ -136,7 +136,8 @@ function TodaySchedule() {
         
         if (detailsResponse.ok) {
           const setupDetails = await detailsResponse.json();
-          const scheduleItems = await generateScheduleFromSetup(setupDetails.data);
+          let scheduleItems = await generateScheduleFromSetup(setupDetails.data);
+          scheduleItems = scheduleItems.filter(item => item.activity.toLowerCase() !== 'free time');
           setSchedule(scheduleItems);
           
           // Add priority and habit items to the to-do list
