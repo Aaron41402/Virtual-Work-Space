@@ -58,7 +58,7 @@ function UserAnalysis() {
         // Get yesterday's date
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
-        const yesterdayStr = yesterday.toISOString().split('T')[0];
+        const yesterdayStr = yesterday.toLocaleDateString().split('T')[0];
 
         const newAnalysis = {
           date: yesterdayStr,

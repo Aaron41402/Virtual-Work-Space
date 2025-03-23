@@ -25,32 +25,40 @@ export default function Dashboard() {
     try {
       const response = await fetch('/api/task');
       const data = await response.json();
-      
+  
       if (data.tasks) {
-        // Get yesterday's date at midnight
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
         yesterday.setHours(0, 0, 0, 0);
-
-        // Filter out old completed tasks and get their IDs
+  
+        const todayString = new Date().toLocaleDateString();
+  
+        // Get scheduled tasks created today from localStorage
+        const localTasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+        const todayScheduledTasks = localTasks.filter(task =>
+          task._id.startsWith('schedule-task-') && task.createdAt === todayString
+        );
+  
+        // Filter tasks to delete (completed and older than yesterday)
         const tasksToDelete = data.tasks.filter(task => 
-          task.status === 'Completed' && 
-          new Date(task.updatedAt) < yesterday
+          task.status === 'Completed' && new Date(task.updatedAt) < yesterday
         ).map(task => task._id);
-
-        // Delete old completed tasks if any exist
+  
+        // Delete old completed tasks via API if necessary
         if (tasksToDelete.length > 0) {
           await fetch(`/api/task?ids=${tasksToDelete.join(',')}`, {
             method: 'DELETE',
           });
         }
-
-        // Filter tasks for localStorage
-        const currentTasks = data.tasks.filter(task => 
-          task.status !== 'Completed' || 
-          new Date(task.updatedAt) >= yesterday
+  
+        // Filter current tasks for localStorage
+        let currentTasks = data.tasks.filter(task => 
+          task.status !== 'Completed' || new Date(task.updatedAt) >= yesterday
         );
-
+  
+        // Merge today's scheduled tasks from localStorage
+        currentTasks = [...currentTasks, ...todayScheduledTasks];
+  
         localStorage.setItem('tasks', JSON.stringify(currentTasks));
       }
     } catch (error) {

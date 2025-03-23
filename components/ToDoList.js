@@ -79,6 +79,8 @@ function ToDoList() {
         setTasks(updatedTasks);
         localStorage.setItem('tasks', JSON.stringify(updatedTasks));
 
+        if (taskId.startsWith('schedule-task-')) return
+
         // Then, try to sync with the database
         try {
             const response = await fetch('/api/task', {
@@ -158,6 +160,21 @@ function ToDoList() {
         if (!editingTask.title.trim()) return;
 
         try {
+            // If it's a schedule task, just update localStorage
+            if (editingTask._id.startsWith('schedule-task-')) {
+                const updatedTasks = tasks.map(t => 
+                    t._id === editingTask._id ? editingTask : t
+                );
+                setTasks(updatedTasks);
+                localStorage.setItem('tasks', JSON.stringify(updatedTasks));
+                setEditingTask(null);
+                
+                // Add scroll after update
+                setTimeout(() => scrollToTask(itemId), 100);
+                return;
+            }
+
+            // For regular tasks, call the API
             const response = await fetch('/api/task', {
                 method: 'PUT',
                 headers: {
@@ -191,7 +208,16 @@ function ToDoList() {
 
     const deleteTask = async (taskId) => {
         try {
-            const response = await fetch(`/api/task?id=${taskId}`, {
+            // If it's a schedule task, just remove from localStorage
+            if (taskId.startsWith('schedule-task-')) {
+                const updatedTasks = tasks.filter(task => task._id !== taskId);
+                setTasks(updatedTasks);
+                localStorage.setItem('tasks', JSON.stringify(updatedTasks));
+                return;
+            }
+
+            // For regular tasks, call the API
+            const response = await fetch(`/api/task?ids=${taskId}`, {
                 method: 'DELETE',
             });
 

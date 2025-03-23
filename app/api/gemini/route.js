@@ -3,7 +3,6 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 export async function POST(request) {
   try {
     const { type, data } = await request.json();
-    console.log(data)
     
     // Log the request for debugging
     console.log(`Processing ${type} request with data:`, typeof data === 'string' ? data : 'complex data');
@@ -58,8 +57,6 @@ export async function POST(request) {
     }
     
     const response = result.response.text();
-    
-    console.log(response)
 
     // Extract efficiency score if it's an analysis
     let efficiencyScore = null;
@@ -240,8 +237,10 @@ function createSchedulePrompt(data) {
 
     2. Setup Data Usage:
     - All hours after bed time and before wake up time should be set to sleep
-    - If there are habits and/or priorities, please analyze how many hours they take and what time of the day they should take place
-    - Assign habits and/or priorities appropriately
+    - If there are habits, please analyze how many hours they take and what time of the day they should take place
+    - Priorities are what matters most to the user, they could be specific tasks (e.g. work out) or vague ideas (e.g. get things done)
+    - For vague priorities, please look for related habits and tasks, and prioritize putting them in the schedule
+    - For specific priorities, please analyze how many hours they take and what time of the day they should take place
 
     3. Active Tasks Usage:
     - Carefully read the task title and description, then analyze how many hours they take and what time of the day they should take place
@@ -251,7 +250,8 @@ function createSchedulePrompt(data) {
     3. Other Rules:
     - Use 24-hour format for time (HH:MM)
     - Start from 00:00 to 23:00
-    - Leave gaps for free time, ideally every 2-4 hours
+    - Give the user some free time throughout the day, ideally every 2-4 hours, or after meals time-consuming tasks
+    - Do not include free time in the list, leave that hour out. For example [..., {"id":"09","time":"09:00","activity":"Lunch","type":"priority"},{"id":"11","time":"11:00","activity":"Project","type":"priority"},...]
     - Assign appropriate meal times depending on the wake up time and bed time, normally 2 or 3 meals a day, each meal time should only take an hour
     - Each activity should have a unique ID
     - Valid types are: "routine", "priority", "habit"

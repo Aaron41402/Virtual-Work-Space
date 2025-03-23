@@ -6,7 +6,6 @@ import { Edit2, Check, X, Plus, Clock, Trash2, AlertCircle } from 'lucide-react'
 
 function TodaySchedule() {
   const { data: session } = useSession();
-  const [setupData, setSetupData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [schedule, setSchedule] = useState([]);
@@ -21,6 +20,7 @@ function TodaySchedule() {
   const [newItemEndTime, setNewItemEndTime] = useState('');
   const [newItemType, setNewItemType] = useState('routine');
   const [isTimeRange, setIsTimeRange] = useState(false);
+  const [hasLoadedToday, setHasLoadedToday] = useState(false);
   const timelineRef = useRef(null);
   const modalRef = useRef(null);
   const [validationErrors, setValidationErrors] = useState({
@@ -67,8 +67,11 @@ function TodaySchedule() {
     }
     setTimelineHours(hours);
     
-    // Load schedule data
-    loadScheduleData();
+    // Only load schedule data if we have a session and haven't loaded today's data yet
+    if (session && !hasLoadedToday) {
+      setHasLoadedToday(true)
+      loadScheduleData();
+    }
   }, [session]);
 
   useEffect(() => {
@@ -106,7 +109,7 @@ function TodaySchedule() {
         console.log('Using cached schedule data');
         setSchedule(JSON.parse(cachedData));
         setLoading(false);
-        setError(false);
+        setError(null);
         return;
       }
       
@@ -121,12 +124,7 @@ function TodaySchedule() {
 
   // Fetch data from API
   const fetchScheduleData = async () => {
-    if (!session) {
-      setError('Please sign in to view your schedule');
-      setLoading(false);
-      return;
-    }
-
+    console.log("fetching schedule data")
     try {
       // Fetch the user's setup data
       const response = await fetch('/api/setup');
@@ -135,12 +133,18 @@ function TodaySchedule() {
       if (response.ok && data.hasSetup) {
         // Fetch the actual setup response data
         const detailsResponse = await fetch('/api/setup/details');
-        const setupDetails = await detailsResponse.json();
         
         if (detailsResponse.ok) {
-          setSetupData(setupDetails.data);
+          const setupDetails = await detailsResponse.json();
           const scheduleItems = await generateScheduleFromSetup(setupDetails.data);
           setSchedule(scheduleItems);
+          
+          // Add priority and habit items to the to-do list
+          for (const item of scheduleItems) {
+            if (item.type === 'priority' || item.type === 'habit') {
+              await addToToDoList(item);
+            }
+          }
           
           // Cache the generated schedule
           const today = new Date().toDateString();
@@ -148,7 +152,7 @@ function TodaySchedule() {
           localStorage.setItem('scheduleData', JSON.stringify(scheduleItems));
           setLoading(false);
         } else {
-          setError(setupDetails.error || 'Failed to fetch setup details');
+          setError('Failed to fetch setup details');
           setLoading(false);
         }
       } else {
@@ -372,37 +376,10 @@ function TodaySchedule() {
       // Update localStorage
       localStorage.setItem('tasks', JSON.stringify(updatedTasks));
       
-      // Try to update in API if available
-      for (const originalTask of matchingTasks) {
-        try {
-          if (originalTask._id && !originalTask._id.startsWith('task-')) { // Only update if it has a real server ID
-            const updatedTask = updatedTasks.find(t => t._id === originalTask._id);
-            
-            await fetch('/api/task', {
-              method: 'PUT',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                id: originalTask._id,
-                title: updatedTask.title,
-                description: updatedTask.description,
-                // Keep other properties the same
-                priority: originalTask.priority,
-                status: originalTask.status
-              }),
-            });
-          }
-        } catch (error) {
-          console.error('Error updating task in API:', error);
-          // Continue with local storage version even if API fails
-        }
-      }
-      
       // Show notification
       setNotification({
         show: true,
-        message: `"${updatedItem.activity}" also updated in your To-Do list`
+        message: `"${updatedItem.activity}" also updated in your Quests`
       });
       
       // Hide notification after 5 seconds
@@ -500,12 +477,12 @@ function TodaySchedule() {
       
       // Create new task object
       const newTask = {
-        _id: `task-${Date.now()}`, // Generate a temporary ID
+        _id: `schedule-task-${item.time}`, // Generate a temporary ID
         title: item.activity,
         description: `Added from schedule (${item.time}${item.endTime ? ` - ${item.endTime}` : ''})`,
         priority: item.type === 'priority' ? 'High' : 'Medium',
         status: 'Pending',
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toLocaleDateString()
       };
       
       // Add to tasks array
@@ -514,39 +491,10 @@ function TodaySchedule() {
       // Update localStorage
       localStorage.setItem('tasks', JSON.stringify(tasks));
       
-      // Try to save to API if available
-      try {
-        const response = await fetch('/api/task', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            title: newTask.title,
-            description: newTask.description,
-            priority: newTask.priority,
-            status: newTask.status
-          }),
-        });
-        
-        if (response.ok) {
-          const data = await response.json();
-          
-          // Update the task in localStorage with the real ID from the server
-          const updatedTasks = tasks.map(t => 
-            t._id === newTask._id ? { ...data.task } : t
-          );
-          localStorage.setItem('tasks', JSON.stringify(updatedTasks));
-        }
-      } catch (error) {
-        console.error('Error saving task to API:', error);
-        // Continue with local storage version even if API fails
-      }
-      
       // Show notification
       setNotification({
         show: true,
-        message: `"${item.activity}" also added to your To-Do list`
+        message: `"${item.activity}" also added to your Quests`
       });
       
       // Hide notification after 5 seconds
@@ -639,24 +587,10 @@ function TodaySchedule() {
       // Update localStorage
       localStorage.setItem('tasks', JSON.stringify(updatedTasks));
       
-      // Try to delete from API if available
-      for (const task of matchingTasks) {
-        try {
-          if (task._id && !task._id.startsWith('task-')) { // Only delete if it has a real server ID
-            await fetch(`/api/task?id=${task._id}`, {
-              method: 'DELETE',
-            });
-          }
-        } catch (error) {
-          console.error('Error deleting task from API:', error);
-          // Continue with local storage version even if API fails
-        }
-      }
-      
       // Show notification
       setNotification({
         show: true,
-        message: `"${scheduleItem.activity}" also removed from your To-Do list`
+        message: `"${scheduleItem.activity}" also removed from your Quests`
       });
       
       // Hide notification after 5 seconds
