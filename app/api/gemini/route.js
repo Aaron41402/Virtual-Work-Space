@@ -233,7 +233,8 @@ function createSchedulePrompt(data) {
 
     Requirements:
     1. Generate a schedule that follows this exact JSON format:
-    [{"id":"hour","time":"HH:MM","activity":"Activity Name","type":"routine/priority/habit"}]
+    [{"id":"hour","time":"HH:00","endTime":"HH:00","activity":"Activity Name","type":"routine/priority/habit"}]
+    - Note that endTime is optional, and should ONLY exist if the activity is only more than one hour long.
 
     2. Setup Data Usage:
     - All hours after bed time and before wake up time should be set to sleep
