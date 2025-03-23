@@ -249,7 +249,7 @@ function createSchedulePrompt(data) {
 
     3. Other Rules:
     - Use 24-hour format for time (HH:MM)
-    - Start from 00:00 to 23:00
+    - Start from 00:00 to 23:00, only hours, so 00:00, 01:00, 02:00, 03:00, ..., 22:00, 23:00.
     - Give the user some free time throughout the day, ideally every 2-4 hours, or after meals time-consuming tasks
     - Do not include free time in the list, leave that hour out. For example [..., {"id":"09","time":"09:00","activity":"Lunch","type":"priority"},{"id":"11","time":"11:00","activity":"Project","type":"priority"},...]
     - Assign appropriate meal times depending on the wake up time and bed time, normally 2 or 3 meals a day, each meal time should only take an hour

@@ -475,9 +475,18 @@ function TodaySchedule() {
       const cachedTasks = localStorage.getItem('tasks');
       let tasks = cachedTasks ? JSON.parse(cachedTasks) : [];
       
+      // Generate task ID
+      const taskId = `schedule-task-${item.time}`;
+
+      // Check if the task already exists
+      if (tasks.some(task => task._id === taskId)) {
+        console.log('Task already exists');
+        return;
+      }
+
       // Create new task object
       const newTask = {
-        _id: `schedule-task-${item.time}`, // Generate a temporary ID
+        _id: taskId,
         title: item.activity,
         description: `Added from schedule (${item.time}${item.endTime ? ` - ${item.endTime}` : ''})`,
         priority: item.type === 'priority' ? 'High' : 'Medium',
