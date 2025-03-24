@@ -66,6 +66,12 @@ export default function CapybaraSkins() {
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('');
 
+  // Define text style for VT323 font
+  const textStyle = {
+    fontFamily: "'VT323', monospace",
+    fontSize: "1.2rem"
+  };
+
   // Fetch user coins and unlocked skins on component mount
   useEffect(() => {
     fetchUserData();
@@ -216,8 +222,8 @@ export default function CapybaraSkins() {
       }}>Capybara Skins</h2>
       
       <div className="flex items-center justify-between mb-4">
-        <p className="font-medium font-pixel">Your Coins:</p>
-        <p className="font-bold text-yellow-500 flex items-center">
+        <p className="font-medium" style={textStyle}>Your Coins:</p>
+        <p className="font-bold text-yellow-500 flex items-center" style={textStyle}>
           <span className="text-xl">{userCoins}</span>
           <span className="ml-1 text-lg">
             <Image 
@@ -235,7 +241,7 @@ export default function CapybaraSkins() {
           messageType === 'success' ? 'bg-green-100 text-green-800' :
           messageType === 'error' ? 'bg-red-100 text-red-800' :
           'bg-blue-100 text-blue-800'
-        }`}>
+        }`} style={textStyle}>
           {message}
         </div>
       )}
@@ -253,20 +259,22 @@ export default function CapybaraSkins() {
                 className="mr-3"
               />
               <div>
-                <p className="font-medium">{SKINS.find(s => s.id === previewSkin)?.name}</p>
-                <p className="text-sm text-gray-600">Preview mode</p>
+                <p className="font-medium" style={textStyle}>{SKINS.find(s => s.id === previewSkin)?.name}</p>
+                <p className="text-sm text-gray-600" style={textStyle}>Preview mode</p>
               </div>
             </div>
             <div className="flex space-x-2">
               <button
                 onClick={cancelPreview}
                 className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm"
+                style={textStyle}
               >
                 Cancel
               </button>
               <button
                 onClick={applySelectedSkin}
                 className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded text-sm"
+                style={textStyle}
               >
                 Apply Skin
               </button>
@@ -313,7 +321,7 @@ export default function CapybaraSkins() {
                 
                 {!isUnlocked && (
                   <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                    <div className="flex items-center bg-black/70 px-2 py-1 rounded text-white text-xs">
+                    <div className="flex items-center bg-black/70 px-2 py-1 rounded text-white text-xs" style={textStyle}>
                       <span className="mr-1">{skin.price}</span>
                       <span>
                         <Image 
@@ -328,21 +336,21 @@ export default function CapybaraSkins() {
                 )}
                 
                 {isCurrentlySelected && !isBeingPreviewed && (
-                  <div className="absolute top-1 right-1 bg-green-500 text-white text-xs px-1 py-0.5 rounded-full">
+                  <div className="absolute top-1 right-1 bg-green-500 text-white text-xs px-1 py-0.5 rounded-full" style={textStyle}>
                     Current
                   </div>
                 )}
                 
                 {isBeingPreviewed && (
-                  <div className="absolute top-1 right-1 bg-blue-500 text-white text-xs px-1 py-0.5 rounded-full">
+                  <div className="absolute top-1 right-1 bg-blue-500 text-white text-xs px-1 py-0.5 rounded-full" style={textStyle}>
                     Preview
                   </div>
                 )}
               </div>
               
               <div className="p-2 bg-white flex-1 flex flex-col">
-                <h3 className="text-xs font-semibold">{skin.name}</h3>
-                <p className="text-xs text-gray-500 truncate">{skin.description}</p>
+                <h3 className="text-xs font-semibold" style={textStyle}>{skin.name}</h3>
+                <p className="text-xs text-gray-500 truncate" style={textStyle}>{skin.description}</p>
                 
                 <div className="mt-auto pt-2">
                   {isUnlocked ? (
@@ -353,6 +361,7 @@ export default function CapybaraSkins() {
                           ? 'bg-gray-200 text-gray-500'
                           : 'bg-blue-500 text-white hover:bg-blue-600'
                       }`}
+                      style={textStyle}
                     >
                       {isCurrentlySelected && !isBeingPreviewed ? 'Current' : 'Preview'}
                     </button>
@@ -365,6 +374,7 @@ export default function CapybaraSkins() {
                           ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
                           : 'bg-green-500 text-white hover:bg-green-600'
                       }`}
+                      style={textStyle}
                     >
                       {loading ? 'Processing...' : `Unlock (${skin.price})`}
                       <Image 

@@ -4,6 +4,12 @@ import ReactMarkdown from 'react-markdown';
 import { Calendar, AlertCircle } from 'lucide-react';
 
 function UserAnalysis() {
+  // Define text style for VT323 font
+  const textStyle = {
+    fontFamily: "'VT323', monospace",
+    fontSize: "1.2rem"
+  };
+
   const [report, setReport] = useState('');
   const [efficiencyScore, setEfficiencyScore] = useState(0);
   const [tasksCompleted, setTaskCompleted] = useState(0);
@@ -105,7 +111,7 @@ function UserAnalysis() {
             letterSpacing: "0.5px",
             textShadow: "2px 2px 0 #000"
           }}>Analysis</h2>
-          <p>Loading your efficiency analysis <span className="loading loading-dots loading-xs"></span></p>
+          <p style={textStyle}>Loading your efficiency analysis <span className="loading loading-dots loading-xs"></span></p>
         </div>
       </div>
     );
@@ -123,9 +129,9 @@ function UserAnalysis() {
           <div className="text-center py-8 text-gray-500">
             <div className="flex items-center justify-center text-red-500 mb-2">
               <AlertCircle size={18} className="mr-2" />
-              <p className='text-sm'>No analysis found</p>
+              <p className='text-sm' style={textStyle}>No analysis found</p>
             </div>
-            <p className="text-xs text-center">
+            <p className="text-xs text-center" style={textStyle}>
               You can generate an analysis by clicking the 'Generate Analysis' button.
             </p>
           </div>
@@ -155,7 +161,7 @@ function UserAnalysis() {
             letterSpacing: "0.5px",
             textShadow: "2px 2px 0 #000"
           }}>Analysis</h2>
-          <div className="flex items-center mb-3 text-sm text-gray-700">
+          <div className="flex items-center mb-3 text-sm text-gray-700" style={textStyle}>
             <Calendar size={16} className="mr-1" />
             <span>{formatDate(analysisDate)}</span>
           </div>
@@ -165,23 +171,23 @@ function UserAnalysis() {
           {/* Circles row with default values */}
           <div className="flex justify-evenly mb-4">
             <div className="flex flex-col items-center">
-              <p className="text-sm mb-1 font-semibold">Efficiency Score</p>
+              <p className="text-sm mb-1 font-semibold" style={textStyle}>Efficiency Score</p>
               <div className="w-20 h-20 flex items-center justify-center rounded-full border-2 bg-blue-50/90">
-                <span className="text-xl font-semibold">{efficiencyScore}</span>
+                <span className="text-xl font-semibold" style={textStyle}>{efficiencyScore}</span>
               </div>
             </div>
 
             <div className="flex flex-col items-center">
-              <p className="text-sm mb-1 font-semibold">Tasks Completed</p>
+              <p className="text-sm mb-1 font-semibold" style={textStyle}>Tasks Completed</p>
               <div className="w-20 h-20 flex items-center justify-center rounded-full border-2 bg-green-50/90">
-                <span className="text-xl font-semibold">{tasksCompleted}</span>
+                <span className="text-xl font-semibold" style={textStyle}>{tasksCompleted}</span>
               </div>
             </div>
           </div>
 
           <div className="w-full border rounded-lg p-4 bg-white">
-            <h3 className="text-lg font-bold text-center mb-2">Report Summary</h3>
-            <div className="prose prose-sm max-w-none text-sm">
+            <h3 className="text-lg font-bold text-center mb-2" style={textStyle}>Report Summary</h3>
+            <div className="prose prose-sm max-w-none text-sm" style={textStyle}>
               <ReactMarkdown>{report}</ReactMarkdown>
             </div>
           </div>

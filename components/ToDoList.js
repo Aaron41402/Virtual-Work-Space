@@ -4,6 +4,12 @@ import { Edit2, Check, X, Trash2, Filter, Circle, Clock, CheckCircle2 } from 'lu
 import { createPortal } from 'react-dom';
 
 function ToDoList() {
+    // Define text style for VT323 font
+    const textStyle = {
+        fontFamily: "'VT323', monospace",
+        fontSize: "1.2rem"
+    };
+    
     const [tasks, setTasks] = useState([]);
     const [showAddTaskModal, setShowAddTaskModal] = useState(false);
     const [newTask, setNewTask] = useState({
@@ -319,6 +325,11 @@ function ToDoList() {
     };
 
     const StatusButton = ({ taskId, currentStatus }) => {
+        const textStyle = {
+            fontFamily: "'VT323', monospace",
+            fontSize: "1.2rem"
+        };
+        
         const getStatusStyles = () => {
             switch (currentStatus) {
                 case 'Pending':
@@ -351,6 +362,7 @@ function ToDoList() {
                     ref={el => buttonRefs.current[taskId] = el}
                     onClick={() => setActiveStatusDropdown(activeStatusDropdown === taskId ? null : taskId)}
                     className={`flex items-center px-3 py-1 rounded-md border ${getStatusStyles()}`}
+                    style={textStyle}
                 >
                     <span className="flex items-center gap-2 text-sm">
                         {getStatusIcon()}
@@ -389,6 +401,7 @@ function ToDoList() {
                                             ? 'hover:bg-blue-500 hover:text-white border-b-2' :
                                         'hover:bg-blue-900 hover:text-white rounded-b-md'
                                     }`}
+                                    style={textStyle}
                                 >
                                     {status === 'Pending' && <Circle size={16} />}
                                     {status === 'In Progress' && <Clock size={16} />}
@@ -431,7 +444,7 @@ function ToDoList() {
                         letterSpacing: "0.5px",
                         textShadow: "2px 2px 0 #000"
                     }}>Quests</h2>
-                    <p>Loading your quests <span className="loading loading-dots loading-xs"></span></p>
+                    <p style={textStyle}>Loading your quests <span className="loading loading-dots loading-xs"></span></p>
                 </div>
             </div>
         );
@@ -462,15 +475,15 @@ function ToDoList() {
 
                 {/* Add Legend */}
                 <div className="flex flex-wrap gap-2 mb-3 ml-2">
-                    <div className="flex items-center text-xs">
+                    <div className="flex items-center text-xs" style={textStyle}>
                         <div className="w-3 h-3 bg-green-100 border border-green-500 rounded mr-1"></div>
                         <span>Low Priority</span>
                     </div>
-                    <div className="flex items-center text-xs">
+                    <div className="flex items-center text-xs" style={textStyle}>
                         <div className="w-3 h-3 bg-yellow-100 border border-yellow-500 rounded mr-1"></div>
                         <span>Medium Priority</span>
                     </div>
-                    <div className="flex items-center text-xs">
+                    <div className="flex items-center text-xs" style={textStyle}>
                         <div className="w-3 h-3 bg-red-100 border border-red-500 rounded mr-1"></div>
                         <span>High Priority</span>
                     </div>
@@ -481,7 +494,7 @@ function ToDoList() {
                         <div className="space-y-4">
                             {/* Priority Filter */}
                             <div className="space-y-2">
-                                <label className="text-sm text-gray-600 block">Priority:</label>
+                                <label className="text-sm text-gray-600 block" style={textStyle}>Priority:</label>
                                 <div className="flex flex-wrap gap-2">
                                     {['High', 'Medium', 'Low'].map(priority => (
                                         <button
@@ -492,6 +505,7 @@ function ToDoList() {
                                                     ? 'bg-blue-500 text-white border-blue-500'
                                                     : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'
                                             }`}
+                                            style={textStyle}
                                         >
                                             {priority}
                                         </button>
@@ -501,7 +515,7 @@ function ToDoList() {
                             
                             {/* Status Filter */}
                             <div className="space-y-2">
-                                <label className="text-sm text-gray-600 block">Status:</label>
+                                <label className="text-sm text-gray-600 block" style={textStyle}>Status:</label>
                                 <div className="flex flex-wrap gap-2">
                                     {['Pending', 'In Progress', 'Completed'].map(status => (
                                         <button
@@ -512,6 +526,7 @@ function ToDoList() {
                                                     ? 'bg-blue-500 text-white border-blue-500'
                                                     : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'
                                             }`}
+                                            style={textStyle}
                                         >
                                             {status}
                                         </button>
@@ -521,12 +536,13 @@ function ToDoList() {
 
                             {/* Sort Options */}
                             <div className="space-y-2">
-                                <label className="text-sm text-gray-600 block">Sort by:</label>
+                                <label className="text-sm text-gray-600 block" style={textStyle}>Sort by:</label>
                                 <div className="flex items-center space-x-2">
                                     <select
                                         value={sortConfig.field}
                                         onChange={(e) => setSortConfig(prev => ({ ...prev, field: e.target.value }))}
                                         className="text-sm border rounded p-1"
+                                        style={textStyle}
                                     >
                                         <option value="priority">Priority</option>
                                         <option value="status">Status</option>
@@ -537,6 +553,7 @@ function ToDoList() {
                                             direction: prev.direction === 'asc' ? 'desc' : 'asc'
                                         }))}
                                         className="px-2 py-1 text-sm border rounded hover:bg-gray-100"
+                                        style={textStyle}
                                     >
                                         {sortConfig.direction === 'asc' ? '↑' : '↓'}
                                     </button>
@@ -548,6 +565,7 @@ function ToDoList() {
                                 <button
                                     onClick={handleApplyChanges}
                                     className="px-4 py-2 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded"
+                                    style={textStyle}
                                 >
                                     Apply Changes
                                 </button>
@@ -561,8 +579,8 @@ function ToDoList() {
                     >
                         {getFilteredAndSortedTasks().length === 0 ? (
                             <div className="text-center py-8 text-gray-500">
-                                <p className="text-sm">No quests available</p>
-                                <p className="text-xs mt-1">You can create a new quest by clicking the 'Add Quest' button.</p>
+                                <p className="text-sm" style={textStyle}>No quests available</p>
+                                <p className="text-xs mt-1" style={textStyle}>You can create a new quest by clicking the 'Add Quest' button.</p>
                             </div>
                         ) : (
                             getFilteredAndSortedTasks().map((task) => (
@@ -578,7 +596,7 @@ function ToDoList() {
                                     {editingTask && editingTask._id === task._id ? (
                                         <div className="space-y-4 mt-4">
                                             <div>
-                                                <label className="text-sm text-gray-600 block mb-1">Title</label>
+                                                <label className="text-sm text-gray-600 block mb-1" style={textStyle}>Title</label>
                                                 <input 
                                                     type="text"
                                                     name="title"
@@ -586,10 +604,11 @@ function ToDoList() {
                                                     onChange={handleEditChange}
                                                     className="w-full p-2 text-sm border rounded"
                                                     placeholder="Enter quest title"
+                                                    style={textStyle}
                                                 />
                                             </div>
                                             <div>
-                                                <label className="text-sm text-gray-600 block mb-1">Description</label>
+                                                <label className="text-sm text-gray-600 block mb-1" style={textStyle}>Description</label>
                                                 <textarea
                                                     name="description"
                                                     value={editingTask.description}
@@ -597,15 +616,17 @@ function ToDoList() {
                                                     className="w-full p-2 text-sm border rounded"
                                                     placeholder="Enter quest description"
                                                     rows="2"
+                                                    style={textStyle}
                                                 />
                                             </div>
                                             <div>
-                                                <label className="text-sm text-gray-600 block mb-1">Priority</label>
+                                                <label className="text-sm text-gray-600 block mb-1" style={textStyle}>Priority</label>
                                                 <select
                                                     name="priority"
                                                     value={editingTask.priority}
                                                     onChange={handleEditChange}
                                                     className="w-full p-2 text-sm border rounded"
+                                                    style={textStyle}
                                                 >
                                                     <option value="Low">Low Priority</option>
                                                     <option value="Medium">Medium Priority</option>
@@ -616,6 +637,7 @@ function ToDoList() {
                                                 <button 
                                                     onClick={() => saveEdit(task._id)}
                                                     className="px-3 py-1 bg-green-500 text-white rounded text-sm"
+                                                    style={textStyle}
                                                 >
                                                     <span className="flex items-center">
                                                         <Check size={14} className="mr-1" />
@@ -625,6 +647,7 @@ function ToDoList() {
                                                 <button 
                                                     onClick={cancelEdit}
                                                     className="px-3 py-1 bg-gray-500 text-white rounded text-sm"
+                                                    style={textStyle}
                                                 >
                                                     <span className="flex items-center">
                                                         <X size={14} className="mr-1" />
@@ -642,7 +665,7 @@ function ToDoList() {
                                                         currentStatus={task.status}
                                                     />
                                                     <div className="flex flex-row justify-between flex-1">
-                                                        <h3 className={`font-semibold ${task.status === 'Completed' ? 'line-through text-gray-500' : ''}`}>
+                                                        <h3 className={`font-semibold ${task.status === 'Completed' ? 'line-through text-gray-500' : ''}`} style={textStyle}>
                                                             {task.title}
                                                         </h3>
                                                         <div className="flex space-x-1 items-start pt-1">
@@ -662,7 +685,7 @@ function ToDoList() {
                                                     </div>
                                                 </div>
                                                 {task.description && (
-                                                    <p className={`text-sm text-gray-600 mt-1 ${task.status === 'Completed' ? 'line-through' : ''}`}>
+                                                    <p className={`text-sm text-gray-600 mt-1 ${task.status === 'Completed' ? 'line-through' : ''}`} style={textStyle}>
                                                         {task.description}
                                                     </p>
                                                 )}
@@ -690,11 +713,15 @@ function ToDoList() {
             {showAddTaskModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                     <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
-                        <h3 className="text-lg font-semibold mb-4">Add New Quest</h3>
+                        <h3 className="text-lg text-[#E6C86E] font-semibold mb-4" style={{
+                            fontFamily: "'Press Start 2P', monospace",
+                            letterSpacing: "0.5px",
+                            textShadow: "2px 2px 0 #000"
+                        }}>Add New Quest</h3>
                         
                         <div className="space-y-4">
                             <div>
-                                <label className="text-sm text-gray-600 block mb-1">Title</label>
+                                <label className="text-sm text-gray-600 block mb-1" style={textStyle}>Title</label>
                                 <input 
                                     type="text" 
                                     name="title"
@@ -702,14 +729,15 @@ function ToDoList() {
                                     onChange={handleInputChange}
                                     className={`w-full p-2 text-sm border rounded ${titleError ? 'border-red-500' : ''}`}
                                     placeholder="Enter title"
+                                    style={textStyle}
                                 />
                                 {titleError && (
-                                    <p className="text-red-500 text-xs mt-1">Title is required</p>
+                                    <p className="text-red-500 text-xs mt-1" style={textStyle}>Title is required</p>
                                 )}
                             </div>
 
                             <div>
-                                <label className="text-sm text-gray-600 block mb-1">Description</label>
+                                <label className="text-sm text-gray-600 block mb-1" style={textStyle}>Description</label>
                                 <textarea 
                                     name="description"
                                     value={newTask.description}
@@ -717,16 +745,18 @@ function ToDoList() {
                                     className="w-full p-2 text-sm border rounded"
                                     placeholder="Enter description"
                                     rows="3"
+                                    style={textStyle}
                                 />
                             </div>
 
                             <div>
-                                <label className="text-sm text-gray-600 block mb-1">Priority</label>
+                                <label className="text-sm text-gray-600 block mb-1" style={textStyle}>Priority</label>
                                 <select
                                     name="priority"
                                     value={newTask.priority}
                                     onChange={handleInputChange}
                                     className="w-full p-2 text-sm border rounded"
+                                    style={textStyle}
                                 >
                                     <option value="Low">Low</option>
                                     <option value="Medium">Medium</option>
@@ -739,12 +769,14 @@ function ToDoList() {
                             <button 
                                 onClick={handleCloseAddTaskModal}
                                 className="px-4 py-2 text-sm bg-gray-200 hover:bg-gray-300 rounded"
+                                style={textStyle}
                             >
                                 Cancel
                             </button>
                             <button 
                                 onClick={handleSaveTask}
                                 className="px-4 py-2 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded"
+                                style={textStyle}
                             >
                                 Add
                             </button>

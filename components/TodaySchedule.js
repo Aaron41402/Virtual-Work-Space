@@ -619,6 +619,12 @@ function TodaySchedule() {
     setIsCreatingSchedule(false);
   }
 
+  // Define styles for text elements
+  const textStyle = {
+    fontFamily: "'VT323', monospace",
+    fontSize: "1.2rem"
+  };
+
   if (loading) {
     return (
       <div className="flex-1 p-8 mt-24 relative z-10">
@@ -628,7 +634,7 @@ function TodaySchedule() {
             letterSpacing: "0.5px",
             textShadow: "2px 2px 0 #000"
           }}>TODAY'S ADVENTURE</h2>
-          <p>Loading your personalized schedule <span className="loading loading-dots loading-xs"></span></p>
+          <p style={textStyle}>Loading your personalized schedule <span className="loading loading-dots loading-xs"></span></p>
         </div>
       </div>
     );
@@ -646,9 +652,9 @@ function TodaySchedule() {
           <div className="text-center py-8 text-gray-500">
             <div className="flex items-center justify-center text-red-500 mb-2">
               <AlertCircle size={18} className="mr-2" />
-              <p className='text-sm'>{error}</p>
+              <p className='text-sm' style={textStyle}>{error}</p>
             </div>
-            <p className="text-xs text-center">
+            <p className="text-xs text-center" style={textStyle}>
               You can create a custom schedule by clicking the 'Create Schedule' button.
             </p>
           </div>
@@ -680,7 +686,7 @@ function TodaySchedule() {
               letterSpacing: "0.5px",
               textShadow: "2px 2px 0 #000"
             }}>Today's Adventure</h2>
-            <div className="flex items-center text-sm text-gray-700">
+            <div className="flex items-center text-sm text-gray-700" style={textStyle}>
               <Clock size={16} className="mr-1" />
               <span>{currentTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
             </div>
@@ -688,20 +694,20 @@ function TodaySchedule() {
 
           {/* Legend */}
           <div className="flex flex-wrap gap-2 mb-3 ml-2">
-            <div className="flex items-center text-xs">
+            <div className="flex items-center text-xs" style={textStyle}>
               <div className="w-3 h-3 bg-blue-100 border border-blue-500 rounded mr-1"></div>
               <span>Routine</span>
             </div>
-            <div className="flex items-center text-xs">
+            <div className="flex items-center text-xs" style={textStyle}>
               <div className="w-3 h-3 bg-yellow-100 border border-yellow-500 rounded mr-1"></div>
               <span>Priority</span>
             </div>
-            <div className="flex items-center text-xs">
+            <div className="flex items-center text-xs" style={textStyle}>
               <div className="w-3 h-3 bg-purple-100 border border-purple-500 rounded mr-1"></div>
               <span>Habit</span>
             </div>
             
-            <div className="flex items-center text-xs">
+            <div className="flex items-center text-xs" style={textStyle}>
               <div className="w-3 h-3 bg-green-100 border border-green-500 rounded mr-1"></div>
               <span>Current</span>
             </div>
@@ -724,7 +730,7 @@ function TodaySchedule() {
                       className={`flex items-start px-2 py-1 rounded ${isCurrentHour ? 'bg-green-300/80' : ''}`}
                       data-hour={hour.split(':')[0]}
                     >
-                      <div className="w-16 text-sm text-gray-600">{hour}</div>
+                      <div className="w-16 text-sm text-gray-600" style={textStyle}>{hour}</div>
                       {activity ? (
                         <div className={`flex-1 ${getBackgroundColor(activity.type)} p-2 rounded text-sm ${isPast ? 'line-through opacity-60' : ''}`}>
                           {editingItem === activity.id ? (
@@ -734,12 +740,14 @@ function TodaySchedule() {
                                 value={newTime}
                                 onChange={(e) => setNewTime(e.target.value)}
                                 className="w-full p-1 text-xs border rounded"
+                                style={textStyle}
                               />
                               <input 
                                 type="text" 
                                 value={newActivity}
                                 onChange={(e) => setNewActivity(e.target.value)}
                                 className="w-full p-1 text-xs border rounded"
+                                style={textStyle}
                               />
                               <div className="flex justify-end space-x-1">
                                 <button 
@@ -758,7 +766,7 @@ function TodaySchedule() {
                             </div>
                           ) : (
                             <div className="flex justify-between items-center">
-                              <span>{activity.activity}</span>
+                              <span style={textStyle}>{activity.activity}</span>
                               {!isPast && (
                                 <div className="flex space-x-1">
                                   <button 
@@ -782,6 +790,7 @@ function TodaySchedule() {
                         <div 
                           className={`flex-1 bg-gray-50/50 p-2 rounded text-gray-400 text-sm ${isPast ? 'line-through opacity-60' : ''} hover:bg-gray-100/50 cursor-pointer`}
                           onClick={() => !isPast && openAddModalWithHour(hour)}
+                          style={textStyle}
                         >
                           Free time
                         </div>
@@ -801,7 +810,7 @@ function TodaySchedule() {
             </>
           ) : (
             <div className="py-8 text-center">
-              <p className="text-gray-500 mb-4">No schedule items yet</p>
+              <p className="text-gray-500 mb-4" style={textStyle}>No schedule items yet</p>
               <button
                 onClick={() => setShowAddModal(true)}
                 className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
@@ -817,6 +826,7 @@ function TodaySchedule() {
               <button 
                 onClick={resetScheduleData}
                 className="text-xs text-gray-500 hover:text-red-500"
+                style={textStyle}
               >
                 Reset Schedule Data
               </button>
@@ -831,10 +841,14 @@ function TodaySchedule() {
               ref={modalRef}
               className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4"
             >
-              <h3 className="text-lg font-semibold mb-4">Add New Activity</h3>
+              <h3 className="text-lg text-[#E6C86E] font-semibold mb-4" style={{
+            fontFamily: "'Press Start 2P', monospace",
+            letterSpacing: "0.5px",
+            textShadow: "2px 2px 0 #000"
+          }}>Add New Activity</h3>
               
               <div className="mb-3">
-                <label className="flex items-center text-sm text-gray-600">
+                <label className="flex items-center text-sm text-gray-600" style={textStyle}>
                   <input 
                     type="checkbox" 
                     checked={isTimeRange}
@@ -847,38 +861,53 @@ function TodaySchedule() {
               
               <div className={`grid ${isTimeRange ? 'grid-cols-2' : 'grid-cols-2'} gap-4 mb-4`}>
                 <div>
-                  <label className="text-sm text-gray-600 block mb-1">
+                  <label className="text-sm text-gray-600 block mb-1" style={textStyle}>
                     {isTimeRange ? 'Start Time' : 'Time'}
                   </label>
-                  <input 
-                    type="time" 
+                  <select 
                     value={newItemTime}
                     onChange={(e) => setNewItemTime(e.target.value)}
                     className={`w-full p-2 text-sm border rounded ${validationErrors.time ? 'border-red-500' : ''}`}
-                  />
+                    style={textStyle}
+                  >
+                    <option value="">Select hour</option>
+                    {Array.from({ length: 24 }, (_, i) => (
+                      <option key={i} value={`${i.toString().padStart(2, '0')}:00`}>
+                        {i.toString().padStart(2, '0')}:00
+                      </option>
+                    ))}
+                  </select>
                   {validationErrors.time && (
-                    <p className="text-red-500 text-xs mt-1">Time is required</p>
+                    <p className="text-red-500 text-xs mt-1" style={textStyle}>Time is required</p>
                   )}
                 </div>
                 
                 {isTimeRange && (
                   <div>
-                    <label className="text-sm text-gray-600 block mb-1">End Time</label>
-                    <input 
-                      type="time" 
+                    <label className="text-sm text-gray-600 block mb-1" style={textStyle}>End Time</label>
+                    <select 
                       value={newItemEndTime}
                       onChange={(e) => setNewItemEndTime(e.target.value)}
                       className="w-full p-2 text-sm border rounded"
-                    />
+                      style={textStyle}
+                    >
+                      <option value="">Select hour</option>
+                      {Array.from({ length: 24 }, (_, i) => (
+                        <option key={i} value={`${i.toString().padStart(2, '0')}:00`}>
+                          {i.toString().padStart(2, '0')}:00
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 )}
                 
                 <div>
-                  <label className="text-sm text-gray-600 block mb-1">Type</label>
+                  <label className="text-sm text-gray-600 block mb-1" style={textStyle}>Type</label>
                   <select 
                     value={newItemType}
                     onChange={(e) => setNewItemType(e.target.value)}
                     className="w-full p-2 text-sm border rounded"
+                    style={textStyle}
                   >
                     <option value="routine">Routine</option>
                     <option value="priority">Priority</option>
@@ -889,7 +918,7 @@ function TodaySchedule() {
               </div>
               
               <div className="mb-4">
-                <label className="text-sm text-gray-600 block mb-1">Activity</label>
+                <label className="text-sm text-gray-600 block mb-1" style={textStyle}>Activity</label>
                 <input 
                   type="text" 
                   value={newItemActivity}
@@ -897,22 +926,23 @@ function TodaySchedule() {
                   placeholder="Enter activity name"
                   className={`w-full p-2 text-sm border rounded ${validationErrors.activity ? 'border-red-500' : ''}`}
                   autoFocus
+                  style={textStyle}
                 />
                 {validationErrors.activity && (
-                  <p className="text-red-500 text-xs mt-1">Activity name is required</p>
+                  <p className="text-red-500 text-xs mt-1" style={textStyle}>Activity name is required</p>
                 )}
               </div>
               
               <div className="flex justify-end space-x-3">
                 <button 
                   onClick={handleCloseModal}
-                  className="px-4 py-2 text-sm bg-gray-200 hover:bg-gray-300 rounded"
+                  className="px-4 py-2 text-sm bg-gray-200 hover:bg-gray-300 rounded" style={textStyle}
                 >
                   Cancel
                 </button>
                 <button 
                   onClick={addNewItem}
-                  className="px-4 py-2 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded"
+                  className="px-4 py-2 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded" style={textStyle}
                 >
                   Add
                 </button>
@@ -925,18 +955,20 @@ function TodaySchedule() {
       {/* Notification */}
       {notification.show && (
         <div className="absolute left-0 right-0 mx-auto w-3/4 max-w-2xl bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded shadow-md z-50 animate-fade-in-up">
-          <div className="flex items-start">
-            <div className="mr-2 flex-shrink-0 h-5 w-5">⚠️</div>
-            <div>
-              <p>{notification.message}</p>
-              <p className="text-sm mt-1">Check your Quests to manage it.</p>
-            </div>
+          <div className="relative">
             <button 
               onClick={() => setNotification({ show: false, message: '' })}
-              className="ml-4 text-green-700 hover:text-green-900"
+              className="absolute top-0 right-0 text-green-700 hover:text-green-900"
             >
               ✕
             </button>
+            <div className="flex items-start pr-6">
+              <div className="mr-2 flex-shrink-0 h-5 w-5">⚠️</div>
+              <div style={textStyle}>
+                <p>{notification.message}</p>
+                <p className="text-sm mt-1">Check your Quests to manage it.</p>
+              </div>
+            </div>
           </div>
         </div>
       )}

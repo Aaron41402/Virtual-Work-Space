@@ -10,30 +10,43 @@ const questions = [
   { 
     id: "wakeTime", 
     question: "What time do you usually wake up?", 
-    type: "time",
-    placeholder: "06:30" 
+    type: "select",
+    placeholder: "06:00" 
   },
   { 
     id: "bedTime", 
     question: "What time do you usually go to bed?", 
-    type: "time",
-    placeholder: "22:30"
+    type: "select",
+    placeholder: "22:00"
   },
   { 
     id: "habits", 
     question: "What are your recurring habits or activities?", 
     type: "text",
-    placeholder: "Exercise, Reading, Meditation (separate with commas)"
+    placeholder: "Exercise, Reading, Meditation"
   },
   { 
     id: "priorities", 
     question: "What are your top priorities for most days?", 
     type: "text",
-    placeholder: "Work on project, Study Spanish (separate with commas)"
+    placeholder: "Work on project, Study Spanish"
   }
 ];
 
 export default function SetupPage() {
+  // Define text style for VT323 font
+  const textStyle = {
+    fontFamily: "'VT323', monospace",
+    fontSize: "1.2rem"
+  };
+
+  const titleStyle = {
+    fontFamily: "'Press Start 2P', monospace",
+    letterSpacing: "0.5px",
+    textShadow: "2px 2px 0 #000",
+    color: "#E6C86E"
+  };
+
   const { data: session, status } = useSession();
   const [answers, setAnswers] = useState({});
   const [message, setMessage] = useState("");
@@ -123,6 +136,20 @@ export default function SetupPage() {
     setShowSurvey(true);
   };
 
+  // Generate time options for the select dropdowns
+  const renderTimeOptions = () => {
+    const options = [];
+    for (let i = 0; i < 24; i++) {
+      const hour = i.toString().padStart(2, '0');
+      options.push(
+        <option key={i} value={`${hour}:00`}>
+          {hour}:00
+        </option>
+      );
+    }
+    return options;
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-white">
@@ -165,38 +192,60 @@ export default function SetupPage() {
               className="px-6 py-2 bg-black hover:bg-slate-800 text-white rounded-md mx-auto block"
             >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-  <path strokeLinecap="round" strokeLinejoin="round" d="M3 8.689c0-.864.933-1.406 1.683-.977l7.108 4.061a1.125 1.125 0 0 1 0 1.954l-7.108 4.061A1.125 1.125 0 0 1 3 16.811V8.69ZM12.75 8.689c0-.864.933-1.406 1.683-.977l7.108 4.061a1.125 1.125 0 0 1 0 1.954l-7.108 4.061a1.125 1.125 0 0 1-1.683-.977V8.69Z" />
-</svg>
-
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 8.689c0-.864.933-1.406 1.683-.977l7.108 4.061a1.125 1.125 0 0 1 0 1.954l-7.108 4.061A1.125 1.125 0 0 1 3 16.811V8.69ZM12.75 8.689c0-.864.933-1.406 1.683-.977l7.108 4.061a1.125 1.125 0 0 1 0 1.954l-7.108 4.061a1.125 1.125 0 0 1-1.683-.977V8.69Z" />
+              </svg>
             </button>
           </div>
         </div>
       ) : (
         <div className="relative z-10 min-h-screen flex items-center justify-center">
           <div className="max-w-md w-full mx-auto p-6 bg-white/70 shadow-md rounded-lg">
-            <h2 className="text-xl font-bold mb-4 text-center">Setup Survey</h2>
+            <h2 className="text-xl font-bold mb-4 text-center" style={titleStyle}>Setup Survey</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               {questions.map((q) => (
                 <div key={q.id}>
-                  <label className="block font-medium">{q.question}</label>
-                  <input
-                    type={q.type}
-                    name={q.id}
-                    onChange={handleChange}
-                    required
-                    placeholder={q.placeholder}
-                    className="w-full border p-2 rounded-md"
-                  />
+                  <label className="block font-medium" style={textStyle}>{q.question}</label>
+                  {q.type === "text" ? (
+                    <input
+                      type="text"
+                      name={q.id}
+                      onChange={handleChange}
+                      required
+                      placeholder={q.placeholder}
+                      className="w-full border p-2 rounded-md"
+                      style={textStyle}
+                    />
+                  ) : (
+                    <select
+                      name={q.id}
+                      onChange={handleChange}
+                      required
+                      className="w-full border p-2 rounded-md"
+                      defaultValue=""
+                      style={textStyle}
+                    >
+                      <option value="" disabled>Select time</option>
+                      {renderTimeOptions()}
+                    </select>
+                  )}
                   {q.type === "text" && (
-                    <p className="text-xs text-gray-500 mt-1">Example: {q.placeholder}</p>
+                    <p className="text-xs text-gray-500 mt-1" style={textStyle}>Example: {q.placeholder}</p>
                   )}
                 </div>
               ))}
-              <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded-md">
+              <button 
+                type="submit" 
+                className="w-full bg-blue-600 text-white py-2 rounded-md"
+                style={{
+                  fontFamily: "'Press Start 2P', monospace",
+                  fontSize: "0.8rem",
+                  letterSpacing: "0.5px"
+                }}
+              >
                 Submit
               </button>
             </form>
-            {message && <p className="mt-4 text-center">{message}</p>}
+            {message && <p className="mt-4 text-center" style={textStyle}>{message}</p>}
           </div>
         </div>
       )}
