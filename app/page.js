@@ -46,7 +46,7 @@ export default async function Home() {
           <div className="mb-8">
             <div className="bg-[#3A2E56] p-6 border-4 border-[#8BABBF] rounded-lg shadow-pixel">
               <p className="text-white text-lg leading-relaxed">
-                TaskHero turns productivity into a game. Complete tasks to earn XP, level up with AI assistance, and stay focused with your capybara companion. Make work fun in our pixel art world!
+                TaskHero turns productivity into a game. Complete tasks, level up with AI assistance, and stay focused with your capybara companion. Make work fun in our pixel art world!
               </p>
             </div>
           </div>
@@ -59,9 +59,9 @@ export default async function Home() {
                 height="auto" 
                 controls 
                 className="w-full"
-                poster="/video-poster.png"
+                poster="/0325(4)-Cover.jpg"
               >
-                <source src="/taskhero-demo.mp4" type="video/mp4" />
+                <source src="/0325(4).mp4" type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
             </div>
@@ -182,7 +182,7 @@ export default async function Home() {
                   </li>
                   <li className="flex items-start">
                     <span className="text-[#E6C86E] mr-2">✓</span>
-                    <span className="text-[#8BABBF]">Answers questions with AI intelligence</span>
+                    <span className="text-[#8BABBF]">Answers questions with AI</span>
                   </li>
                 </ul>
                 
