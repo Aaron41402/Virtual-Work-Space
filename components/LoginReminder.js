@@ -7,6 +7,10 @@ export default function LoginReminder() {
   const [hasCheckedIn, setHasCheckedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   
+  const textStyle = {
+    fontFamily: "'VT323', monospace",
+    fontSize: "1.2rem"
+  };
   // Helper function to compare dates without time
   const isSameDay = (date1, date2) => {
     const d1 = new Date(date1);
@@ -145,7 +149,7 @@ export default function LoginReminder() {
           </h2>
         </div>
         
-        <p className="text-center mb-6">
+        <p className="text-center mb-6" style={textStyle}>
           Don't forget to check in daily to earn coins! You can use coins to unlock new themes and capybara skins.
         </p>
         
@@ -157,14 +161,15 @@ export default function LoginReminder() {
               width={24} 
               height={24} 
             />
-            <span className="ml-2 font-medium">+1 coin for daily check-in</span>
+            <span className="ml-2 font-medium" style={textStyle}>+1 coin for daily check-in</span>
           </div>
         </div>
         
         <div className="flex justify-center">
           {hasCheckedIn ? (
             <button
-              className="px-4 py-2 bg-gray-400 text-white rounded-md font-pixel cursor-not-allowed"
+              className="px-4 py-2 bg-gray-400 text-white rounded-md cursor-not-allowed"
+              style={textStyle}
               disabled
             >
               Already Checked In
