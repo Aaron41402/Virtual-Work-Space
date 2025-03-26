@@ -59,8 +59,9 @@ export default async function Home() {
                 height="auto" 
                 controls 
                 className="w-full"
+                poster="/landing_showcase_cover.jpg"
               >
-                <source src="/0325(4).mp4" type="video/mp4" />
+                <source src="/landing_showcase.mp4" type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
             </div>
@@ -250,7 +251,7 @@ export default async function Home() {
             />
             <span className="text-[#E6C86E] font-bold">TaskHero</span>
           </div>
-          <p>© 2023 TaskHero. All rights reserved.</p>
+          <p>© 2025 TaskHero. All rights reserved.</p>
         </div>
       </footer>
     </main>
