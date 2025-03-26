@@ -168,8 +168,7 @@ export default function LoginReminder() {
         <div className="flex justify-center">
           {hasCheckedIn ? (
             <button
-              className="px-4 py-2 bg-gray-400 text-white rounded-md cursor-not-allowed"
-              style={textStyle}
+              className="px-4 py-2 bg-gray-400 text-white font-pixel rounded-md cursor-not-allowed"
               disabled
             >
               Already Checked In

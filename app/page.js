@@ -59,7 +59,6 @@ export default async function Home() {
                 height="auto" 
                 controls 
                 className="w-full"
-                poster="/0325(4)-Cover.jpg"
               >
                 <source src="/0325(4).mp4" type="video/mp4" />
                 Your browser does not support the video tag.
