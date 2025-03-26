@@ -61,7 +61,7 @@ export default async function Home() {
                 className="w-full"
                 poster="/landing_showcase_cover.jpg"
               >
-                <source src="/landing_showcase.mp4" type="video/mp4" />
+                <source src="/landing_showcase_fixed.mp4" type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
             </div>
