@@ -337,13 +337,8 @@ export default function ThemeSelector() {
                           }`}
                           style={textStyle}
                         >
-                          {loading ? 'Processing...' : `Unlock (${theme.price})`}
-                          <Image 
-                            src="/coin.png" 
-                            alt="Coin" 
-                            width={20} 
-                            height={20} 
-                            />
+                          {loading ? 'Processing...' : `Unlock`}
+                          
                         </button>
                       )}
                     </div>

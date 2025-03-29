@@ -376,13 +376,7 @@ export default function CapybaraSkins() {
                       }`}
                       style={textStyle}
                     >
-                      {loading ? 'Processing...' : `Unlock (${skin.price})`}
-                      <Image 
-                          src="/coin.png" 
-                          alt="Coin" 
-                          width={20} 
-                          height={20} 
-                      />
+                      {loading ? 'Processing...' : `Unlock`}
                     </button>
                   )}
                 </div>

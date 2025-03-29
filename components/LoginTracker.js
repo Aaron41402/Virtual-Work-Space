@@ -12,7 +12,7 @@ export default function LoginTracker() {
   const [showPopup, setShowPopup] = useState(false);
   const [loginData, setLoginData] = useState({
     loginDates: [],
-    coins: 0
+    coins: 10
   });
   const [loading, setLoading] = useState(false);
   const [checkedInToday, setCheckedInToday] = useState(false);

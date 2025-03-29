@@ -47,6 +47,15 @@ function ToDoList() {
     const taskRefs = useRef({});
     const buttonRefs = useRef({});
 
+    // Add this near the top of your component
+    const inputStyle = {
+        fontFamily: "'VT323', monospace",
+        fontSize: "1.2rem",
+        color: "#333333",
+        backgroundColor: "#ffffff",
+        border: "1px solid #cccccc"
+    };
+
     // Fetch tasks on component mount
     useEffect(() => {
         fetchTasks();
@@ -604,7 +613,7 @@ function ToDoList() {
                                                     onChange={handleEditChange}
                                                     className="w-full p-2 text-sm border rounded"
                                                     placeholder="Enter quest title"
-                                                    style={textStyle}
+                                                    style={{...textStyle, ...inputStyle}}
                                                 />
                                             </div>
                                             <div>
@@ -616,7 +625,7 @@ function ToDoList() {
                                                     className="w-full p-2 text-sm border rounded"
                                                     placeholder="Enter quest description"
                                                     rows="2"
-                                                    style={textStyle}
+                                                    style={{...textStyle, ...inputStyle}}
                                                 />
                                             </div>
                                             <div>
@@ -626,7 +635,7 @@ function ToDoList() {
                                                     value={editingTask.priority}
                                                     onChange={handleEditChange}
                                                     className="w-full p-2 text-sm border rounded"
-                                                    style={textStyle}
+                                                    style={{...textStyle, ...inputStyle}}
                                                 >
                                                     <option value="Low">Low Priority</option>
                                                     <option value="Medium">Medium Priority</option>
@@ -727,9 +736,9 @@ function ToDoList() {
                                     name="title"
                                     value={newTask.title}
                                     onChange={handleInputChange}
-                                    className={`w-full p-2 text-sm border rounded ${titleError ? 'border-red-500' : ''}`}
-                                    placeholder="Enter title"
-                                    style={textStyle}
+                                    placeholder="Enter task title"
+                                    className="w-full p-2 text-sm border rounded"
+                                    style={{...textStyle, ...inputStyle}}
                                 />
                                 {titleError && (
                                     <p className="text-red-500 text-xs mt-1" style={textStyle}>Title is required</p>
@@ -742,11 +751,11 @@ function ToDoList() {
                                     name="description"
                                     value={newTask.description}
                                     onChange={handleInputChange}
+                                    placeholder="Enter task description (optional)"
                                     className="w-full p-2 text-sm border rounded"
-                                    placeholder="Enter description"
+                                    style={{...textStyle, ...inputStyle}}
                                     rows="3"
-                                    style={textStyle}
-                                />
+                                ></textarea>
                             </div>
 
                             <div>
@@ -756,7 +765,7 @@ function ToDoList() {
                                     value={newTask.priority}
                                     onChange={handleInputChange}
                                     className="w-full p-2 text-sm border rounded"
-                                    style={textStyle}
+                                    style={{...textStyle, ...inputStyle}}
                                 >
                                     <option value="Low">Low</option>
                                     <option value="Medium">Medium</option>

@@ -47,6 +47,14 @@ export default function SetupPage() {
     color: "#E6C86E"
   };
 
+  const inputStyle = {
+    fontFamily: "'VT323', monospace",
+    fontSize: "1.2rem",
+    color: "#333333",
+    backgroundColor: "#ffffff",
+    border: "1px solid #cccccc"
+  };
+
   const { data: session, status } = useSession();
   const [answers, setAnswers] = useState({});
   const [message, setMessage] = useState("");
@@ -213,7 +221,7 @@ export default function SetupPage() {
                       required
                       placeholder={q.placeholder}
                       className="w-full border p-2 rounded-md"
-                      style={textStyle}
+                      style={{...textStyle, ...inputStyle}}
                     />
                   ) : (
                     <select
@@ -222,7 +230,7 @@ export default function SetupPage() {
                       required
                       className="w-full border p-2 rounded-md"
                       defaultValue=""
-                      style={textStyle}
+                      style={{...textStyle, ...inputStyle}}
                     >
                       <option value="" disabled>Select time</option>
                       {renderTimeOptions()}

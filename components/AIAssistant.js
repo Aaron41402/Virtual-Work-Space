@@ -586,7 +586,7 @@ export default function AIAssistant() {
           "🏰 You're building your kingdom one task at a time. Your strategic approach is admirable!",
           "🧝‍♀️ Even the elven elders would be impressed by how you've managed your quests today.",
           "🐉 You're slaying your tasks like a true dragon hunter! Your courage in facing challenges is inspiring.",
-          "�� Your work ethic is as rare and valuable as enchanted gems. Keep mining for greatness!"
+          "🏆 Your work ethic is as rare and valuable as enchanted gems. Keep mining for greatness!"
         ];
         
         // Select a random encouragement message
@@ -690,6 +690,13 @@ export default function AIAssistant() {
     }
   };
 
+  // Add this near the top of your component
+  const inputStyle = {
+    color: "#333333",
+    backgroundColor: "#ffffff",
+    border: "1px solid #cccccc"
+  };
+
   return (
     <div className="fixed bottom-4 right-4 z-50 font-pixel">
       {/* Notification Bubble */}
@@ -774,6 +781,7 @@ export default function AIAssistant() {
                 onChange={(e) => setInputMessage(e.target.value)}
                 placeholder="TYPE MESSAGE..."
                 className="flex-1 rounded-none px-3 py-2 text-xs pixel-input min-w-0 h-10"
+                style={inputStyle}
               />
               <button 
                 type="submit"

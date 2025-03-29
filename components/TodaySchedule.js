@@ -30,6 +30,14 @@ function TodaySchedule() {
   const [notification, setNotification] = useState({ show: false, message: '' });
   const [isCreatingSchedule, setIsCreatingSchedule] = useState(false);
 
+  const inputStyle = {
+    fontFamily: "'VT323', monospace",
+    fontSize: "1.2rem",
+    color: "#333333",
+    backgroundColor: "#ffffff",
+    border: "1px solid #cccccc"
+  };
+
   useEffect(() => {
     // Update current time every minute
     const timer = setInterval(() => {
@@ -740,14 +748,14 @@ function TodaySchedule() {
                                 value={newTime}
                                 onChange={(e) => setNewTime(e.target.value)}
                                 className="w-full p-1 text-xs border rounded"
-                                style={textStyle}
+                                style={{...textStyle, ...inputStyle}}
                               />
                               <input 
                                 type="text" 
                                 value={newActivity}
                                 onChange={(e) => setNewActivity(e.target.value)}
                                 className="w-full p-1 text-xs border rounded"
-                                style={textStyle}
+                                style={{...textStyle, ...inputStyle}}
                               />
                               <div className="flex justify-end space-x-1">
                                 <button 
@@ -868,7 +876,7 @@ function TodaySchedule() {
                     value={newItemTime}
                     onChange={(e) => setNewItemTime(e.target.value)}
                     className={`w-full p-2 text-sm border rounded ${validationErrors.time ? 'border-red-500' : ''}`}
-                    style={textStyle}
+                    style={{...textStyle, ...inputStyle}}
                   >
                     <option value="">Select hour</option>
                     {Array.from({ length: 24 }, (_, i) => (
@@ -889,7 +897,7 @@ function TodaySchedule() {
                       value={newItemEndTime}
                       onChange={(e) => setNewItemEndTime(e.target.value)}
                       className="w-full p-2 text-sm border rounded"
-                      style={textStyle}
+                      style={{...textStyle, ...inputStyle}}
                     >
                       <option value="">Select hour</option>
                       {Array.from({ length: 24 }, (_, i) => (
@@ -907,7 +915,7 @@ function TodaySchedule() {
                     value={newItemType}
                     onChange={(e) => setNewItemType(e.target.value)}
                     className="w-full p-2 text-sm border rounded"
-                    style={textStyle}
+                    style={{...textStyle, ...inputStyle}}
                   >
                     <option value="routine">Routine</option>
                     <option value="priority">Priority</option>
@@ -926,7 +934,7 @@ function TodaySchedule() {
                   placeholder="Enter activity name"
                   className={`w-full p-2 text-sm border rounded ${validationErrors.activity ? 'border-red-500' : ''}`}
                   autoFocus
-                  style={textStyle}
+                  style={{...textStyle, ...inputStyle}}
                 />
                 {validationErrors.activity && (
                   <p className="text-red-500 text-xs mt-1" style={textStyle}>Activity name is required</p>
