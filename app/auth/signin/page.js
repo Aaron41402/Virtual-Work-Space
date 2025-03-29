@@ -66,7 +66,7 @@ export default function SignIn() {
         </div>
         <button 
             className="flex items-center px-5 py-3 border border-gray-300 rounded-xl bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 transition"
-            onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+            onClick={() => signIn("google", { callbackUrl: "/setup" })}
         >
             {/* Google Icon */}
             <Image
