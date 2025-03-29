@@ -17,7 +17,8 @@ export default function ThemeSelector() {
   // Define text style for VT323 font
   const textStyle = {
     fontFamily: "'VT323', monospace",
-    fontSize: "1.2rem"
+    fontSize: "1.2rem",
+    color: "#000000"
   };
 
   const [currentTheme, setCurrentTheme] = useState('lofi');

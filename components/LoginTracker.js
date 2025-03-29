@@ -249,17 +249,20 @@ export default function LoginTracker() {
           </div>
 
           <div className="mb-4">
-            <p className="text-sm text-gray-600 mb-1" style={textStyle}>Total Coins Earned:</p>
-            <p className="font-bold text-yellow-500 flex items-center" style={textStyle}>
-              <span className="text-xl">{loginData.coins}</span>
-              <span className="ml-1 text-lg"><Image 
-                src="/coin.png" 
-                alt="Coin" 
-                width={20} 
-                height={20} 
-              />
-              </span>
-            </p>
+            <div className="flex items-center justify-between" style={textStyle}>
+              <p className="text-md text-gray-600">Total Coins Earned:</p>
+              <p className="font-bold text-yellow-500 flex items-center">
+                <span className="text-xl">{loginData.coins}</span>
+                <span className="ml-1 text-lg">
+                  <Image 
+                    src="/coin.png" 
+                    alt="Coin" 
+                    width={20} 
+                    height={20} 
+                  />
+                </span>
+              </p>
+            </div>
           </div>
 
           {/* Calendar */}
