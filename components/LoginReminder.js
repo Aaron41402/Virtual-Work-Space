@@ -9,7 +9,8 @@ export default function LoginReminder() {
   
   const textStyle = {
     fontFamily: "'VT323', monospace",
-    fontSize: "1.2rem"
+    fontSize: "1.2rem",
+    color: "#000000"
   };
   // Helper function to compare dates without time
   const isSameDay = (date1, date2) => {

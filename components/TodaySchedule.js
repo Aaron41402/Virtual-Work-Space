@@ -38,6 +38,29 @@ function TodaySchedule() {
     border: "1px solid #cccccc"
   };
 
+  const typeStyles = {
+    routine: {
+      backgroundColor: "#4A5568", // Darker blue-gray
+      color: "#FFFFFF",           // White text
+      border: "1px solid #2D3748" // Darker border
+    },
+    priority: {
+      backgroundColor: "#C53030", // Darker red
+      color: "#FFFFFF",           // White text
+      border: "1px solid #9B2C2C" // Darker border
+    },
+    habit: {
+      backgroundColor: "#2C7A7B", // Darker teal
+      color: "#FFFFFF",           // White text
+      border: "1px solid #285E61" // Darker border
+    },
+    free: {
+      backgroundColor: "#744210", // Darker yellow
+      color: "#FFFFFF",           // White text
+      border: "1px solid #5F370E" // Darker border
+    }
+  };
+
   useEffect(() => {
     // Update current time every minute
     const timer = setInterval(() => {
@@ -630,7 +653,8 @@ function TodaySchedule() {
   // Define styles for text elements
   const textStyle = {
     fontFamily: "'VT323', monospace",
-    fontSize: "1.2rem"
+    fontSize: "1.2rem",
+    color: "#000000"
   };
 
   if (loading) {
